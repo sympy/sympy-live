@@ -1,4 +1,4 @@
-application: shell
+application: sympy-live
 version: 1
 
 runtime: python

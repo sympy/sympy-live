@@ -94,12 +94,12 @@ shell.onPromptKeyPress = function(event) {
   }
 
   // should we pull something from the history?
-  if (event.ctrlKey && event.keyCode == 38 /* up arrow */) {
+  if (event.shiftKey && event.keyCode == 38 /* up arrow */) {
     if (this.historyCursor > 0) {
       statement.value = this.history[--this.historyCursor];
     }
     return false;
-  } else if (event.ctrlKey && event.keyCode == 40 /* down arrow */) {
+  } else if (event.shiftKey && event.keyCode == 40 /* down arrow */) {
     if (this.historyCursor < this.history.length - 1) {
       statement.value = this.history[++this.historyCursor];
     }
@@ -112,8 +112,8 @@ shell.onPromptKeyPress = function(event) {
 
   // should we submit?
   var ctrlEnter = (document.getElementById('submit_key').value == 'ctrl-enter');
-  if (event.keyCode == 13 /* enter */ && !event.altKey && !event.shiftKey &&
-      event.ctrlKey == ctrlEnter) {
+  if (event.keyCode == 13 /* enter */ && !event.altKey && event.shiftKey &&
+      !(event.ctrlKey == ctrlEnter)) {
     return this.runStatement();
   }
 };
