@@ -1,0 +1,16 @@
+application: shell
+version: 1
+
+runtime: python
+api_version: 1
+
+handlers:
+- url: /static
+  static_dir: static
+  expiration: 1d
+
+# if you're adding the shell to your own app, change this regex url to the URL
+# endpoint where you want the shell to run, e.g. /shell . You'll also probably
+# want to add login: admin to restrict to admins only.
+- url: .*
+  script: shell.py
