@@ -1,3 +1,23 @@
+SymPy online shell
+------------------
+
+How to set it up:
+
+$ cd /tmp
+$ hg clone http://hg.sympy.org/sympy
+$ hg clone http://hg.sympy.org/sympy-live
+$ cd sympy-live
+$ cp -a ../sympy/sympy .
+$ /path/to/dev_appserver.py .
+
+And go to http://localhost:8080
+
+How to upload to google app engine:
+
+$ /path/to/appcfg.py update .
+
+Original info
+-------------
 An interactive, stateful AJAX shell that runs Python code on the server.
 
 Part of http://code.google.com/p/google-app-engine-samples/.
