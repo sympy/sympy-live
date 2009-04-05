@@ -3,12 +3,19 @@ SymPy online shell
 
 How to set it up:
 
+Download and unpack the google app engine SDK from
+http://code.google.com/appengine/downloads.html:
+
+$ unzip google_appengine_1.1.9.zip
+
+then:
+
 $ cd /tmp
-$ hg clone http://hg.sympy.org/sympy
-$ hg clone http://hg.sympy.org/sympy-live
+$ git clone git://git.sympy.org/sympy.git
+$ git clone git://git.sympy.org/sympy-live.git
 $ cd sympy-live
 $ cp -a ../sympy/sympy .
-$ /path/to/dev_appserver.py .
+$ /path/to/google_appengine/dev_appserver.py .
 
 And go to http://localhost:8080
 
