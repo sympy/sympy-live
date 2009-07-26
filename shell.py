@@ -224,7 +224,62 @@ class GraphicalFrontPageHandler(webapp.RequestHandler):
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
 
+class ShellDsiFrontPageHandler(webapp.RequestHandler):
+  """Creates a new session and renders the graphical_shell.html template.
+  """
 
+  def get(self):
+    # set up the session. TODO: garbage collect old shell sessions
+    session_key = self.request.get('session')
+    if session_key:
+      session = Session.get(session_key)
+    else:
+      # create a new session
+      session = Session()
+      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
+      session_key = session.put()
+
+    template_file = os.path.join(os.path.dirname(__file__), 'templates',
+                                 'shelldsi.html')
+    session_url = '/shelldsi?session=%s' % session_key
+    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+             'python_version': sys.version,
+             'session': str(session_key),
+             'user': users.get_current_user(),
+             'login_url': users.create_login_url(session_url),
+             'logout_url': users.create_logout_url(session_url),
+             }
+    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+    self.response.out.write(rendered)
+
+class HelpDsiFrontPageHandler(webapp.RequestHandler):
+  """Creates a new session and renders the graphical_shell.html template.
+  """
+
+  def get(self):
+    # set up the session. TODO: garbage collect old shell sessions
+    session_key = self.request.get('session')
+    if session_key:
+      session = Session.get(session_key)
+    else:
+      # create a new session
+      session = Session()
+      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
+      session_key = session.put()
+
+    template_file = os.path.join(os.path.dirname(__file__), 'templates',
+                                 'helpdsi.html')
+    session_url = '/?session=%s' % session_key
+    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+             'python_version': sys.version,
+             'session': str(session_key),
+             'user': users.get_current_user(),
+             'login_url': users.create_login_url(session_url),
+             'logout_url': users.create_logout_url(session_url),
+             }
+    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+    self.response.out.write(rendered)
+	
 class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
@@ -331,6 +386,8 @@ def main():
   application = webapp.WSGIApplication(
     [('/', FrontPageHandler),
      ('/graphical', GraphicalFrontPageHandler),
+	 ('/shelldsi', ShellDsiFrontPageHandler),
+	 ('/helpdsi', HelpDsiFrontPageHandler),
      ('/shell.do', StatementHandler)], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
