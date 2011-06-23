@@ -141,7 +141,7 @@ shell.done = function(req) {
     this.historyCursor = this.history.length - 1;
 
     // add the command's result
-    var result = req.responseText.replace(/^\s*|\s*$/g, '');  // trim whitespace
+    var result = req.responseText;
     if (result != '')
       output.value += '\n' + result;
 
