@@ -6,6 +6,11 @@
 <title> Interactive Shell </title>
 <script type="text/javascript" src="/static/external/ext-core.js"></script>
 <script type="text/javascript" src="/static/shell.js"></script>
+<script type="text/javascript">
+    Ext.onReady(function() {
+        Ext.get("statement").on("keypress", shell.onPromptKeyPress, shell);
+    });
+</script>
 <style type="text/css">
 body {
   font-family: monospace;
@@ -94,8 +99,7 @@ Python {{ python_version }}
   <textarea class="prompt" id="caret" readonly="readonly" rows="4"
             onfocus="document.getElementById('statement').focus()"
             >&gt;&gt;&gt;</textarea>
-  <textarea class="prompt" name="statement" id="statement" rows="4"
-            onkeypress="return shell.onPromptKeyPress(event);"></textarea>
+  <textarea class="prompt" name="statement" id="statement" rows="4"></textarea>
   </nobr>
   <input type="hidden" name="session" value="{{ session }}" />
   <input type="submit" style="display: none" />

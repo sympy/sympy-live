@@ -85,11 +85,10 @@ shell.getXmlHttpRequest = function() {
  * @return {Boolean} false to tell the browser not to submit the form.
  */
 shell.onPromptKeyPress = function(event) {
-  var statement = document.getElementById('statement');
+  var statement = Ext.get("statement");
 
   if (this.historyCursor == this.history.length - 1) {
-    // we're on the current statement. update it in the history before doing
-    // anything.
+    // we're on the current statement. update it in the history before doing anything.
     this.history[this.historyCursor] = statement.value;
   }
 
