@@ -141,8 +141,14 @@ shell.done = function(req) {
 
     // add the command's result
     var result = req.responseText;
-    if (result != '')
-      output.value += '\n' + result;
+
+    if (result != '') {
+      if (output.value[output.value.length-1] != '\n') {
+        output.value += '\n';
+      }
+
+      output.value += result;
+    }
 
     // scroll to the bottom
     output.scrollTop = output.scrollHeight;
