@@ -50,7 +50,6 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
-
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = True
 
@@ -67,13 +66,14 @@ UNPICKLABLE_TYPES = (
 
 # Unpicklable statements to seed new sessions with.
 INITIAL_UNPICKLABLES = [
-  'import logging',
-  'import os',
-  'import sys',
-  'from google.appengine.ext import db',
-  'from google.appengine.api import users',
-  'from sympy.interactive import *',
-  ]
+  "import logging",
+  "import os",
+  "import sys",
+  "from google.appengine.ext import db",
+  "from google.appengine.api import users",
+  "from __future__ import division",
+  "from sympy import *",
+]
 
 
 class Session(db.Model):
@@ -279,7 +279,7 @@ class HelpDsiFrontPageHandler(webapp.RequestHandler):
              }
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
-	
+
 class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
@@ -381,16 +381,16 @@ class StatementHandler(webapp.RequestHandler):
 
     session.put()
 
-
 def main():
+  sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
+
   application = webapp.WSGIApplication(
     [('/', FrontPageHandler),
      ('/graphical', GraphicalFrontPageHandler),
-	 ('/shelldsi', ShellDsiFrontPageHandler),
-	 ('/helpdsi', HelpDsiFrontPageHandler),
+     ('/shelldsi', ShellDsiFrontPageHandler),
+     ('/helpdsi', HelpDsiFrontPageHandler),
      ('/shell.do', StatementHandler)], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
-
 
 if __name__ == '__main__':
   main()
