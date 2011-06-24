@@ -127,15 +127,17 @@ shell.onPromptKeyPress = function(event) {
   }
 
   // should we pull something from the history?
-  if (event.shiftKey && event.getKeyCode() === SymPy.Keys.UP) {
+  if (event.shiftKey && event.getKey() === SymPy.Keys.UP) {
     if (this.historyCursor > 0) {
       statement.value = this.history[--this.historyCursor];
     }
+    event.preventDefault();
     return false;
-  } else if (event.shiftKey && event.getKeyCode() === SymPy.Keys.DOWN) {
+  } else if (event.shiftKey && event.getKey() === SymPy.Keys.DOWN) {
     if (this.historyCursor < this.history.length - 1) {
       statement.value = this.history[++this.historyCursor];
     }
+    event.preventDefault();
     return false;
   } else if (!event.altKey) {
     // probably changing the statement. update it in the history.
@@ -144,10 +146,15 @@ shell.onPromptKeyPress = function(event) {
   }
 
   // should we submit?
-  var shiftEnter = (document.getElementById('submit_key').value == 'shift-enter');
-  if ((event.getKeyCode() === SymPy.Keys.ENTER) && (event.shiftKey == shiftEnter)) {
-    return this.runStatement();
+  var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
+
+  if ((event.getKey() === SymPy.Keys.ENTER) && (event.shiftKey == shiftEnter)) {
+    event.preventDefault();
+    this.runStatement();
+    return false;
   }
+
+  return true;
 };
 
 /**
