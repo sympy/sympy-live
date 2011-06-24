@@ -110,15 +110,7 @@ shell.getXmlHttpRequest = function() {
   return null;
 };
 
-/**
- * This is the prompt textarea's onkeypress handler. Depending on the key that
- * was pressed, it will run the statement, navigate the history, or update the
- * current statement in the history.
- *
- * @param {Event} event the keypress event
- * @return {Boolean} false to tell the browser not to submit the form.
- */
-shell.onPromptKeyPress = function(event) {
+shell.onPromptKeyDown = function(event) {
   var statement = Ext.get("statement");
 
   if (this.historyCursor == this.history.length - 1) {
