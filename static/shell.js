@@ -110,40 +110,54 @@ shell.getXmlHttpRequest = function() {
   return null;
 };
 
-shell.onPromptKeyDown = function(event) {
-  var statement = Ext.get("statement");
+shell.setValue = function(value) {
+    Ext.get('statement').dom.value = value;
+};
 
-  if (this.historyCursor == this.history.length - 1) {
+shell.getValue = function() {
+    return Ext.get('statement').dom.value;
+};
+
+shell.isEmpty = function() {
+    return this.getValue().length == 0;
+};
+
+shell.onPromptKeyDown = function(event) {
+  if (this.historyCursor == this.history.length-1) {
     // we're on the current statement. update it in the history before doing anything.
-    this.history[this.historyCursor] = statement.value;
+    this.history[this.historyCursor] = this.getValue();
   }
 
   // should we pull something from the history?
-  if (event.shiftKey && event.getKey() === SymPy.Keys.UP) {
-    if (this.historyCursor > 0) {
-      statement.value = this.history[--this.historyCursor];
-    }
-    event.preventDefault();
-    return false;
-  } else if (event.shiftKey && event.getKey() === SymPy.Keys.DOWN) {
-    if (this.historyCursor < this.history.length - 1) {
-      statement.value = this.history[++this.historyCursor];
-    }
-    event.preventDefault();
-    return false;
-  } else if (!event.altKey) {
-    // probably changing the statement. update it in the history.
-    this.historyCursor = this.history.length - 1;
-    this.history[this.historyCursor] = statement.value;
-  }
+  switch (event.getKey()) {
+  case SymPy.Keys.UP:
+    if (event.ctrlKey || this.isEmpty()) {
+      event.preventDefault();
 
-  // should we submit?
-  var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
+      if (this.historyCursor > 0) {
+        this.setValue(this.history[--this.historyCursor]);
+      }
 
-  if ((event.getKey() === SymPy.Keys.ENTER) && (event.shiftKey == shiftEnter)) {
-    event.preventDefault();
-    this.runStatement();
-    return false;
+      return false;
+    }
+  case SymPy.Keys.DOWN:
+    if (event.ctrlKey || this.isEmpty()) {
+      event.preventDefault();
+
+      if (this.historyCursor < this.history.length - 1) {
+        this.setValue(this.history[++this.historyCursor]);
+      }
+
+      return false;
+    }
+  case SymPy.Keys.ENTER:
+    var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
+
+    if (event.shiftKey == shiftEnter) {
+      event.preventDefault();
+      this.runStatement();
+      return false;
+    }
   }
 
   return true;
