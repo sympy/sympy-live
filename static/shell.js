@@ -26,6 +26,40 @@
  * XmlHttpRequest.
  */
 
+SymPy = {};
+
+SymPy.Keys = {
+    BACKSPACE: 8,  DEL:       49,
+    TAB:       9,  SPACE:     32,
+    ENTER:     13, ESC:       27,
+    PAGE_UP:   33, PAGE_DOWN: 34,
+    END:       35, HOME:      36,
+    LEFT:      37, UP:        38,
+    RIGHT:     39, DOWN:      40,
+    A: 65, B: 66, C: 67, D: 68,
+    E: 69, F: 70, G: 71, H: 72,
+    I: 73, J: 74, K: 75, L: 76,
+    M: 77, N: 78, O: 79, P: 80,
+    Q: 81, R: 82, S: 83, T: 84,
+    U: 85, V: 86, W: 87, X: 88,
+    Y: 89, Z: 90,
+    ZERO:  48, ONE:   49,
+    TWO:   50, THREE: 51,
+    FOUR:  52, FIVE:  53,
+    SIX:   54, SEVEN: 55,
+    EIGHT: 56, NINE:  57,
+    ';':  59, ':':  59,
+    '=':  61, '+':  61,
+    '-': 109, '_': 109,
+    ',': 188, '<': 188,
+    '.': 190, '>': 190,
+    '/': 191, '?': 191,
+    '`': 192, '~': 192,
+    '[': 219, '{': 219,
+    ']': 221, '}': 221,
+    "'": 222, '"': 222
+};
+
 /**
  * Shell namespace.
  * @type {Object}
@@ -93,12 +127,12 @@ shell.onPromptKeyPress = function(event) {
   }
 
   // should we pull something from the history?
-  if (event.shiftKey && event.keyCode == 38 /* up arrow */) {
+  if (event.shiftKey && event.getKeyCode() === SymPy.Keys.UP) {
     if (this.historyCursor > 0) {
       statement.value = this.history[--this.historyCursor];
     }
     return false;
-  } else if (event.shiftKey && event.keyCode == 40 /* down arrow */) {
+  } else if (event.shiftKey && event.getKeyCode() === SymPy.Keys.DOWN) {
     if (this.historyCursor < this.history.length - 1) {
       statement.value = this.history[++this.historyCursor];
     }
@@ -110,9 +144,8 @@ shell.onPromptKeyPress = function(event) {
   }
 
   // should we submit?
-  var ctrlEnter = (document.getElementById('submit_key').value == 'ctrl-enter');
-  if (event.keyCode == 13 /* enter */ && !event.altKey && event.shiftKey &&
-      !(event.ctrlKey == ctrlEnter)) {
+  var shiftEnter = (document.getElementById('submit_key').value == 'shift-enter');
+  if ((event.getKeyCode() === SymPy.Keys.ENTER) && (event.shiftKey == shiftEnter)) {
     return this.runStatement();
   }
 };
