@@ -281,14 +281,14 @@ shell.runStatement = function() {
   req.onreadystatechange = function() { shell.done(req); };
 
   // build the query parameter string
-  var params = '';
-  for (i = 0; i < form.elements.length; i++) {
-    var elem = form.elements[i];
-    if (elem.type != 'submit' && elem.type != 'button' && elem.id != 'caret') {
-      var value = escape(elem.value).replace(/\+/g, '%2B'); // escape ignores +
-      params += '&' + elem.name + '=' + value;
-    }
-  }
+  var params = '',
+      elements = ['statement', 'session', 'printer'];
+
+  Ext.each(elements, function(elem) {
+    var obj = Ext.get(elem);
+    var value = escape(obj.getValue()).replace(/\+/g, '%2B'); // escape ignores +
+    params += '&' + elem + '=' + value;
+  });
 
   // send the request and tell the user.
   Ext.get('statement').addClass('processing');

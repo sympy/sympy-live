@@ -112,7 +112,7 @@ p {
             >&gt;&gt;&gt;</textarea>
   <textarea class="prompt" name="statement" id="statement" rows="4"></textarea>
   </nobr>
-  <input type="hidden" name="session" value="{{ session }}" />
+  <input type="hidden" name="session" id="session" value="{{ session }}" />
   <input type="submit" style="display: none" />
 </form>
 
@@ -125,13 +125,24 @@ p {
 {% else %}
   <a href="{{ login_url }}">log in</a>
 {% endif %}
- | Ctrl-Up/Down for history |
+<span class="separator">|</span>
+Ctrl-Up/Down for history
+<span class="separator">|</span>
 <select id="submit_key">
   <option value="enter">Enter</option>
   <option value="shift-enter" selected="selected">Shift-Enter</option>
 </select>
 <label for="submit_key">submits</label>
- | <button id="clear">Clear</button>
+<span class="separator">|</span>
+<select id="printer" name="printer">
+  <option value="srepr">Repr</option>
+  <option value="sstr">Str</option>
+  <option value="pretty" selected="selected">ASCII</option>
+  <option value="upretty">Unicode</option>
+  <option value="latex">LaTeX</option>
+</select>
+<span class="separator">|</span>
+<button id="clear">Clear</button>
 </p>
 
 <script type="text/javascript">

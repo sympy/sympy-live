@@ -50,6 +50,18 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
+sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
+
+from sympy import srepr, sstr, pretty, latex
+
+PRINTERS = {
+    'srepr': srepr,
+    'sstr': sstr,
+    'pretty': lambda arg: pretty(arg, use_unicode=False),
+    'upretty': lambda arg: pretty(arg, use_unicode=True),
+    'latex': lambda arg: latex(arg, mode="equation*"),
+}
+
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = True
 
@@ -111,7 +123,7 @@ def banner(quiet=False):
 
     return message
 
-def evaluate(statement, session, stream=None):
+def evaluate(statement, session, printer=None, stream=None):
     """Evaluate the statement in sessions's globals. """
     if not statement:
         return
@@ -140,10 +152,23 @@ def evaluate(statement, session, stream=None):
     import __builtin__
     statement_module.__builtins__ = __builtin__
 
+    # create customized display hook
+    stringify_func = printer or sstr
+
+    def displayhook(arg):
+        if arg is not None:
+            statement_module.__builtins__._ = None
+            print stringify_func(arg)
+            statement_module.__builtins__._ = arg
+
+    old_displayhook = sys.displayhook
+    sys.displayhook = displayhook
+
     # swap in our custom module for __main__. then unpickle the session
     # globals, run the statement, and re-pickle the session globals, all
     # inside it.
     old_main = sys.modules.get('__main__')
+
     try:
       sys.modules['__main__'] = statement_module
       statement_module.__name__ = '__main__'
@@ -199,6 +224,7 @@ def evaluate(statement, session, stream=None):
             session.set_global(name, val)
 
     finally:
+      sys.displayhook = old_displayhook
       sys.modules['__main__'] = old_main
 
     session.put()
@@ -420,12 +446,18 @@ class StatementHandler(webapp.RequestHandler):
     # load the session from the datastore
     session = Session.get(self.request.get('session'))
 
+    # setup printing function (srepr, sstr, pretty, upretty, latex)
+    key = self.request.get('printer')
+
+    try:
+        printer = PRINTERS[key]
+    except KeyError:
+        printer = None
+
     # evaluate the statement in session's globals
-    evaluate(statement, session, self.response.out)
+    evaluate(statement, session, printer, self.response.out)
 
 def main():
-  sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
-
   application = webapp.WSGIApplication(
     [('/', FrontPageHandler),
      ('/graphical', GraphicalFrontPageHandler),
