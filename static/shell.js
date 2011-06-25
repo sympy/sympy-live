@@ -168,6 +168,14 @@ shell.onPromptKeyDown = function(event) {
     }
 
     break;
+  case SymPy.Keys.E:
+    if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
+      event.preventDefault();
+      this.runStatement();
+      return false;
+    }
+
+    break;
   }
 
   switch (event.getKey()) {
