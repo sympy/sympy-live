@@ -172,8 +172,7 @@ shell.onPromptKeyDown = function(event) {
  */
 shell.done = function(req) {
   if (req.readyState == this.DONE_STATE) {
-    var statement = document.getElementById('statement')
-    statement.className = 'prompt';
+    Ext.get('statement').removeClass('processing');
 
     // add the command to the shell output
     var output = document.getElementById('output');
@@ -236,7 +235,8 @@ shell.runStatement = function() {
   }
 
   // send the request and tell the user.
-  document.getElementById('statement').className = 'prompt processing';
+  Ext.get('statement').addClass('processing');
+
   req.open(form.method, form.action + '?' + params, true);
   req.setRequestHeader('Content-type',
                        'application/x-www-form-urlencoded;charset=UTF-8');

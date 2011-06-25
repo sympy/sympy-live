@@ -9,6 +9,12 @@
 <script type="text/javascript">
     Ext.onReady(function() {
         Ext.get("statement").on("keydown", shell.onPromptKeyDown, shell);
+
+        SymPy.Banner = Ext.get("output").getValue();
+
+        Ext.get("clear").on("click", function() {
+            Ext.get("output").dom.value = SymPy.Banner;
+        });
     });
 </script>
 <style type="text/css">
@@ -120,6 +126,7 @@ p {
   <option value="shift-enter" selected="selected">Shift-Enter</option>
 </select>
 <label for="submit_key">submits</label>
+ | <button id="clear">Clear</button>
 </p>
 
 <script type="text/javascript">
