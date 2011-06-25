@@ -130,6 +130,7 @@ def evaluate(statement, session, stream=None):
     except:
       if stream is not None:
         stream.write(traceback.format_exc())
+      return
 
     # create a dedicated module to be used as this statement's __main__
     statement_module = new.module('__main__')
@@ -176,6 +177,7 @@ def evaluate(statement, session, stream=None):
       except:
         if stream is not None:
           stream.write(traceback.format_exc())
+        return
 
       # extract the new globals that this statement added
       new_globals = {}
