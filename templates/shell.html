@@ -8,9 +8,17 @@
 <script type="text/javascript" src="/static/shell.js"></script>
 <script type="text/javascript">
     Ext.onReady(function() {
+        SymPy.Banner = Ext.get("output").getValue();
+
+        Ext.get("caret").on("focus", function() {
+            Ext.get('statement').focus();
+        });
+
         Ext.get("statement").on("keydown", shell.onPromptKeyDown, shell);
 
-        SymPy.Banner = Ext.get("output").getValue();
+        Ext.get("evaluate").on("click", function() {
+            shell.runStatement.call(shell);
+        });
 
         Ext.get("clear").on("click", function() {
             Ext.get("output").dom.value = SymPy.Banner;
@@ -142,6 +150,7 @@ Ctrl-Up/Down for history
   <option value="latex">LaTeX</option>
 </select>
 <span class="separator">|</span>
+<button id="evaluate">Evaluate</button>
 <button id="clear">Clear</button>
 </p>
 
