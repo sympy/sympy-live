@@ -114,6 +114,10 @@ shell.setValue = function(value) {
     Ext.get('statement').dom.value = value;
 };
 
+shell.clearValue = function() {
+    this.setValue("");
+}
+
 shell.getValue = function() {
     return Ext.get('statement').dom.value;
 };
@@ -140,6 +144,8 @@ shell.onPromptKeyDown = function(event) {
 
       return false;
     }
+
+    break;
   case SymPy.Keys.DOWN:
     if (event.ctrlKey || this.isEmpty()) {
       event.preventDefault();
@@ -150,6 +156,8 @@ shell.onPromptKeyDown = function(event) {
 
       return false;
     }
+
+    break;
   case SymPy.Keys.ENTER:
     var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
 
@@ -158,9 +166,55 @@ shell.onPromptKeyDown = function(event) {
       this.runStatement();
       return false;
     }
+
+    break;
+  }
+
+  switch (event.getKey()) {
+  case SymPy.Keys.BACKSPACE:
+  case SymPy.Keys.ENTER:
+    this.updatePrompt.defer(50, this);
+    break;
   }
 
   return true;
+};
+
+shell.updatePrompt = function() {
+    var prompt = ">>>",
+        lines = this.getValue().split('\n');
+
+    var i = 1,
+        n = lines.length;
+
+    for (; i < n; i++) {
+        prompt += "\n...";
+    }
+
+    var caret = Ext.get("caret"),
+        statement = Ext.get("statement");
+
+    caret.dom.value = prompt;
+
+    var rows = Math.max(4, n);
+
+    caret.dom.setAttribute('rows', rows);
+    statement.dom.setAttribute('rows', rows);
+};
+
+shell.prefixStatement = function() {
+    var lines = this.getValue().split('\n');
+
+    lines[0] = ">>> " + lines[0];
+
+    var i = 1,
+        n = lines.length;
+
+    for (; i < n; i++) {
+        lines[i] = "... " + lines[i];
+    }
+
+    return lines.join("\n");
 };
 
 /**
@@ -177,8 +231,10 @@ shell.done = function(req) {
     // add the command to the shell output
     var output = document.getElementById('output');
 
-    output.value += '\n>>> ' + statement.value;
-    statement.value = '';
+    output.value += '\n' + this.prefixStatement();
+
+    this.clearValue();
+    this.updatePrompt();
 
     // add a new history element
     this.history.push('');
