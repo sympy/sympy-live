@@ -60,11 +60,19 @@ SymPy.Keys = {
     "'": 222, '"': 222
 };
 
+SymPy.escapeHTML = function(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
+SymPy.unescapeHTML = function(str) {
+    return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+};
+
 /**
  * Shell namespace.
  * @type {Object}
  */
-var shell = {}
+var shell = {};
 
 /**
  * The shell history. history is an array of strings, ordered oldest to
@@ -233,40 +241,41 @@ shell.prefixStatement = function() {
  *     statement to the server
  */
 shell.done = function(req) {
-  if (req.readyState == this.DONE_STATE) {
-    Ext.get('statement').removeClass('processing');
-
-    // add the command to the shell output
-    var output = document.getElementById('output');
-
-    output.value += '\n' + this.prefixStatement();
+    var output = Ext.get('output'),
+        value = '\n' + this.prefixStatement();
 
     this.clearValue();
     this.updatePrompt();
 
-    // add a new history element
     this.history.push('');
     this.historyCursor = this.history.length - 1;
 
-    // add the command's result
-    var result = req.responseText;
+    var result = req.responseText.replace(/^(\s*\n)+/, '');
 
     if (result != '') {
-      if (output.value[output.value.length-1] != '\n') {
-        output.value += '\n';
-      }
+        if (value[value.length-1] != '\n') {
+            value += '\n';
+        }
 
-      output.value += result;
+        value += result;
     }
 
-    // scroll to the bottom
-    output.scrollTop = output.scrollHeight;
-    if (output.createTextRange) {
-      var range = output.createTextRange();
-      range.collapse(false);
-      range.select();
+    var element = Ext.DomHelper.append(output, {
+        tag: 'div',
+        html: SymPy.escapeHTML(value)
+    });
+
+    function scrollToBottom() {
+        output.dom.scrollTop = output.dom.scrollHeight;
     }
-  }
+
+    scrollToBottom();
+
+    if (Ext.get('printer').getValue() == 'latex') {
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.dom], [scrollToBottom]);
+    }
+
+    Ext.get('statement').removeClass('processing');
 };
 
 /**
@@ -286,7 +295,11 @@ shell.runStatement = function() {
     return false;
   }
 
-  req.onreadystatechange = function() { shell.done(req); };
+  req.onreadystatechange = function() {
+    if (req.readyState == shell.DONE_STATE) {
+      shell.done.call(shell, req);
+    }
+  };
 
   // build the query parameter string
   var params = '',
