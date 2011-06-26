@@ -197,7 +197,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             Ext.get(elem).remove();
         });
 
-        this.promptEl.dom.value = "";
+        this.clearValue();
+        this.historyCursor = this.history.length-1;
     },
 
     setValue: function(value) {
@@ -265,6 +266,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             break;
         }
+
+        this.historyCursor = this.history.length - 1;
+        this.history[this.historyCursor] = this.getValue();
 
         return true;
     },
