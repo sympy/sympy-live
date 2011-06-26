@@ -61,6 +61,124 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     constructor: function(config) {
         config = config || {};
+        SymPy.Shell.superclass.constructor.call(this, config);
+    },
+
+    render: function(el) {
+        el = Ext.get(el);
+
+        this.outputEl = Ext.DomHelper.append(el, {
+            tag: 'div',
+            cls: 'output',
+            children: {
+                tag: 'div',
+                html: Ext.get('banner').dom.innerHTML
+            }
+        }, true);
+
+        this.caretEl = Ext.DomHelper.append(el, {
+            tag: 'textarea',
+            cls: 'caret',
+            rows: '4',
+            readonly: 'readonly',
+            html: '&gt;&gt;&gt;'
+        }, true);
+
+        this.promptEl = Ext.DomHelper.append(el, {
+            tag: 'textarea',
+            cls: 'prompt',
+            rows: '4'
+        }, true);
+
+        this.toolbarEl = Ext.DomHelper.append(el, {
+            tag: 'p',
+            cls: 'toolbar',
+            children: [{
+                tag: 'button',
+                html: 'Evaluate'
+            }, {
+                tag: 'button',
+                html: 'Clear'
+            }, {
+                tag: 'span',
+                cls: 'separator',
+                html: '|'
+            }, {
+                tag: 'select',
+                children: [{
+                    tag: 'option',
+                    value: 'srepr',
+                    html: 'Repr'
+                }, {
+                    tag: 'option',
+                    value: 'sstr',
+                    html: 'Str'
+                }, {
+                    tag: 'option',
+                    value: 'pretty',
+                    selected: 'selected',
+                    html: 'ASCII'
+                }, {
+                    tag: 'option',
+                    value: 'upretty',
+                    html: 'Unicode'
+                }, {
+                    tag: 'option',
+                    value: 'latex',
+                    html: 'LaTeX'
+                }]
+            }, {
+                tag: 'span',
+                cls: 'separator',
+                html: '|'
+            }, {
+                tag: 'select',
+                children: [{
+                    tag: 'option',
+                    value: 'enter',
+                    html: 'Enter'
+                }, {
+                    tag: 'option',
+                    value: 'shift-enter',
+                    selected: 'selected',
+                    html: 'Shift-Enter'
+                }]
+            }, {
+                tag: 'span',
+                html: 'submits'
+            }, {
+                tag: 'span',
+                cls: 'separator',
+                html: '|'
+            }, {
+                tag: 'span',
+                html: 'Ctrl-Up/Down for history'
+            }]
+        }, true);
+
+        this.evaluateEl = this.toolbarEl.down('button:nth(1)');
+        this.clearEl = this.toolbarEl.down('button:nth(2)');
+
+        this.printerEl = this.toolbarEl.down('select:nth(1)');
+        this.submitEl = this.toolbarEl.down('select:nth(2)');
+
+        this.caretEl.on("focus", function(event) {
+            this.promptEl.focus();
+        }, this);
+
+        this.promptEl.on("keydown", function(event) {
+            this.onPromptKeyDown(event);
+        }, this);
+
+        this.evaluateEl.on("click", function(event) {
+            this.evaluate();
+        }, this);
+
+        this.clearEl.on("click", function(event) {
+            this.clear();
+        }, this);
+
+        this.promptEl.focus();
 
         var task = {
             run: this.updatePrompt,
@@ -70,12 +188,20 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         var runner = new Ext.util.TaskRunner();
         runner.start(task);
+    },
 
-        SymPy.Shell.superclass.constructor.call(this, config);
+    clear: function() {
+        var elements = this.outputEl.query('div.item');
+
+        Ext.each(elements, function(elem) {
+            Ext.get(elem).remove();
+        });
+
+        this.promptEl.dom.value = "";
     },
 
     setValue: function(value) {
-        Ext.get('statement').dom.value = value;
+        this.promptEl.dom.value = value;
     },
 
     clearValue: function() {
@@ -83,7 +209,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     getValue: function() {
-        return Ext.get('statement').dom.value;
+        return this.promptEl.dom.value;
     },
 
     isEmpty: function() {
@@ -121,11 +247,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             break;
         case SymPy.Keys.ENTER:
-            var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
+            var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 
             if (event.shiftKey == shiftEnter) {
                 event.preventDefault();
-                this.runStatement();
+                this.evaluate();
                 return false;
             }
 
@@ -133,7 +259,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         case SymPy.Keys.E:
             if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
                 event.preventDefault();
-                this.runStatement();
+                this.evaluate();
                 return false;
             }
 
@@ -157,15 +283,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 prompt += "\n...";
             }
 
-            var caret = Ext.get("caret"),
-                statement = Ext.get("statement");
-
-            caret.dom.value = prompt;
+            this.caretEl.dom.value = prompt;
 
             var rows = Math.max(4, n);
 
-            caret.dom.setAttribute('rows', rows);
-            statement.dom.setAttribute('rows', rows);
+            this.caretEl.dom.setAttribute('rows', rows);
+            this.promptEl.dom.setAttribute('rows', rows);
 
             this.previousValue = value;
         }
@@ -186,9 +309,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return lines.join("\n");
     },
 
+    scrollToBottom: function() {
+        this.outputEl.dom.scrollTop = this.outputEl.dom.scrollHeight;
+    },
+
     done: function(response) {
-        var output = Ext.get('output'),
-            value = '\n' + this.prefixStatement();
+        var value = '\n' + this.prefixStatement();
 
         this.clearValue();
         this.updatePrompt();
@@ -196,16 +322,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.history.push('');
         this.historyCursor = this.history.length - 1;
 
-        Ext.DomHelper.append(output, {
+        Ext.DomHelper.append(this.outputEl, {
             tag: 'div',
+            cls: 'item',
             html: SymPy.escapeHTML(value)
         });
 
-        function scrollToBottom() {
-            output.dom.scrollTop = output.dom.scrollHeight;
-        }
-
-        scrollToBottom();
+        this.scrollToBottom();
 
         var response = Ext.decode(response.responseText);
         this.session = response.session;
@@ -213,27 +336,29 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         var result = response.output.replace(/^(\s*\n)+/, '');
 
         if (result.length) {
-            var element = Ext.DomHelper.append(output, {
+            var element = Ext.DomHelper.append(this.outputEl, {
                 tag: 'div',
+                cls: 'item',
                 html: SymPy.escapeHTML(result)
             }, false);
 
-            scrollToBottom();
+            this.scrollToBottom();
 
-            if (Ext.get('printer').getValue() == 'latex') {
-                MathJax.Hub.Queue(['Typeset', MathJax.Hub, element], [scrollToBottom]);
+            if (this.printerEl.getValue() == 'latex') {
+                MathJax.Hub.Queue(['Typeset', MathJax.Hub, element],
+                                  [this.scrollToBottom.createDelegate(this)]);
             }
         }
 
-        Ext.get('statement').removeClass('processing');
+        this.promptEl.removeClass('processing');
     },
 
-    runStatement: function() {
-        Ext.get('statement').addClass('processing');
+    evaluate: function() {
+        this.promptEl.addClass('processing');
 
         var data = {
-            statement: Ext.get('statement').getValue(),
-            printer: Ext.get('printer').getValue(),
+            statement: this.promptEl.getValue(),
+            printer: this.printerEl.getValue(),
             session: this.session || null
         };
 

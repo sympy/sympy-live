@@ -36,35 +36,12 @@
         <script type="text/javascript">
             Ext.onReady(function() {
                 var shell = new SymPy.Shell();
-
-                Ext.get("caret").on("focus", function() {
-                    Ext.get('statement').focus();
-                });
-
-                Ext.get("statement").on("keydown", shell.onPromptKeyDown, shell);
-
-                Ext.get("evaluate").on("click", function() {
-                    shell.runStatement();
-                });
-
-                Ext.get("clear").on("click", function() {
-                    var elements = Ext.DomQuery.select('#output > div');
-
-                    Ext.each(elements, function(elem, i) {
-                        if (i > 0) {
-                            Ext.get(elem).remove();
-                        }
-                    });
-
-                    Ext.get("statement").dom.value = "";
-                });
-
-                Ext.get('statement').focus();
+                shell.render(Ext.get('shell'));
             });
         </script>
     </head>
     <body>
-        <p style="width: 50em">
+        <p class="header">
             <a href="http://sympy.org/">SymPy</a>
             <a href="https://github.com/sympy/sympy-live">online shell</a>
             running on the
@@ -79,45 +56,13 @@
             </span>
         </p>
 
-        <div id="output">
-            <div>{{ banner }}</div>
-        </div>
-
-        <form id="form" action="shell.do" method="get">
-            <nobr>
-            <textarea class="prompt" id="caret" readonly="readonly" rows="4">&gt;&gt;&gt;</textarea>
-            <textarea class="prompt" name="statement" id="statement" rows="4"></textarea>
-            </nobr>
-            <input type="hidden" name="session" id="session" value="{{ session }}" />
-            <input type="submit" style="display: none" />
-        </form>
-
-        <p id="toolbar">
-            <button id="evaluate">Evaluate</button>
-            <button id="clear">Clear</button>
-            <span class="separator">|</span>
-            <select id="printer" name="printer">
-                <option value="srepr">Repr</option>
-                <option value="sstr">Str</option>
-                <option value="pretty" selected="selected">ASCII</option>
-                <option value="upretty">Unicode</option>
-                <option value="latex">LaTeX</option>
-            </select>
-            <span class="separator">|</span>
-            <select id="submit_key">
-                <option value="enter">Enter</option>
-                <option value="shift-enter" selected="selected">Shift-Enter</option>
-            </select>
-            <label for="submit_key">submits</label>
-            <span class="separator">|</span>
-            Ctrl-Up/Down for history
-        </p>
+        <div id="banner">{{ banner }}</div>
+        <div id="shell"></div>
 
         <h3>About</h3>
         <p>
 This is just a regular Python shell, with the following command executed by default:
 <pre>
-&gt;&gt;&gt; from sympy import *
 &gt;&gt;&gt; from __future__ import division
 &gt;&gt;&gt; from sympy import *
 &gt;&gt;&gt; x, y, z, t = symbols('x y z t')
