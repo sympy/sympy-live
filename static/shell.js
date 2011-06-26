@@ -57,9 +57,20 @@ SymPy.unescapeHTML = function(str) {
 SymPy.Shell = Ext.extend(Ext.util.Observable, {
     history: [''],
     historyCursor: 0,
+    previousValue: "",
 
     constructor: function(config) {
         config = config || {};
+
+        var task = {
+            run: this.updatePrompt,
+            scope: this,
+            interval: 100
+        }
+
+        var runner = new Ext.util.TaskRunner();
+        runner.start(task);
+
         SymPy.Shell.superclass.constructor.call(this, config);
     },
 
@@ -129,36 +140,35 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         }
 
-        switch (event.getKey()) {
-        case SymPy.Keys.BACKSPACE:
-        case SymPy.Keys.ENTER:
-            this.updatePrompt.defer(50, this);
-            break;
-        }
-
         return true;
     },
 
     updatePrompt: function() {
-        var prompt = ">>>",
-            lines = this.getValue().split('\n');
+        var value = this.getValue();
 
-        var i = 1,
-            n = lines.length;
+        if (this.previousValue != value) {
+            var prompt = ">>>",
+                lines = value.split('\n');
 
-        for (; i < n; i++) {
-            prompt += "\n...";
+            var i = 1,
+                n = lines.length;
+
+            for (; i < n; i++) {
+                prompt += "\n...";
+            }
+
+            var caret = Ext.get("caret"),
+                statement = Ext.get("statement");
+
+            caret.dom.value = prompt;
+
+            var rows = Math.max(4, n);
+
+            caret.dom.setAttribute('rows', rows);
+            statement.dom.setAttribute('rows', rows);
+
+            this.previousValue = value;
         }
-
-        var caret = Ext.get("caret"),
-            statement = Ext.get("statement");
-
-        caret.dom.value = prompt;
-
-        var rows = Math.max(4, n);
-
-        caret.dom.setAttribute('rows', rows);
-        statement.dom.setAttribute('rows', rows);
     },
 
     prefixStatement: function() {
