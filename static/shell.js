@@ -12,19 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @fileoverview
- * Javascript code for the interactive AJAX shell.
- *
- * Part of http://code.google.com/p/google-app-engine-samples/.
- *
- * Includes a function (shell.runStatement) that sends the current python
- * statement in the shell prompt text box to the server, and a callback
- * (shell.done) that displays the results when the XmlHttpRequest returns.
- *
- */
-
-SymPy = {};
+Ext.ns("SymPy");
 
 SymPy.Keys = {
     BACKSPACE: 8,  DEL:       49,
@@ -66,209 +54,192 @@ SymPy.unescapeHTML = function(str) {
     return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 };
 
-/**
- * Shell namespace.
- * @type {Object}
- */
-var shell = {};
+SymPy.Shell = Ext.extend(Ext.util.Observable, {
+    history: [''],
+    historyCursor: 0,
 
-/**
- * The shell history. history is an array of strings, ordered oldest to
- * newest. historyCursor is the current history element that the user is on.
- *
- * The last history element is the statement that the user is currently
- * typing. When a statement is run, it's frozen in the history, a new history
- * element is added to the end of the array for the new statement, and
- * historyCursor is updated to point to the new element.
- *
- * @type {Array}
- */
-shell.history = [''];
+    constructor: function(config) {
+        config = config || {};
+        SymPy.Shell.superclass.constructor.call(this, config);
+    },
 
-/**
- * See {shell.history}
- * @type {number}
- */
-shell.historyCursor = 0;
+    setValue: function(value) {
+        Ext.get('statement').dom.value = value;
+    },
 
-shell.setValue = function(value) {
-    Ext.get('statement').dom.value = value;
-};
+    clearValue: function() {
+        this.setValue("");
+    },
 
-shell.clearValue = function() {
-    this.setValue("");
-}
+    getValue: function() {
+        return Ext.get('statement').dom.value;
+    },
 
-shell.getValue = function() {
-    return Ext.get('statement').dom.value;
-};
+    isEmpty: function() {
+        return this.getValue().length == 0;
+    },
 
-shell.isEmpty = function() {
-    return this.getValue().length == 0;
-};
-
-shell.onPromptKeyDown = function(event) {
-  if (this.historyCursor == this.history.length-1) {
-    // we're on the current statement. update it in the history before doing anything.
-    this.history[this.historyCursor] = this.getValue();
-  }
-
-  // should we pull something from the history?
-  switch (event.getKey()) {
-  case SymPy.Keys.UP:
-    if (event.ctrlKey || this.isEmpty()) {
-      event.preventDefault();
-
-      if (this.historyCursor > 0) {
-        this.setValue(this.history[--this.historyCursor]);
-      }
-
-      return false;
-    }
-
-    break;
-  case SymPy.Keys.DOWN:
-    if (event.ctrlKey || this.isEmpty()) {
-      event.preventDefault();
-
-      if (this.historyCursor < this.history.length - 1) {
-        this.setValue(this.history[++this.historyCursor]);
-      }
-
-      return false;
-    }
-
-    break;
-  case SymPy.Keys.ENTER:
-    var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
-
-    if (event.shiftKey == shiftEnter) {
-      event.preventDefault();
-      this.runStatement();
-      return false;
-    }
-
-    break;
-  case SymPy.Keys.E:
-    if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
-      event.preventDefault();
-      this.runStatement();
-      return false;
-    }
-
-    break;
-  }
-
-  switch (event.getKey()) {
-  case SymPy.Keys.BACKSPACE:
-  case SymPy.Keys.ENTER:
-    this.updatePrompt.defer(50, this);
-    break;
-  }
-
-  return true;
-};
-
-shell.updatePrompt = function() {
-    var prompt = ">>>",
-        lines = this.getValue().split('\n');
-
-    var i = 1,
-        n = lines.length;
-
-    for (; i < n; i++) {
-        prompt += "\n...";
-    }
-
-    var caret = Ext.get("caret"),
-        statement = Ext.get("statement");
-
-    caret.dom.value = prompt;
-
-    var rows = Math.max(4, n);
-
-    caret.dom.setAttribute('rows', rows);
-    statement.dom.setAttribute('rows', rows);
-};
-
-shell.prefixStatement = function() {
-    var lines = this.getValue().split('\n');
-
-    lines[0] = ">>> " + lines[0];
-
-    var i = 1,
-        n = lines.length;
-
-    for (; i < n; i++) {
-        lines[i] = "... " + lines[i];
-    }
-
-    return lines.join("\n");
-};
-
-shell.done = function(response) {
-    var output = Ext.get('output'),
-        value = '\n' + this.prefixStatement();
-
-    this.clearValue();
-    this.updatePrompt();
-
-    this.history.push('');
-    this.historyCursor = this.history.length - 1;
-
-    var result = response.responseText.replace(/^(\s*\n)+/, '');
-
-    if (result != '') {
-        if (value[value.length-1] != '\n') {
-            value += '\n';
+    onPromptKeyDown: function(event) {
+        if (this.historyCursor == this.history.length-1) {
+            this.history[this.historyCursor] = this.getValue();
         }
 
-        value += result;
-    }
+        switch (event.getKey()) {
+        case SymPy.Keys.UP:
+            if (event.ctrlKey || this.isEmpty()) {
+                event.preventDefault();
 
-    var element = Ext.DomHelper.append(output, {
-        tag: 'div',
-        html: SymPy.escapeHTML(value)
-    });
+                if (this.historyCursor > 0) {
+                    this.setValue(this.history[--this.historyCursor]);
+                }
 
-    function scrollToBottom() {
-        output.dom.scrollTop = output.dom.scrollHeight;
-    }
+                return false;
+            }
 
-    scrollToBottom();
+            break;
+        case SymPy.Keys.DOWN:
+            if (event.ctrlKey || this.isEmpty()) {
+                event.preventDefault();
 
-    if (Ext.get('printer').getValue() == 'latex') {
-        MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.dom], [scrollToBottom]);
-    }
+                if (this.historyCursor < this.history.length - 1) {
+                    this.setValue(this.history[++this.historyCursor]);
+                }
 
-    Ext.get('statement').removeClass('processing');
-};
+                return false;
+            }
 
-shell.runStatement = function() {
-  var form = document.getElementById('form');
+            break;
+        case SymPy.Keys.ENTER:
+            var shiftEnter = (Ext.get("submit_key").getValue() == "shift-enter");
 
-  var params = '',
-      elements = ['statement', 'session', 'printer'];
+            if (event.shiftKey == shiftEnter) {
+                event.preventDefault();
+                this.runStatement();
+                return false;
+            }
 
-  Ext.each(elements, function(elem) {
-    var obj = Ext.get(elem);
-    var value = escape(obj.getValue()).replace(/\+/g, '%2B'); // escape ignores +
-    params += '&' + elem + '=' + value;
-  });
+            break;
+        case SymPy.Keys.E:
+            if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
+                event.preventDefault();
+                this.runStatement();
+                return false;
+            }
 
-  Ext.get('statement').addClass('processing');
+            break;
+        }
 
-  Ext.Ajax.request({
-    method: form.method,
-    url: form.action + '?' + params,
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        switch (event.getKey()) {
+        case SymPy.Keys.BACKSPACE:
+        case SymPy.Keys.ENTER:
+            this.updatePrompt.defer(50, this);
+            break;
+        }
+
+        return true;
     },
-    success: function(response) {
-      shell.done.call(shell, response);
-    },
-    scope: this
-  });
 
-  return false;
-};
+    updatePrompt: function() {
+        var prompt = ">>>",
+            lines = this.getValue().split('\n');
+
+        var i = 1,
+            n = lines.length;
+
+        for (; i < n; i++) {
+            prompt += "\n...";
+        }
+
+        var caret = Ext.get("caret"),
+            statement = Ext.get("statement");
+
+        caret.dom.value = prompt;
+
+        var rows = Math.max(4, n);
+
+        caret.dom.setAttribute('rows', rows);
+        statement.dom.setAttribute('rows', rows);
+    },
+
+    prefixStatement: function() {
+        var lines = this.getValue().split('\n');
+
+        lines[0] = ">>> " + lines[0];
+
+        var i = 1,
+            n = lines.length;
+
+        for (; i < n; i++) {
+            lines[i] = "... " + lines[i];
+        }
+
+        return lines.join("\n");
+    },
+
+    done: function(response) {
+        var output = Ext.get('output'),
+            value = '\n' + this.prefixStatement();
+
+        this.clearValue();
+        this.updatePrompt();
+
+        this.history.push('');
+        this.historyCursor = this.history.length - 1;
+
+        var result = response.responseText.replace(/^(\s*\n)+/, '');
+
+        if (result != '') {
+            if (value[value.length-1] != '\n') {
+                value += '\n';
+            }
+
+            value += result;
+        }
+
+        var element = Ext.DomHelper.append(output, {
+            tag: 'div',
+            html: SymPy.escapeHTML(value)
+        });
+
+        function scrollToBottom() {
+            output.dom.scrollTop = output.dom.scrollHeight;
+        }
+
+        scrollToBottom();
+
+        if (Ext.get('printer').getValue() == 'latex') {
+            MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.dom], [scrollToBottom]);
+        }
+
+        Ext.get('statement').removeClass('processing');
+    },
+
+    runStatement: function() {
+        var form = document.getElementById('form');
+
+        var params = '',
+            elements = ['statement', 'session', 'printer'];
+
+        Ext.each(elements, function(elem) {
+            var obj = Ext.get(elem);
+            var value = escape(obj.getValue()).replace(/\+/g, '%2B'); // escape ignores +
+            params += '&' + elem + '=' + value;
+        });
+
+        Ext.get('statement').addClass('processing');
+
+        Ext.Ajax.request({
+            method: form.method,
+            url: form.action + '?' + params,
+            headers: {
+                'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            success: function(response) {
+                this.done(response);
+            },
+            scope: this
+        });
+
+        return false;
+    }
+});
