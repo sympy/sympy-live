@@ -3,10 +3,6 @@ body {
   font-size: 10pt;
 }
 
-p {
-  margin: 0.5em;
-}
-
 .prompt {
   width: 50em;
   border: 1px solid silver;

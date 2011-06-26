@@ -1,151 +1,146 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
- "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>SymPy Live</title>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>SymPy Live</title>
 
-<link rel="stylesheet" type="text/css" href="/static/shell.css" />
+        <link rel="stylesheet" type="text/css" href="/static/shell.css" />
 
-<script type="text/javascript" src="/static/external/ext-core.js"></script>
-<script type="text/javascript" src="/static/shell.js"></script>
+        <script type="text/javascript" src="/static/external/ext-core.js"></script>
+        <script type="text/javascript" src="/static/shell.js"></script>
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        extensions: ["MathMenu.js", "MathZoom.js"],
-        showProcessingMessages: false,
-        tex2jax: {
-            inlineMath: [['$','$'], ['\\(','\\)']],
-            displayMath: [['$$','$$'], ['\[','\]']]
-        },
-        TeX: {
-            extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
-        },
-        menuSettings: {
-            context: "Browser",
-            zoom: "Hover",
-            ALT: true
-        },
-        MathZoom: {
-            delay: 100
-        }
-    });
-</script>
-
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
-
-<script type="text/javascript">
-    Ext.onReady(function() {
-        var shell = new SymPy.Shell();
-
-        Ext.get("caret").on("focus", function() {
-            Ext.get('statement').focus();
-        });
-
-        Ext.get("statement").on("keydown", shell.onPromptKeyDown, shell);
-
-        Ext.get("evaluate").on("click", function() {
-            shell.runStatement();
-        });
-
-        Ext.get("clear").on("click", function() {
-            var elements = Ext.DomQuery.select('#output > div');
-
-            Ext.each(elements, function(elem, i) {
-                if (i > 0) {
-                    Ext.get(elem).remove();
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                extensions: ["MathMenu.js", "MathZoom.js"],
+                showProcessingMessages: false,
+                tex2jax: {
+                    inlineMath: [['$','$'], ['\\(','\\)']],
+                    displayMath: [['$$','$$'], ['\[','\]']]
+                },
+                TeX: {
+                    extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
+                },
+                menuSettings: {
+                    context: "Browser",
+                    zoom: "Hover",
+                    ALT: true
+                },
+                MathZoom: {
+                    delay: 100
                 }
             });
+        </script>
 
-            Ext.get("statement").dom.value = "";
-        });
-    });
-</script>
-</head>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
-<body>
+        <script type="text/javascript">
+            Ext.onReady(function() {
+                var shell = new SymPy.Shell();
 
-<p> <a href="http://sympy.org/">SymPy</a> online shell running on the
-<a href="http://code.google.com/appengine/">Google App Engine</a>.
-(<a href="http://git.sympy.org/?p=sympy-live.git">source</a>)
-</p>
+                Ext.get("caret").on("focus", function() {
+                    Ext.get('statement').focus();
+                });
 
-<div id="output">
-    <div>{{ banner }}</div>
-</div>
+                Ext.get("statement").on("keydown", shell.onPromptKeyDown, shell);
 
-<form id="form" action="shell.do" method="get">
-  <nobr>
-  <textarea class="prompt" id="caret" readonly="readonly" rows="4"
-            onfocus="document.getElementById('statement').focus()"
-            >&gt;&gt;&gt;</textarea>
-  <textarea class="prompt" name="statement" id="statement" rows="4"></textarea>
-  </nobr>
-  <input type="hidden" name="session" id="session" value="{{ session }}" />
-  <input type="submit" style="display: none" />
-</form>
+                Ext.get("evaluate").on("click", function() {
+                    shell.runStatement();
+                });
 
-<p id="toolbar">
-{% if user %}
-  <span class="username">{{ user.nickname }}</span>
-  (<a href="{{ logout_url }}">log out</a>)
-{% else %}
-  <a href="{{ login_url }}">log in</a>
-{% endif %}
-<span class="separator">|</span>
-Ctrl-Up/Down for history
-<span class="separator">|</span>
-<select id="submit_key">
-  <option value="enter">Enter</option>
-  <option value="shift-enter" selected="selected">Shift-Enter</option>
-</select>
-<label for="submit_key">submits</label>
-<span class="separator">|</span>
-<select id="printer" name="printer">
-  <option value="srepr">Repr</option>
-  <option value="sstr">Str</option>
-  <option value="pretty" selected="selected">ASCII</option>
-  <option value="upretty">Unicode</option>
-  <option value="latex">LaTeX</option>
-</select>
-<span class="separator">|</span>
-<button id="evaluate">Evaluate</button>
-<button id="clear">Clear</button>
-</p>
+                Ext.get("clear").on("click", function() {
+                    var elements = Ext.DomQuery.select('#output > div');
 
-<script type="text/javascript">
-document.getElementById('statement').focus();
-</script>
-<h3>About</h3>
-<p>
+                    Ext.each(elements, function(elem, i) {
+                        if (i > 0) {
+                            Ext.get(elem).remove();
+                        }
+                    });
+
+                    Ext.get("statement").dom.value = "";
+                });
+
+                Ext.get('statement').focus();
+            });
+        </script>
+    </head>
+    <body>
+        <p>
+            <a href="http://sympy.org/">SymPy</a> online shell running on the
+            <a href="http://code.google.com/appengine/">Google App Engine</a>.
+            (<a href="http://git.sympy.org/?p=sympy-live.git">source</a>)
+        </p>
+
+        <div id="output">
+            <div>{{ banner }}</div>
+        </div>
+
+        <form id="form" action="shell.do" method="get">
+            <nobr>
+            <textarea class="prompt" id="caret" readonly="readonly" rows="4">&gt;&gt;&gt;</textarea>
+            <textarea class="prompt" name="statement" id="statement" rows="4"></textarea>
+            </nobr>
+            <input type="hidden" name="session" id="session" value="{{ session }}" />
+            <input type="submit" style="display: none" />
+        </form>
+
+        <p id="toolbar">
+            {% if user %}
+                <span class="username">{{ user.nickname }}</span>
+                (<a href="{{ logout_url }}">log out</a>)
+            {% else %}
+                <a href="{{ login_url }}">log in</a>
+            {% endif %}
+            <span class="separator">|</span>
+            Ctrl-Up/Down for history
+            <span class="separator">|</span>
+            <select id="submit_key">
+                <option value="enter">Enter</option>
+                <option value="shift-enter" selected="selected">Shift-Enter</option>
+            </select>
+            <label for="submit_key">submits</label>
+            <span class="separator">|</span>
+            <select id="printer" name="printer">
+                <option value="srepr">Repr</option>
+                <option value="sstr">Str</option>
+                <option value="pretty" selected="selected">ASCII</option>
+                <option value="upretty">Unicode</option>
+                <option value="latex">LaTeX</option>
+            </select>
+            <span class="separator">|</span>
+            <button id="evaluate">Evaluate</button>
+            <button id="clear">Clear</button>
+        </p>
+
+        <h3>About</h3>
+        <p>
 This is just a regular Python shell, with the following command executed by default:
 <pre>
->>> from sympy.interactive import *
+&gt;&gt;&gt; from sympy import *
+&gt;&gt;&gt; from __future__ import division
+&gt;&gt;&gt; from sympy import *
+&gt;&gt;&gt; x, y, z, t = symbols('x y z t')
+&gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)
+&gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
 </pre>
-</p>
-<h3>Example session</h3>
-<p>
+            </p>
+            <h3>Example session</h3>
+            <p>
 <pre>
->>> e = (x+y)**5
->>> e.expand()
-10*x**3*y**2 + 10*x**2*y**3 + 5*x*y**4 + 5*y*x**4 + x**5 + y**5
->>> sin(x).series(x, 0, 5)
+&gt;&gt;&gt; expr = (x + y)**5
+&gt;&gt;&gt; expand(expr)
+x**5 + 5*x**4*y + 10*x**3*y**2 + 10*x**2*y**3 + 5*x*y**4 + y**5
+&gt;&gt;&gt; sin(x).series(x, 0, 5)
 x - 1/6*x**3 + O(x**5)
->>> integrate(1/(x**3+1), x)
--log(1 - x + x**2)/6 + log(1 + x)/3 + 3**(1/2)*atan(-3**(1/2)/3 +
-2*x*3**(1/2)/3)/3
+&gt;&gt;&gt; integrate(1/(x**3 + 1), x)
+log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/3
 </pre>
-More information at <a href="http://docs.sympy.org/">
-    http://docs.sympy.org/</a>.
-<br/>
-<br/>
-Other shells:
-<ul>
-<li>
-<a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the
-dimensions of the ndsi browser.</li>
-</ul>
-</p>
-
-</body>
+            More information at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.
+            <br/>
+            <br/>
+            Other shells:
+            <ul>
+                <li><a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the dimensions of the ndsi browser.</li>
+            </ul>
+        </p>
+    </body>
 </html>
