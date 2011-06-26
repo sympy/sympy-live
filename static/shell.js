@@ -22,8 +22,6 @@
  * statement in the shell prompt text box to the server, and a callback
  * (shell.done) that displays the results when the XmlHttpRequest returns.
  *
- * Also includes cross-browser code (shell.getXmlHttpRequest) to get an
- * XmlHttpRequest.
  */
 
 SymPy = {};
@@ -92,31 +90,6 @@ shell.history = [''];
  * @type {number}
  */
 shell.historyCursor = 0;
-
-/**
- * A constant for the XmlHttpRequest 'done' state.
- * @type Number
- */
-shell.DONE_STATE = 4;
-
-/**
- * A cross-browser function to get an XmlHttpRequest object.
- *
- * @return {XmlHttpRequest?} a new XmlHttpRequest
- */
-shell.getXmlHttpRequest = function() {
-  if (window.XMLHttpRequest) {
-    return new XMLHttpRequest();
-  } else if (window.ActiveXObject) {
-    try {
-      return new ActiveXObject('Msxml2.XMLHTTP');
-    } catch(e) {
-      return new ActiveXObject('Microsoft.XMLHTTP');
-    }
-  }
-
-  return null;
-};
 
 shell.setValue = function(value) {
     Ext.get('statement').dom.value = value;
@@ -233,14 +206,7 @@ shell.prefixStatement = function() {
     return lines.join("\n");
 };
 
-/**
- * The XmlHttpRequest callback. If the request succeeds, it adds the command
- * and its resulting output to the shell history div.
- *
- * @param {XmlHttpRequest} req the XmlHttpRequest we used to send the current
- *     statement to the server
- */
-shell.done = function(req) {
+shell.done = function(response) {
     var output = Ext.get('output'),
         value = '\n' + this.prefixStatement();
 
@@ -250,7 +216,7 @@ shell.done = function(req) {
     this.history.push('');
     this.historyCursor = this.history.length - 1;
 
-    var result = req.responseText.replace(/^(\s*\n)+/, '');
+    var result = response.responseText.replace(/^(\s*\n)+/, '');
 
     if (result != '') {
         if (value[value.length-1] != '\n') {
@@ -278,30 +244,9 @@ shell.done = function(req) {
     Ext.get('statement').removeClass('processing');
 };
 
-/**
- * This is the form's onsubmit handler. It sends the python statement to the
- * server, and registers shell.done() as the callback to run when it returns.
- *
- * @return {Boolean} false to tell the browser not to submit the form.
- */
 shell.runStatement = function() {
   var form = document.getElementById('form');
 
-  // build a XmlHttpRequest
-  var req = this.getXmlHttpRequest();
-  if (!req) {
-    document.getElementById('ajax-status').innerHTML =
-        "<span class='error'>Your browser doesn't support AJAX. :(</span>";
-    return false;
-  }
-
-  req.onreadystatechange = function() {
-    if (req.readyState == shell.DONE_STATE) {
-      shell.done.call(shell, req);
-    }
-  };
-
-  // build the query parameter string
   var params = '',
       elements = ['statement', 'session', 'printer'];
 
@@ -311,13 +256,19 @@ shell.runStatement = function() {
     params += '&' + elem + '=' + value;
   });
 
-  // send the request and tell the user.
   Ext.get('statement').addClass('processing');
 
-  req.open(form.method, form.action + '?' + params, true);
-  req.setRequestHeader('Content-type',
-                       'application/x-www-form-urlencoded;charset=UTF-8');
-  req.send(null);
+  Ext.Ajax.request({
+    method: form.method,
+    url: form.action + '?' + params,
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    },
+    success: function(response) {
+      shell.done.call(shell, response);
+    },
+    scope: this
+  });
 
   return false;
 };
