@@ -207,7 +207,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         scrollToBottom();
 
-        var result = response.responseText.replace(/^(\s*\n)+/, '');
+        var response = Ext.decode(response.responseText);
+        this.session = response.session;
+
+        var result = response.output.replace(/^(\s*\n)+/, '');
 
         if (result.length) {
             var element = Ext.DomHelper.append(output, {
@@ -226,25 +229,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     runStatement: function() {
-        var form = document.getElementById('form');
-
-        var params = '',
-            elements = ['statement', 'session', 'printer'];
-
-        Ext.each(elements, function(elem) {
-            var obj = Ext.get(elem);
-            var value = escape(obj.getValue()).replace(/\+/g, '%2B'); // escape ignores +
-            params += '&' + elem + '=' + value;
-        });
-
         Ext.get('statement').addClass('processing');
 
+        var data = {
+            statement: Ext.get('statement').getValue(),
+            printer: Ext.get('printer').getValue(),
+            session: this.session || null
+        };
+
         Ext.Ajax.request({
-            method: form.method,
-            url: form.action + '?' + params,
-            headers: {
-                'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            },
+            method: 'POST',
+            url: '/evaluate',
+            jsonData: Ext.encode(data),
             success: function(response) {
                 this.done(response);
             },

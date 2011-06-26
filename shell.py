@@ -43,7 +43,10 @@ import pickle
 import sys
 import traceback
 import types
+import simplejson
 import wsgiref.handlers
+
+from StringIO import StringIO
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -320,34 +323,65 @@ class Session(db.Model):
       self.unpicklable_names.remove(name)
 
 class FrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the shell.html template.
-  """
+    """Creates a new session and renders the ``shell.html`` template. """
 
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
-      evaluate(PREEXEC, session)
+    def get(self):
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shell.html')
-    session_url = '/?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             'banner': banner(),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+        vars = {
+            'server_software': os.environ['SERVER_SOFTWARE'],
+            'python_version': sys.version,
+            'user': users.get_current_user(),
+            'login_url': users.create_login_url('/'),
+            'logout_url': users.create_logout_url('/'),
+            'banner': banner(),
+        }
+
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
+
+class EvaluateHandler(webapp.RequestHandler):
+    """Evaluates a Python statement in a given session and returns the result. """
+
+    def post(self):
+        try:
+            message = simplejson.loads(self.request.body)
+        except ValueError:
+            self.error(400)
+            return
+
+        statement = message.get('statement')
+
+        session_key = message.get('session')
+        printer_key = message.get('printer')
+
+        if session_key is not None:
+            try:
+                session = Session.get(session_key)
+            except db.Error:
+                self.error(400)
+                return
+        else:
+            session = Session()
+            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
+            session_key = session.put()
+            evaluate(PREEXEC, session)
+
+        try:
+            printer = PRINTERS[printer_key]
+        except KeyError:
+            printer = None
+
+        stream = StringIO()
+        evaluate(statement, session, printer, stream)
+
+        result = {
+            'session': str(session_key),
+            'output': stream.getvalue(),
+        }
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps(result))
 
 class ShellDsiFrontPageHandler(webapp.RequestHandler):
   """Creates a new session and renders the graphical_shell.html template.
@@ -430,11 +464,14 @@ class StatementHandler(webapp.RequestHandler):
     evaluate(statement, session, printer, self.response.out)
 
 def main():
-  application = webapp.WSGIApplication(
-    [('/', FrontPageHandler),
-     ('/shelldsi', ShellDsiFrontPageHandler),
-     ('/helpdsi', HelpDsiFrontPageHandler),
-     ('/shell.do', StatementHandler)], debug=_DEBUG)
+  application = webapp.WSGIApplication([
+      ('/', FrontPageHandler),
+      ('/evaluate', EvaluateHandler),
+      ('/shelldsi', ShellDsiFrontPageHandler),
+      ('/helpdsi', HelpDsiFrontPageHandler),
+      ('/shell.do', StatementHandler),
+  ], debug=_DEBUG)
+
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
