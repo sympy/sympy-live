@@ -196,17 +196,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.history.push('');
         this.historyCursor = this.history.length - 1;
 
-        var result = response.responseText.replace(/^(\s*\n)+/, '');
-
-        if (result != '') {
-            if (value[value.length-1] != '\n') {
-                value += '\n';
-            }
-
-            value += result;
-        }
-
-        var element = Ext.DomHelper.append(output, {
+        Ext.DomHelper.append(output, {
             tag: 'div',
             html: SymPy.escapeHTML(value)
         });
@@ -217,8 +207,19 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         scrollToBottom();
 
-        if (Ext.get('printer').getValue() == 'latex') {
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.dom], [scrollToBottom]);
+        var result = response.responseText.replace(/^(\s*\n)+/, '');
+
+        if (result.length) {
+            var element = Ext.DomHelper.append(output, {
+                tag: 'div',
+                html: SymPy.escapeHTML(result)
+            }, false);
+
+            scrollToBottom();
+
+            if (Ext.get('printer').getValue() == 'latex') {
+                MathJax.Hub.Queue(['Typeset', MathJax.Hub, element], [scrollToBottom]);
+            }
         }
 
         Ext.get('statement').removeClass('processing');
