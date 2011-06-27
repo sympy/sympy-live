@@ -24,6 +24,10 @@ body {
     word-wrap: break-word;
 }
 
+.output > div.hidden {
+    visibility: hidden;
+}
+
 .caret {
     font-family: monospace;
     font-size: 10pt;

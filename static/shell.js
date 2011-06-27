@@ -244,6 +244,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return this.getValue().length == 0;
     },
 
+    isLaTeX: function() {
+        return this.printerEl.getValue() == 'latex';
+    },
+
     handleKey: function(event) {
         if (this.historyCursor == this.history.length-1) {
             this.history[this.historyCursor] = this.getValue();
@@ -407,15 +411,20 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (result.length) {
             var element = Ext.DomHelper.append(this.outputEl, {
                 tag: 'div',
-                cls: 'item',
+                cls: 'item ' + (this.isLaTeX() ? 'hidden' : ''),
                 html: SymPy.escapeHTML(result)
             }, false);
 
             this.scrollToBottom();
 
             if (this.printerEl.getValue() == 'latex') {
+                function postprocessLaTeX() {
+                    Ext.get(element).removeClass('hidden');
+                    this.scrollToBottom();
+                }
+
                 MathJax.Hub.Queue(['Typeset', MathJax.Hub, element],
-                                  [this.scrollToBottom.createDelegate(this)]);
+                                  [postprocessLaTeX.createDelegate(this)]);
             }
         }
 
