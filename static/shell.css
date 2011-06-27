@@ -1,0 +1,91 @@
+body {
+    font-family: monospace;
+    font-size: 10pt;
+}
+
+.header {
+    width: 50em;
+}
+
+.output {
+    font-family: monospace;
+    font-size: 10pt;
+    margin: 0 0 10px 0;
+    padding: 5px;
+    width: 50em;
+    height: 20em;
+    overflow: auto;
+    border: 1px solid silver;
+    background-color: #f5f5f5;
+}
+
+.output > div {
+    white-space: pre;
+    word-wrap: break-word;
+}
+
+.output > div.hidden {
+    visibility: hidden;
+}
+
+.caret {
+    font-family: monospace;
+    font-size: 10pt;
+    width: 2.5em;
+    border: 1px solid silver;
+    padding: 5px;
+    margin-right: 0;
+    border-right: 0;
+    padding-right: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    resize: none;
+}
+
+.prompt {
+    font-family: monospace;
+    font-size: 10pt;
+    width: 48.0em;
+    border: 1px solid silver;
+    padding: 5px;
+    margin-left: -0.5em;
+    border-left: 0;
+    padding-left: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    background-position: top right;
+    background-repeat: no-repeat;
+    resize: none;
+}
+
+.toolbar {
+    margin-left: 0.5em;
+}
+
+.toolbar > * {
+    margin-left: 0.5em;
+}
+
+.processing {
+    background-image: url("/static/spinner.gif");
+}
+
+.message {
+    color: #8AD;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.error {
+    color: #F44;
+}
+
+.username {
+    font-weight: bold;
+}
+
+#banner {
+    display: none;
+}

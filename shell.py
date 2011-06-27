@@ -41,15 +41,35 @@ import new
 import os
 import pickle
 import sys
+import pdb
 import traceback
 import types
+import simplejson
 import wsgiref.handlers
+
+from StringIO import StringIO
 
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
+sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
+
+from sympy import srepr, sstr, pretty, latex
+
+PRINTERS = {
+    'repr': srepr,
+    'str': sstr,
+    'ascii': lambda arg: pretty(arg, use_unicode=False),
+    'unicode': lambda arg: pretty(arg, use_unicode=True),
+    'latex': lambda arg: latex(arg, mode="equation*"),
+}
+
+def gdb():
+    """Enter pdb in Google App Engine. """
+    pdb.Pdb(stdin=getattr(sys, '__stdin__'),
+            stdout=getattr(sys, '__stderr__')).set_trace(sys._getframe().f_back)
 
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = True
@@ -67,14 +87,170 @@ UNPICKLABLE_TYPES = (
 
 # Unpicklable statements to seed new sessions with.
 INITIAL_UNPICKLABLES = [
-  'import logging',
-  'import os',
-  'import sys',
-  'from google.appengine.ext import db',
-  'from google.appengine.api import users',
-  'from sympy.interactive import *',
-  ]
+  "import logging",
+  "import os",
+  "import sys",
+  "from google.appengine.ext import db",
+  "from google.appengine.api import users",
+  "from __future__ import division",
+  "from sympy import *",
+]
 
+PREEXEC = """\
+x, y, z, t = symbols('x y z t')
+k, m, n = symbols('k m n', integer=True)
+f, g, h = symbols('f g h', cls=Function)
+"""
+
+PREEXEC_MESSAGE = """\
+from __future__ import division
+from sympy import *
+""" + PREEXEC
+
+VERBOSE_MESSAGE = """\
+These commands were executed:
+%(source)s
+Documentation can be found at http://www.sympy.org\
+"""
+
+def banner(quiet=False):
+    from sympy import __version__ as sympy_version
+    python_version = "%d.%d.%d" % sys.version_info[:3]
+
+    message = "Python console for SymPy %s (Python %s)\n" % (sympy_version, python_version)
+
+    if not quiet:
+        source = ""
+
+        for line in PREEXEC_MESSAGE.split('\n')[:-1]:
+            if not line:
+                source += '\n'
+            else:
+                source += '>>> ' + line + '\n'
+
+        message += '\n' + VERBOSE_MESSAGE % {'source': source}
+
+    return message
+
+def evaluate(statement, session, printer=None, stream=None):
+    """Evaluate the statement in sessions's globals. """
+    if not statement:
+        return
+
+    # the python compiler doesn't like network line endings
+    statement = statement.replace('\r\n', '\n')
+
+    # add a couple newlines at the end of the statement. this makes
+    # single-line expressions such as 'class Foo: pass' evaluate happily.
+    statement += '\n\n'
+
+    # log and compile the statement up front
+    try:
+        logging.info('Compiling and evaluating:\n%s' % statement)
+        compiled = compile(statement, '<string>', 'single')
+    except:
+        if stream is not None:
+            stream.write(traceback.format_exc())
+        return
+
+    # create a dedicated module to be used as this statement's __main__
+    statement_module = new.module('__main__')
+
+    # use this request's __builtin__, since it changes on each request.
+    # this is needed for import statements, among other things.
+    import __builtin__
+    statement_module.__builtin__ = __builtin__
+
+    # create customized display hook
+    stringify_func = printer or sstr
+
+    def displayhook(arg):
+        if arg is not None:
+            __builtin__._ = None
+            print stringify_func(arg)
+            __builtin__._ = arg
+
+    old_displayhook = sys.displayhook
+    sys.displayhook = displayhook
+
+    # swap in our custom module for __main__. then unpickle the session
+    # globals, run the statement, and re-pickle the session globals, all
+    # inside it.
+    old_main = sys.modules.get('__main__')
+
+    try:
+        sys.modules['__main__'] = statement_module
+        statement_module.__name__ = '__main__'
+
+        # re-evaluate the unpicklables
+        for code in session.unpicklables:
+            exec code in statement_module.__dict__
+
+        old_globals = dict(statement_module.__dict__)
+
+        # re-initialize the globals
+        session_globals_dict = session.globals_dict()
+
+        for name, val in session_globals_dict.items():
+            try:
+                statement_module.__dict__[name] = val
+            except:
+                logging.warning(msg + traceback.format_exc())
+                session.remove_global(name)
+
+        val = session_globals_dict.get('_')
+        setattr(__builtin__, '_', val)
+
+        # run!
+        try:
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+
+            try:
+                if stream is not None:
+                    sys.stdout = stream
+                    sys.stderr = stream
+
+                exec compiled in statement_module.__dict__
+            finally:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr
+        except:
+            if stream is not None:
+                stream.write(traceback.format_exc())
+            return
+
+        # extract the new globals that this statement added
+        new_globals = {}
+
+        for name, val in statement_module.__dict__.items():
+            if name not in old_globals or val != old_globals[name]:
+                new_globals[name] = val
+
+        if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
+            # this statement added an unpicklable global. store the statement and
+            # the names of all of the globals it added in the unpicklables.
+            session.add_unpicklable(statement, new_globals.keys())
+            logging.debug('Storing this statement as an unpicklable.')
+        else:
+            # this statement didn't add any unpicklables. pickle and store the
+            # new globals back into the datastore.
+            for name, val in new_globals.items():
+                if not name.startswith('__'):
+                    session.set_global(name, val)
+
+        val = getattr(__builtin__, '_', None)
+
+        try:
+            session.set_global('_', val)
+        except pickle.PicklingError:
+            session.set_global('_', None)
+    finally:
+        sys.modules['__main__'] = old_main
+        sys.displayhook = old_displayhook
+        setattr(__builtin__, '_', None)
+
+    session.put()
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
@@ -166,63 +342,68 @@ class Session(db.Model):
     if name in self.unpicklable_names:
       self.unpicklable_names.remove(name)
 
-
 class FrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the shell.html template.
-  """
+    """Creates a new session and renders the ``shell.html`` template. """
 
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
+    def get(self):
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shell.html')
-    session_url = '/?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+        vars = {
+            'server_software': os.environ['SERVER_SOFTWARE'],
+            'python_version': sys.version,
+            'user': users.get_current_user(),
+            'login_url': users.create_login_url('/'),
+            'logout_url': users.create_logout_url('/'),
+            'banner': banner(),
+            'printer': self.request.get('printer').lower() or '',
+            'submit': self.request.get('submit').lower() or '',
+        }
 
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
 
-class GraphicalFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
+class EvaluateHandler(webapp.RequestHandler):
+    """Evaluates a Python statement in a given session and returns the result. """
 
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
+    def post(self):
+        try:
+            message = simplejson.loads(self.request.body)
+        except ValueError:
+            self.error(400)
+            return
 
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'graphical_shell.html')
-    session_url = '/?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+        statement = message.get('statement')
+
+        session_key = message.get('session')
+        printer_key = message.get('printer')
+
+        if session_key is not None:
+            try:
+                session = Session.get(session_key)
+            except db.Error:
+                self.error(400)
+                return
+        else:
+            session = Session()
+            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
+            session_key = session.put()
+            evaluate(PREEXEC, session)
+
+        try:
+            printer = PRINTERS[printer_key]
+        except KeyError:
+            printer = None
+
+        stream = StringIO()
+        evaluate(statement, session, printer, stream)
+
+        result = {
+            'session': str(session_key),
+            'output': stream.getvalue(),
+        }
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps(result))
 
 class ShellDsiFrontPageHandler(webapp.RequestHandler):
   """Creates a new session and renders the graphical_shell.html template.
@@ -279,7 +460,7 @@ class HelpDsiFrontPageHandler(webapp.RequestHandler):
              }
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
-	
+
 class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
@@ -289,108 +470,31 @@ class StatementHandler(webapp.RequestHandler):
 
     # extract the statement to be run
     statement = self.request.get('statement')
-    if not statement:
-      return
-
-    # the python compiler doesn't like network line endings
-    statement = statement.replace('\r\n', '\n')
-
-    # add a couple newlines at the end of the statement. this makes
-    # single-line expressions such as 'class Foo: pass' evaluate happily.
-    statement += '\n\n'
-
-    # log and compile the statement up front
-    try:
-      logging.info('Compiling and evaluating:\n%s' % statement)
-      compiled = compile(statement, '<string>', 'single')
-    except:
-      self.response.out.write(traceback.format_exc())
-      return
-
-    # create a dedicated module to be used as this statement's __main__
-    statement_module = new.module('__main__')
-
-    # use this request's __builtin__, since it changes on each request.
-    # this is needed for import statements, among other things.
-    import __builtin__
-    statement_module.__builtins__ = __builtin__
 
     # load the session from the datastore
     session = Session.get(self.request.get('session'))
 
-    # swap in our custom module for __main__. then unpickle the session
-    # globals, run the statement, and re-pickle the session globals, all
-    # inside it.
-    old_main = sys.modules.get('__main__')
+    # setup printing function (srepr, sstr, pretty, upretty, latex)
+    key = self.request.get('printer')
+
     try:
-      sys.modules['__main__'] = statement_module
-      statement_module.__name__ = '__main__'
+        printer = PRINTERS[key]
+    except KeyError:
+        printer = None
 
-      # re-evaluate the unpicklables
-      for code in session.unpicklables:
-        exec code in statement_module.__dict__
-
-      # re-initialize the globals
-      for name, val in session.globals_dict().items():
-        try:
-          statement_module.__dict__[name] = val
-        except:
-          msg = 'Dropping %s since it could not be unpickled.\n' % name
-          self.response.out.write(msg)
-          logging.warning(msg + traceback.format_exc())
-          session.remove_global(name)
-
-      # run!
-      old_globals = dict(statement_module.__dict__)
-      try:
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-        try:
-          sys.stdout = self.response.out
-          sys.stderr = self.response.out
-          exec compiled in statement_module.__dict__
-        finally:
-          sys.stdout = old_stdout
-          sys.stderr = old_stderr
-      except:
-        self.response.out.write(traceback.format_exc())
-        return
-
-      # extract the new globals that this statement added
-      new_globals = {}
-      for name, val in statement_module.__dict__.items():
-        if name not in old_globals or val != old_globals[name]:
-          new_globals[name] = val
-
-      if True in [isinstance(val, UNPICKLABLE_TYPES)
-                  for val in new_globals.values()]:
-        # this statement added an unpicklable global. store the statement and
-        # the names of all of the globals it added in the unpicklables.
-        session.add_unpicklable(statement, new_globals.keys())
-        logging.debug('Storing this statement as an unpicklable.')
-
-      else:
-        # this statement didn't add any unpicklables. pickle and store the
-        # new globals back into the datastore.
-        for name, val in new_globals.items():
-          if not name.startswith('__'):
-            session.set_global(name, val)
-
-    finally:
-      sys.modules['__main__'] = old_main
-
-    session.put()
-
+    # evaluate the statement in session's globals
+    evaluate(statement, session, printer, self.response.out)
 
 def main():
-  application = webapp.WSGIApplication(
-    [('/', FrontPageHandler),
-     ('/graphical', GraphicalFrontPageHandler),
-	 ('/shelldsi', ShellDsiFrontPageHandler),
-	 ('/helpdsi', HelpDsiFrontPageHandler),
-     ('/shell.do', StatementHandler)], debug=_DEBUG)
-  wsgiref.handlers.CGIHandler().run(application)
+  application = webapp.WSGIApplication([
+      ('/', FrontPageHandler),
+      ('/evaluate', EvaluateHandler),
+      ('/shelldsi', ShellDsiFrontPageHandler),
+      ('/helpdsi', HelpDsiFrontPageHandler),
+      ('/shell.do', StatementHandler),
+  ], debug=_DEBUG)
 
+  wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
   main()

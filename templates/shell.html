@@ -1,154 +1,98 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
- "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title> Interactive Shell </title>
-<script type="text/javascript" src="/static/shell.js"></script>
-<style type="text/css">
-body {
-  font-family: monospace;
-  font-size: 10pt;
-}
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>SymPy Live</title>
 
-p {
-  margin: 0.5em;
-}
+        <link rel="stylesheet" type="text/css" href="/static/shell.css" />
 
-.prompt, #output {
-  width: 45em;
-  border: 1px solid silver;
-  background-color: #f5f5f5;
-  font-size: 10pt;
-  margin: 0.5em;
-  padding: 0.5em;
-  padding-right: 0em;
-  overflow-x: hidden;
-}
+        <script type="text/javascript" src="/static/external/ext-core.js"></script>
+        <script type="text/javascript" src="/static/shell.js"></script>
 
-#toolbar {
-  margin-left: 0.5em;
-  padding-left: 0.5em;
-}
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                extensions: ["MathMenu.js", "MathZoom.js"],
+                showProcessingMessages: false,
+                tex2jax: {
+                    inlineMath: [['$','$'], ['\\(','\\)']],
+                    displayMath: [['$$','$$'], ['\[','\]']]
+                },
+                TeX: {
+                    extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
+                },
+                menuSettings: {
+                    context: "Browser",
+                    zoom: "Hover",
+                    ALT: true
+                },
+                MathZoom: {
+                    delay: 100
+                }
+            });
+        </script>
 
-#caret {
-  width: 2.5em;
-  margin-right: 0px;
-  padding-right: 0px;
-  border-right: 0px;
-}
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
-#statement {
-  width: 43em;
-  margin-left: -1em;
-  padding-left: 0px;
-  border-left: 0px;
-  background-position: top right;
-  background-repeat: no-repeat;
-}
+        <script type="text/javascript">
+            Ext.onReady(function() {
+                var shell = new SymPy.Shell({
+                    printer: "{{ printer }}",
+                    submit: "{{ submit }}"
+                });
 
-.processing {
-  background-image: url("/static/spinner.gif");
-}
+                var el = Ext.get('shell');
+                shell.render(el);
+            });
+        </script>
+    </head>
+    <body>
+        <p class="header">
+            <a href="http://sympy.org/">SymPy</a>
+            <a href="https://github.com/sympy/sympy-live">online shell</a>
+            running on the
+            <a href="http://code.google.com/appengine/">Google App Engine</a>.
+            <span style="float: right">
+            {% if user %}
+                <span class="username">{{ user.nickname }}</span>
+                (<a href="{{ logout_url }}">log out</a>)
+            {% else %}
+                <a href="{{ login_url }}">log in</a>
+            {% endif %}
+            </span>
+        </p>
 
-#ajax-status {
-  font-weight: bold;
-}
+        <div id="banner">{{ banner }}</div>
+        <div id="shell"></div>
 
-.message {
-  color: #8AD;
-  font-weight: bold;
-  font-style: italic;
-}
-
-.error {
-  color: #F44;
-}
-
-.username {
-  font-weight: bold;
-}
-
-</style>
-</head>
-
-<body>
-
-<p> <a href="http://sympy.org/">SymPy</a> online shell running on the
-<a href="http://code.google.com/appengine/">Google App Engine</a>.
-(<a href="http://git.sympy.org/?p=sympy-live.git">source</a>)
-</p>
-
-<textarea id="output" rows="22" readonly="readonly">
-{{ server_software }}
-Python {{ python_version }}
-</textarea>
-
-<form id="form" action="shell.do" method="get">
-  <nobr>
-  <textarea class="prompt" id="caret" readonly="readonly" rows="4"
-            onfocus="document.getElementById('statement').focus()"
-            >&gt;&gt;&gt;</textarea>
-  <textarea class="prompt" name="statement" id="statement" rows="4"
-            onkeypress="return shell.onPromptKeyPress(event);"></textarea>
-  </nobr>
-  <input type="hidden" name="session" value="{{ session }}" />
-  <input type="submit" style="display: none" />
-</form>
-
-<p id="ajax-status"></p>
-
-<p id="toolbar">
-{% if user %}
-  <span class="username">{{ user.nickname }}</span>
-  (<a href="{{ logout_url }}">log out</a>)
-{% else %}
-  <a href="{{ login_url }}">log in</a>
-{% endif %}
- | Shift-Up/Down for history |
-<select id="submit_key">
-  <option value="enter">Enter</option>
-  <option value="ctrl-enter" selected="selected">Shift-Enter</option>
-</select>
-<label for="submit_key">submits</label>
-</p>
-
-<script type="text/javascript">
-document.getElementById('statement').focus();
-</script>
-<h3>About</h3>
-<p>
+        <h3>About</h3>
+        <p>
 This is just a regular Python shell, with the following command executed by default:
 <pre>
->>> from sympy.interactive import *
+&gt;&gt;&gt; from __future__ import division
+&gt;&gt;&gt; from sympy import *
+&gt;&gt;&gt; x, y, z, t = symbols('x y z t')
+&gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)
+&gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
 </pre>
-</p>
-<h3>Example session</h3>
-<p>
+            </p>
+            <h3>Example session</h3>
+            <p>
 <pre>
->>> e = (x+y)**5
->>> e.expand()
-10*x**3*y**2 + 10*x**2*y**3 + 5*x*y**4 + 5*y*x**4 + x**5 + y**5
->>> sin(x).series(x, 0, 5)
+&gt;&gt;&gt; expr = (x + y)**5
+&gt;&gt;&gt; expand(expr)
+x**5 + 5*x**4*y + 10*x**3*y**2 + 10*x**2*y**3 + 5*x*y**4 + y**5
+&gt;&gt;&gt; sin(x).series(x, 0, 5)
 x - 1/6*x**3 + O(x**5)
->>> integrate(1/(x**3+1), x)
--log(1 - x + x**2)/6 + log(1 + x)/3 + 3**(1/2)*atan(-3**(1/2)/3 +
-2*x*3**(1/2)/3)/3
+&gt;&gt;&gt; integrate(1/(x**3 + 1), x)
+log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/3
 </pre>
-More information at <a href="http://docs.sympy.org/">
-    http://docs.sympy.org/</a>.
-<br/>
-<br/>
-Other shells:
-<ul>
-    <li>
-<a href="/graphical">graphical shell</a> which renders LaTeX
-output from SymPy (using jsMath).</li>
-<li>
-<a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the
-dimensions of the ndsi browser.</li>
-</ul>
-</p>
-
-</body>
+            More information at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.
+            <br/>
+            <br/>
+            Other shells:
+            <ul>
+                <li><a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the dimensions of the ndsi browser.</li>
+            </ul>
+        </p>
+    </body>
 </html>

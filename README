@@ -1,30 +1,86 @@
-SymPy online shell
+SymPy Online Shell
+==================
+
+Online Shell for SymPy (sympy-live) is a simple web application based on
+Google App Engine, which allows to evaluate Python code with SymPy in web
+browsers.
+
+This is accomplished by providing a HTML/JavaScript GUI for entering source
+code and visualization of output, and a server part which evaluates the
+requested source code. Note that this shell is not scalable and it uses
+only one instance on GAE, thus all evaluation requests are queued and it
+make take quite a lot of time, before our code can be evaluated (depending
+on the current load of the instance).
+
+Google App Engine has intrinsic 30 second request handling limit, so each
+evaluation request is a subject to this limit. There are also other limits
+related to memory consumption, output size, etc. (see Google App Engine
+documentation for details).
+
+Installation
+------------
+
+Download and unpack most recent Google App Engine SDK for Python from
+http://code.google.com/appengine/downloads.html, e.g.::
+
+    $ wget http://googleappengine.googlecode.com/files/google_appengine_1.5.1.zip
+    $ unzip google_appengine_1.5.1.zip
+
+Then clone sympy-live repository::
+
+    $ git clone git://github.com/sympy/sympy-live.git
+    $ cd sympy-live
+
+We use submodules to include external libraries in sympy-live::
+
+    $ git submodule init
+    $ git submodule update
+
+This is sufficient to clone appropriate repositories in correct versions
+into sympy-live (see git documentation on submodules for information).
+
+Development server
 ------------------
 
-How to set it up:
+Now you are ready to run development web server::
 
-Download and unpack the google app engine SDK from
-http://code.google.com/appengine/downloads.html:
+    $ ../google_appengine/dev_appserver.py .
 
-$ unzip google_appengine_1.1.9.zip
+This is a local server that runs on port 8080 (use ``--port`` option to
+change this). Open a web browser and go to http://localhost:8080. You
+should see GUI of SymPy Online Shell.
 
-then:
+Uploading to GAE
+----------------
 
-$ cd /tmp
-$ git clone git://git.sympy.org/sympy.git
-$ git clone git://git.sympy.org/sympy-live.git
-$ cd sympy-live
-$ cp -a ../sympy/sympy .
-$ /path/to/google_appengine/dev_appserver.py .
+Assuming that sympy-live works properly (also across different mainstream
+web browsers), you can upload your changes to Google App Engine::
 
-And go to http://localhost:8080
+    $ ../appcfg.py update .
 
-How to upload to google app engine:
+This requires admin privileges to http://sympy-live.appspot.com. If you
+don't have access to this App Engine application, you can make your own.
+To achieve this, create an account on Google App Engine, start a new
+application and make appropriate changes to ``app.yaml`` (replace in the
+first line sympy-live with the name of your application). Then you can
+use ``appcfg.py`` as above, to upload to GAE.
 
-$ /path/to/appcfg.py update .
+Development notes
+-----------------
+
+Make sure SymPy Online Shell works in major mainstream web browsers. This
+includes Chrome, Firefox, Safari and Internet Explorer. Be extra cautious
+about trailing commas in JavaScript object and arrays. IE doesn't allow
+them, so you have to remove them, if any were introduced.
+
+GAE development server allows to use any Python interpreter, but Google
+App Engine uses Python 2.5, so if the default Python isn't 2.5, then make
+sure to test your changes to the server part, if it runs properly on 2.5.
+Also don't use any modules that aren't supported by GAE.
 
 Original info
 -------------
+
 An interactive, stateful AJAX shell that runs Python code on the server.
 
 Part of http://code.google.com/p/google-app-engine-samples/.
