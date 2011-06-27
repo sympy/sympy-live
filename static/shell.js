@@ -65,7 +65,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     render: function(el) {
-        el = Ext.get(el);
+        el = Ext.get(el) || Ext.getBody();
 
         this.outputEl = Ext.DomHelper.append(el, {
             tag: 'div',
@@ -169,7 +169,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         var keyEvent = Ext.isOpera ? "keypress" : "keydown";
 
         this.promptEl.on(keyEvent, function(event) {
-            this.onPromptKeyDown(event);
+            this.handleKey(event);
         }, this);
 
         this.evaluateEl.on("click", function(event) {
@@ -192,17 +192,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         runner.start(task);
     },
 
-    clear: function() {
-        var elements = this.outputEl.query('div.item');
-
-        Ext.each(elements, function(elem) {
-            Ext.get(elem).remove();
-        });
-
-        this.clearValue();
-        this.historyCursor = this.history.length-1;
-    },
-
     setValue: function(value) {
         this.promptEl.dom.value = value;
     },
@@ -219,7 +208,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return this.getValue().length == 0;
     },
 
-    onPromptKeyDown: function(event) {
+    handleKey: function(event) {
         if (this.historyCursor == this.history.length-1) {
             this.history[this.historyCursor] = this.getValue();
         }
@@ -335,6 +324,28 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.outputEl.dom.scrollTop = this.outputEl.dom.scrollHeight;
     },
 
+    evaluate: function() {
+        this.promptEl.addClass('processing');
+
+        var data = {
+            statement: this.promptEl.getValue(),
+            printer: this.printerEl.getValue(),
+            session: this.session || null
+        };
+
+        Ext.Ajax.request({
+            method: 'POST',
+            url: '/evaluate',
+            jsonData: Ext.encode(data),
+            success: function(response) {
+                this.done(response);
+            },
+            scope: this
+        });
+
+        return false;
+    },
+
     done: function(response) {
         var value = '\n' + this.prefixStatement();
 
@@ -375,25 +386,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.promptEl.removeClass('processing');
     },
 
-    evaluate: function() {
-        this.promptEl.addClass('processing');
+    clear: function() {
+        var elements = this.outputEl.query('div.item');
 
-        var data = {
-            statement: this.promptEl.getValue(),
-            printer: this.printerEl.getValue(),
-            session: this.session || null
-        };
-
-        Ext.Ajax.request({
-            method: 'POST',
-            url: '/evaluate',
-            jsonData: Ext.encode(data),
-            success: function(response) {
-                this.done(response);
-            },
-            scope: this
+        Ext.each(elements, function(elem) {
+            Ext.get(elem).remove();
         });
 
-        return false;
+        this.clearValue();
+        this.historyCursor = this.history.length-1;
     }
 });
