@@ -8,6 +8,8 @@ body {
 }
 
 .output {
+    font-family: monospace;
+    font-size: 10pt;
     margin: 0 0 10px 0;
     padding: 5px;
     width: 50em;
@@ -23,6 +25,8 @@ body {
 }
 
 .caret {
+    font-family: monospace;
+    font-size: 10pt;
     width: 2.5em;
     border: 1px solid silver;
     padding: 5px;
@@ -36,6 +40,8 @@ body {
 }
 
 .prompt {
+    font-family: monospace;
+    font-size: 10pt;
     width: 48.0em;
     border: 1px solid silver;
     padding: 5px;
