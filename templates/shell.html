@@ -35,8 +35,13 @@
 
         <script type="text/javascript">
             Ext.onReady(function() {
-                var shell = new SymPy.Shell();
-                shell.render(Ext.get('shell'));
+                var shell = new SymPy.Shell({
+                    printer: "{{ printer }}",
+                    submit: "{{ submit }}"
+                });
+
+                var el = Ext.get('shell');
+                shell.render(el);
             });
         </script>
     </head>

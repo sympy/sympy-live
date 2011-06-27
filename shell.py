@@ -58,10 +58,10 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 from sympy import srepr, sstr, pretty, latex
 
 PRINTERS = {
-    'srepr': srepr,
-    'sstr': sstr,
-    'pretty': lambda arg: pretty(arg, use_unicode=False),
-    'upretty': lambda arg: pretty(arg, use_unicode=True),
+    'repr': srepr,
+    'str': sstr,
+    'ascii': lambda arg: pretty(arg, use_unicode=False),
+    'unicode': lambda arg: pretty(arg, use_unicode=True),
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
 
@@ -335,6 +335,8 @@ class FrontPageHandler(webapp.RequestHandler):
             'login_url': users.create_login_url('/'),
             'logout_url': users.create_logout_url('/'),
             'banner': banner(),
+            'printer': self.request.get('printer').lower() or '',
+            'submit': self.request.get('submit').lower() or '',
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)

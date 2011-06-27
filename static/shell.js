@@ -55,12 +55,42 @@ SymPy.unescapeHTML = function(str) {
 };
 
 SymPy.Shell = Ext.extend(Ext.util.Observable, {
+    banner: '',
     history: [''],
     historyCursor: 0,
     previousValue: "",
 
+    printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
+    submitTypes: ['enter', 'shift-enter'],
+
+    printer: null,
+    submit: null,
+
     constructor: function(config) {
-        config = config || {};
+        config = Ext.apply({}, config);
+
+        if (config.banner) {
+            this.banner = config.banner;
+            delete config.banner;
+        } else {
+            var elem = Ext.get('banner');
+
+            if (elem) {
+                this.banner = elem.dom.innerHTML;
+            }
+        }
+
+        var index;
+
+        index = this.printerTypes.indexOf(config.printer);
+        this.printer = (index == -1) ? 'ascii' : config.printer;
+
+        index = this.submitTypes.indexOf(config.submit);
+        this.submit = (index == -1) ? 'shift-enter' : config.submit;
+
+        delete config.printer;
+        delete config.submit;
+
         SymPy.Shell.superclass.constructor.call(this, config);
     },
 
@@ -72,7 +102,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             cls: 'output',
             children: {
                 tag: 'div',
-                html: Ext.get('banner').dom.innerHTML
+                html: this.banner
             }
         }, true);
 
@@ -107,20 +137,19 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 tag: 'select',
                 children: [{
                     tag: 'option',
-                    value: 'srepr',
+                    value: 'repr',
                     html: 'Repr'
                 }, {
                     tag: 'option',
-                    value: 'sstr',
+                    value: 'str',
                     html: 'Str'
                 }, {
                     tag: 'option',
-                    value: 'pretty',
-                    selected: 'selected',
+                    value: 'ascii',
                     html: 'ASCII'
                 }, {
                     tag: 'option',
-                    value: 'upretty',
+                    value: 'unicode',
                     html: 'Unicode'
                 }, {
                     tag: 'option',
@@ -140,7 +169,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 }, {
                     tag: 'option',
                     value: 'shift-enter',
-                    selected: 'selected',
                     html: 'Shift-Enter'
                 }]
             }, {
@@ -161,6 +189,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
+
+        var index;
+
+        index = this.printerTypes.indexOf(this.printer);
+        this.printerEl.dom.selectedIndex = index;
+
+        index = this.submitTypes.indexOf(this.submit);
+        this.submitEl.dom.selectedIndex = index;
 
         this.caretEl.on("focus", function(event) {
             this.promptEl.focus();
