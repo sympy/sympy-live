@@ -41,6 +41,7 @@ import new
 import os
 import pickle
 import sys
+import pdb
 import traceback
 import types
 import simplejson
@@ -64,6 +65,11 @@ PRINTERS = {
     'unicode': lambda arg: pretty(arg, use_unicode=True),
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
+
+def gdb():
+    """Enter pdb in Google App Engine. """
+    pdb.Pdb(stdin=getattr(sys, '__stdin__'),
+            stdout=getattr(sys, '__stderr__')).set_trace(sys._getframe().f_back)
 
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = True
@@ -140,12 +146,12 @@ def evaluate(statement, session, printer=None, stream=None):
 
     # log and compile the statement up front
     try:
-      logging.info('Compiling and evaluating:\n%s' % statement)
-      compiled = compile(statement, '<string>', 'single')
+        logging.info('Compiling and evaluating:\n%s' % statement)
+        compiled = compile(statement, '<string>', 'single')
     except:
-      if stream is not None:
-        stream.write(traceback.format_exc())
-      return
+        if stream is not None:
+            stream.write(traceback.format_exc())
+        return
 
     # create a dedicated module to be used as this statement's __main__
     statement_module = new.module('__main__')
@@ -153,16 +159,16 @@ def evaluate(statement, session, printer=None, stream=None):
     # use this request's __builtin__, since it changes on each request.
     # this is needed for import statements, among other things.
     import __builtin__
-    statement_module.__builtins__ = __builtin__
+    statement_module.__builtin__ = __builtin__
 
     # create customized display hook
     stringify_func = printer or sstr
 
     def displayhook(arg):
         if arg is not None:
-            statement_module.__builtins__._ = None
+            __builtin__._ = None
             print stringify_func(arg)
-            statement_module.__builtins__._ = arg
+            __builtin__._ = arg
 
     old_displayhook = sys.displayhook
     sys.displayhook = displayhook
@@ -173,62 +179,76 @@ def evaluate(statement, session, printer=None, stream=None):
     old_main = sys.modules.get('__main__')
 
     try:
-      sys.modules['__main__'] = statement_module
-      statement_module.__name__ = '__main__'
+        sys.modules['__main__'] = statement_module
+        statement_module.__name__ = '__main__'
 
-      # re-evaluate the unpicklables
-      for code in session.unpicklables:
-        exec code in statement_module.__dict__
+        # re-evaluate the unpicklables
+        for code in session.unpicklables:
+            exec code in statement_module.__dict__
 
-      # re-initialize the globals
-      for name, val in session.globals_dict().items():
+        # re-initialize the globals
+        session_globals_dict = session.globals_dict()
+
+        for name, val in session_globals_dict.items():
+            try:
+                statement_module.__dict__[name] = val
+            except:
+                logging.warning(msg + traceback.format_exc())
+                session.remove_global(name)
+
+        val = session_globals_dict.get('_')
+        setattr(__builtin__, '_', val)
+
+        # run!
+        old_globals = dict(statement_module.__dict__)
+
         try:
-          statement_module.__dict__[name] = val
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+
+            try:
+                if stream is not None:
+                    sys.stdout = stream
+                    sys.stderr = stream
+
+                exec compiled in statement_module.__dict__
+            finally:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr
         except:
-          logging.warning(msg + traceback.format_exc())
-          session.remove_global(name)
+            if stream is not None:
+                stream.write(traceback.format_exc())
+            return
 
-      # run!
-      old_globals = dict(statement_module.__dict__)
-      try:
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
+        # extract the new globals that this statement added
+        new_globals = {}
+
+        for name, val in statement_module.__dict__.items():
+            if name not in old_globals or val != old_globals[name]:
+                new_globals[name] = val
+
+        if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
+            # this statement added an unpicklable global. store the statement and
+            # the names of all of the globals it added in the unpicklables.
+            session.add_unpicklable(statement, new_globals.keys())
+            logging.debug('Storing this statement as an unpicklable.')
+        else:
+            # this statement didn't add any unpicklables. pickle and store the
+            # new globals back into the datastore.
+            for name, val in new_globals.items():
+                if not name.startswith('__'):
+                    session.set_global(name, val)
+
+        val = getattr(__builtin__, '_', None)
+
         try:
-          if stream is not None:
-              sys.stdout = stream
-              sys.stderr = stream
-
-          exec compiled in statement_module.__dict__
-        finally:
-          sys.stdout = old_stdout
-          sys.stderr = old_stderr
-      except:
-        if stream is not None:
-          stream.write(traceback.format_exc())
-        return
-
-      # extract the new globals that this statement added
-      new_globals = {}
-      for name, val in statement_module.__dict__.items():
-        if name not in old_globals or val != old_globals[name]:
-          new_globals[name] = val
-
-      if True in [isinstance(val, UNPICKLABLE_TYPES)
-                  for val in new_globals.values()]:
-        # this statement added an unpicklable global. store the statement and
-        # the names of all of the globals it added in the unpicklables.
-        session.add_unpicklable(statement, new_globals.keys())
-        logging.debug('Storing this statement as an unpicklable.')
-      else:
-        # this statement didn't add any unpicklables. pickle and store the
-        # new globals back into the datastore.
-        for name, val in new_globals.items():
-          if not name.startswith('__'):
-            session.set_global(name, val)
-
+            session.set_global('_', val)
+        except pickle.PicklingError:
+            session.set_global('_', None)
     finally:
-      sys.displayhook = old_displayhook
-      sys.modules['__main__'] = old_main
+        sys.modules['__main__'] = old_main
+        sys.displayhook = old_displayhook
+        setattr(__builtin__, '_', None)
 
     session.put()
 
