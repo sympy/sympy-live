@@ -222,30 +222,46 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.history[this.historyCursor] = this.getValue();
         }
 
+        function prevInHistory(event) {
+            event.preventDefault();
+
+            if (this.historyCursor > 0) {
+                this.setValue(this.history[--this.historyCursor]);
+            }
+
+            return false;
+        }
+
+        function nextInHistory(event) {
+            event.preventDefault();
+
+            if (this.historyCursor < this.history.length - 1) {
+                this.setValue(this.history[++this.historyCursor]);
+            }
+
+            return false;
+        }
+
         switch (event.getKey()) {
         case SymPy.Keys.UP:
-            if (event.ctrlKey || this.isEmpty()) {
-                event.preventDefault();
-
-                if (this.historyCursor > 0) {
-                    this.setValue(this.history[--this.historyCursor]);
-                }
-
-                return false;
+            if (event.ctrlKey && !event.altKey) {
+                return prevInHistory.call(this, event);
             }
-
             break;
         case SymPy.Keys.DOWN:
-            if (event.ctrlKey || this.isEmpty()) {
-                event.preventDefault();
-
-                if (this.historyCursor < this.history.length - 1) {
-                    this.setValue(this.history[++this.historyCursor]);
-                }
-
-                return false;
+            if (event.ctrlKey && !event.altKey) {
+                return nextInHistory.call(this, event);
             }
-
+            break;
+        case SymPy.Keys.K:
+            if (event.altKey && !event.ctrlKey) {
+                return prevInHistory.call(this, event);
+            }
+            break;
+        case SymPy.Keys.J:
+            if (event.altKey && !event.ctrlKey) {
+                return nextInHistory.call(this, event);
+            }
             break;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
