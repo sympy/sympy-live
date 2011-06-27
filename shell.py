@@ -186,6 +186,8 @@ def evaluate(statement, session, printer=None, stream=None):
         for code in session.unpicklables:
             exec code in statement_module.__dict__
 
+        old_globals = dict(statement_module.__dict__)
+
         # re-initialize the globals
         session_globals_dict = session.globals_dict()
 
@@ -200,8 +202,6 @@ def evaluate(statement, session, printer=None, stream=None):
         setattr(__builtin__, '_', val)
 
         # run!
-        old_globals = dict(statement_module.__dict__)
-
         try:
             old_stdout = sys.stdout
             old_stderr = sys.stderr
