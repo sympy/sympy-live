@@ -166,7 +166,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.focus();
         }, this);
 
-        this.promptEl.on("keydown", function(event) {
+        var keyEvent = Ext.isOpera ? "keypress" : "keydown";
+
+        this.promptEl.on(keyEvent, function(event) {
             this.onPromptKeyDown(event);
         }, this);
 
@@ -223,7 +225,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         function prevInHistory(event) {
-            event.preventDefault();
+            event.stopEvent();
 
             if (this.historyCursor > 0) {
                 this.setValue(this.history[--this.historyCursor]);
@@ -233,7 +235,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         function nextInHistory(event) {
-            event.preventDefault();
+            event.stopEvent();
 
             if (this.historyCursor < this.history.length - 1) {
                 this.setValue(this.history[++this.historyCursor]);
@@ -267,7 +269,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 
             if (event.shiftKey == shiftEnter) {
-                event.preventDefault();
+                event.stopEvent();
                 this.evaluate();
                 return false;
             }
@@ -275,7 +277,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         case SymPy.Keys.E:
             if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
-                event.preventDefault();
+                event.stopEvent();
                 this.evaluate();
                 return false;
             }
