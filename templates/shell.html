@@ -37,7 +37,8 @@
             Ext.onReady(function() {
                 var shell = new SymPy.Shell({
                     printer: "{{ printer }}",
-                    submit: "{{ submit }}"
+                    submit: "{{ submit }}",
+                    tabWidth: {{ tabWidth }}
                 });
 
                 var el = Ext.get('shell');

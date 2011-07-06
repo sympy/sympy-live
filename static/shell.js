@@ -54,17 +54,25 @@ SymPy.unescapeHTML = function(str) {
     return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 };
 
+Ext.USE_NATIVE_JSON = true;
+Ext.Ajax.timeout = 60000;
+
 SymPy.Shell = Ext.extend(Ext.util.Observable, {
     banner: '',
     history: [''],
     historyCursor: 0,
     previousValue: "",
+    evaluating: false,
+
+    supportsSelection: false,
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
 
     printer: null,
     submit: null,
+
+    tabWidth: 4,
 
     constructor: function(config) {
         config = Ext.apply({}, config);
@@ -90,6 +98,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         delete config.printer;
         delete config.submit;
+
+        if (Ext.isNumber(config.tabWidth)) {
+            this.tabWidth = config.tabWidth;
+            delete config.tabWidth;
+        }
 
         SymPy.Shell.superclass.constructor.call(this, config);
     },
@@ -184,6 +197,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }]
         }, true);
 
+        this.supportsSelection = ('selectionStart' in this.promptEl.dom);
+
         this.evaluateEl = this.toolbarEl.down('button:nth(1)');
         this.clearEl = this.toolbarEl.down('button:nth(2)');
 
@@ -248,6 +263,42 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return this.printerEl.getValue() == 'latex';
     },
 
+    setSelection: function(sel) {
+        var start, end;
+
+        if (Ext.isNumber(sel)) {
+            start = sel;
+            end = sel;
+        } else {
+            start = sel.start;
+            end = sel.end;
+        }
+
+        this.promptEl.dom.selectionStart = start;
+        this.promptEl.dom.selectionEnd = end;
+    },
+
+    getSelection: function() {
+        return {
+            start: this.promptEl.dom.selectionStart,
+            end: this.promptEl.dom.selectionEnd
+        };
+    },
+
+    setCursor: function(cur) {
+        this.setSelection(cur);
+    },
+
+    getCursor: function() {
+        var sel = this.getSelection();
+
+        if (sel.start == sel.end) {
+            return sel.start;
+        } else {
+            return null;
+        }
+    },
+
     handleKey: function(event) {
         if (this.historyCursor == this.history.length-1) {
             this.history[this.historyCursor] = this.getValue();
@@ -273,27 +324,59 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             return false;
         }
 
+        function inFirstLine() {
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    return this.getValue().lastIndexOf('\n', cursor-1) === -1;
+                }
+            }
+
+            return false;
+        }
+
+        function inLastLine() {
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    return this.getValue().indexOf('\n', cursor) === -1;
+                }
+            }
+
+            return false;
+        }
+
         switch (event.getKey()) {
         case SymPy.Keys.UP:
-            if (event.ctrlKey && !event.altKey) {
+            if ((event.ctrlKey && !event.altKey) || inFirstLine.call(this)) {
                 return prevInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.DOWN:
-            if (event.ctrlKey && !event.altKey) {
+            if ((event.ctrlKey && !event.altKey) || inLastLine.call(this)) {
                 return nextInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.K:
-            if (event.altKey && !event.ctrlKey) {
+            if ((event.altKey && !event.ctrlKey) || inFirstLine.call(this)) {
                 return prevInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.J:
-            if (event.altKey && !event.ctrlKey) {
+            if ((event.altKey && !event.ctrlKey) || inLastLine.call(this)) {
                 return nextInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
+        case SymPy.Keys.LEFT:
+            return true;
+        case SymPy.Keys.RIGHT:
+            return true;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 
@@ -301,6 +384,32 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 event.stopEvent();
                 this.evaluate();
                 return false;
+            } else if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    var value = this.getValue();
+                    var index = value.lastIndexOf('\n', cursor) + 1;
+                    var spaces = "";
+
+                    while (value[index++] == ' ') {
+                        spaces += " ";
+                    }
+
+                    if (value[cursor-1] == ':') {
+                        for (var i = 0; i < this.tabWidth; i++) {
+                            spaces += " ";
+                        }
+                    }
+
+                    var start = value.slice(0, cursor);
+                    var end = value.slice(cursor+1);
+
+                    this.setValue(start + '\n' + spaces + end);
+
+                    event.stopEvent();
+                    return false;
+                }
             }
 
             break;
@@ -365,25 +474,32 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     evaluate: function() {
-        this.promptEl.addClass('processing');
+        if (!this.evaluating) {
+            this.evaluating = true;
+            this.promptEl.addClass('processing');
 
-        var data = {
-            statement: this.promptEl.getValue(),
-            printer: this.printerEl.getValue(),
-            session: this.session || null
-        };
+            var data = {
+                statement: this.promptEl.getValue(),
+                printer: this.printerEl.getValue(),
+                session: this.session || null
+            };
 
-        Ext.Ajax.request({
-            method: 'POST',
-            url: '/evaluate',
-            jsonData: Ext.encode(data),
-            success: function(response) {
-                this.done(response);
-            },
-            scope: this
-        });
-
-        return false;
+            Ext.Ajax.request({
+                method: 'POST',
+                url: '/evaluate',
+                jsonData: Ext.encode(data),
+                success: function(response) {
+                    this.done(response);
+                },
+                failure: function(response) {
+                    this.clearValue();
+                    this.updatePrompt();
+                    this.promptEl.removeClass('processing');
+                    this.evaluating = false;
+                },
+                scope: this
+            });
+        }
     },
 
     done: function(response) {
@@ -429,6 +545,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.promptEl.removeClass('processing');
+        this.evaluating = false;
     },
 
     clear: function() {
