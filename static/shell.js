@@ -54,6 +54,9 @@ SymPy.unescapeHTML = function(str) {
     return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 };
 
+Ext.USE_NATIVE_JSON = true;
+Ext.Ajax.timeout = 60000;
+
 SymPy.Shell = Ext.extend(Ext.util.Observable, {
     banner: '',
     history: [''],
@@ -487,6 +490,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
+                },
+                failure: function(response) {
+                    this.clearValue();
+                    this.updatePrompt();
+                    this.promptEl.removeClass('processing');
+                    this.evaluating = false;
                 },
                 scope: this
             });
