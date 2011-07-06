@@ -43,6 +43,7 @@ import pickle
 import sys
 import pdb
 import traceback
+import tokenize
 import types
 import simplejson
 import wsgiref.handlers
@@ -102,6 +103,10 @@ k, m, n = symbols('k m n', integer=True)
 f, g, h = symbols('f g h', cls=Function)
 """
 
+PREEXEC_INTERNAL = """\
+_ = None
+"""
+
 PREEXEC_MESSAGE = """\
 from __future__ import division
 from sympy import *
@@ -132,125 +137,216 @@ def banner(quiet=False):
 
     return message
 
-def evaluate(statement, session, printer=None, stream=None):
-    """Evaluate the statement in sessions's globals. """
-    if not statement:
-        return
+class Live(object):
+    """ """
 
-    # the python compiler doesn't like network line endings
-    statement = statement.replace('\r\n', '\n')
+    _header = 'Traceback (most recent call last):\n'
+    _file = '<string>'
 
-    # add a couple newlines at the end of the statement. this makes
-    # single-line expressions such as 'class Foo: pass' evaluate happily.
-    statement += '\n\n'
+    def traceback(self, offset=None):
+        """Return nicely formatted most recent traceback. """
+        etype, value, tb = sys.exc_info()
 
-    # log and compile the statement up front
-    try:
-        logging.info('Compiling and evaluating:\n%s' % statement)
-        compiled = compile(statement, '<string>', 'single')
-    except:
-        if stream is not None:
-            stream.write(traceback.format_exc())
-        return
-
-    # create a dedicated module to be used as this statement's __main__
-    statement_module = new.module('__main__')
-
-    # use this request's __builtin__, since it changes on each request.
-    # this is needed for import statements, among other things.
-    import __builtin__
-    statement_module.__builtin__ = __builtin__
-
-    # create customized display hook
-    stringify_func = printer or sstr
-
-    def displayhook(arg):
-        if arg is not None:
-            __builtin__._ = None
-            print stringify_func(arg)
-            __builtin__._ = arg
-
-    old_displayhook = sys.displayhook
-    sys.displayhook = displayhook
-
-    # swap in our custom module for __main__. then unpickle the session
-    # globals, run the statement, and re-pickle the session globals, all
-    # inside it.
-    old_main = sys.modules.get('__main__')
-
-    try:
-        sys.modules['__main__'] = statement_module
-        statement_module.__name__ = '__main__'
-
-        # re-evaluate the unpicklables
-        for code in session.unpicklables:
-            exec code in statement_module.__dict__
-
-        old_globals = dict(statement_module.__dict__)
-
-        # re-initialize the globals
-        session_globals_dict = session.globals_dict()
-
-        for name, val in session_globals_dict.items():
-            try:
-                statement_module.__dict__[name] = val
-            except:
-                logging.warning(msg + traceback.format_exc())
-                session.remove_global(name)
-
-        val = session_globals_dict.get('_')
-        setattr(__builtin__, '_', val)
-
-        # run!
-        try:
-            old_stdout = sys.stdout
-            old_stderr = sys.stderr
-
-            try:
-                if stream is not None:
-                    sys.stdout = stream
-                    sys.stderr = stream
-
-                exec compiled in statement_module.__dict__
-            finally:
-                sys.stdout = old_stdout
-                sys.stderr = old_stderr
-        except:
-            if stream is not None:
-                stream.write(traceback.format_exc())
-            return
-
-        # extract the new globals that this statement added
-        new_globals = {}
-
-        for name, val in statement_module.__dict__.items():
-            if name not in old_globals or val != old_globals[name]:
-                new_globals[name] = val
-
-        if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
-            # this statement added an unpicklable global. store the statement and
-            # the names of all of the globals it added in the unpicklables.
-            session.add_unpicklable(statement, new_globals.keys())
-            logging.debug('Storing this statement as an unpicklable.')
+        if tb.tb_next is not None:
+            _tb = tb.tb_next
         else:
-            # this statement didn't add any unpicklables. pickle and store the
-            # new globals back into the datastore.
-            for name, val in new_globals.items():
-                if not name.startswith('__'):
-                    session.set_global(name, val)
-
-        val = getattr(__builtin__, '_', None)
+            _tb = tb
 
         try:
-            session.set_global('_', val)
-        except pickle.PicklingError:
-            session.set_global('_', None)
-    finally:
-        sys.modules['__main__'] = old_main
-        sys.displayhook = old_displayhook
-        setattr(__builtin__, '_', None)
+            if offset is not None:
+                lines = traceback.extract_tb(_tb)
 
-    session.put()
+                line = lines[0][1] + offset
+                lines[0] = (lines[0][0], line) + lines[0][2:]
+
+                text = [self._header]
+                text = text + traceback.format_list(lines)
+                text = text + traceback.format_exception_only(etype, value)
+
+                line = lines[0][1]
+            else:
+                text = traceback.format_exception(etype, value, _tb)
+                line = _tb.tb_lineno
+        finally:
+            del tb, _tb
+
+        return ''.join(text), line
+
+    def syntaxerror(self):
+        """Return nicely formatted syntax error. """
+        etype, value, sys.last_traceback = sys.exc_info()
+
+        sys.last_type = etype
+        sys.last_value = value
+
+        if etype is SyntaxError:
+            try:
+                msg, (dummy_filename, line, offset, source) = value
+            except:
+                pass
+            else:
+                value = SyntaxError(msg, (self._file, line, offset, source))
+                sys.last_value = value
+
+        text = [self._header]
+        text = text + traceback.format_exception_only(etype, value)
+
+        return ''.join(text), line
+
+    def error(self, stream, error):
+        """Write error message to a stream. """
+        if stream is not None:
+            stream.write(error[0])
+
+    def split(self, source):
+        """Extract last logical line from multi-line source code. """
+        string = StringIO(source).readline
+
+        try:
+            tokens = tokenize.generate_tokens(string)
+        except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
+            return None, source
+
+        for tok, _, (n, _), _, _ in reversed(list(tokens)):
+            if tok == tokenize.NEWLINE:
+                lines = source.split('\n')
+
+                exec_source = '\n'.join(lines[:n])
+                eval_source = '\n'.join(lines[n:])
+
+                return exec_source, eval_source
+        else:
+            return None, source
+
+    def compile(self, source, mode):
+        """Wrapper over Python's built-in function. """
+        return compile(source, self._file, mode)
+
+    def evaluate(self, statement, session, printer=None, stream=None):
+        """Evaluate the statement in sessions's globals. """
+        # the Python compiler doesn't like network line endings
+        source = statement.replace('\r\n', '\n')
+
+        # split source code into 'exec' and 'eval' parts
+        exec_source, eval_source = self.split(source)
+        eval_source += '\n'
+
+        try:
+            self.compile(eval_source, 'eval')
+        except (OverflowError, SyntaxError, ValueError):
+            exec_source, eval_source = source, None
+
+        # create a dedicated module to be used as this statement's __main__
+        statement_module = new.module('__main__')
+
+        # use this request's __builtin__, since it changes on each request.
+        # this is needed for import statements, among other things.
+        import __builtin__
+        statement_module.__builtin__ = __builtin__
+
+        # create customized display hook
+        stringify_func = printer or sstr
+
+        def displayhook(arg):
+            if arg is not None:
+                __builtin__._ = None
+                print stringify_func(arg)
+                __builtin__._ = arg
+
+        old_displayhook = sys.displayhook
+        sys.displayhook = displayhook
+
+        # swap in our custom module for __main__. then unpickle the session
+        # globals, run the statement, and re-pickle the session globals, all
+        # inside it.
+        old_main = sys.modules.get('__main__')
+
+        try:
+            sys.modules['__main__'] = statement_module
+            statement_module.__name__ = '__main__'
+
+            # re-evaluate the unpicklables
+            for code in session.unpicklables:
+                exec code in statement_module.__dict__
+
+            old_globals = dict(statement_module.__dict__)
+
+            # re-initialize the globals
+            session_globals_dict = session.globals_dict()
+
+            for name, val in session_globals_dict.items():
+                try:
+                    statement_module.__dict__[name] = val
+                except:
+                    session.remove_global(name)
+
+            # re-initialize '_' special variable
+            __builtin__._ = session_globals_dict.get('_')
+
+            # run!
+            offset = 0
+
+            try:
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+
+                try:
+                    if stream is not None:
+                        sys.stdout = stream
+                        sys.stderr = stream
+
+                    if exec_source is not None:
+                        try:
+                            exec_code = self.compile(exec_source, 'exec')
+                        except (OverflowError, SyntaxError, ValueError):
+                            return self.error(stream, self.syntaxerror())
+
+                        eval(exec_code, statement_module.__dict__)
+
+                    if eval_source is not None:
+                        if exec_source is not None:
+                            offset = len(exec_source.split('\n'))
+
+                        result = eval(eval_source, statement_module.__dict__)
+                        sys.displayhook(result)
+                finally:
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+            except:
+                return self.error(stream, self.traceback(offset))
+
+            # extract the new globals that this statement added
+            new_globals = {}
+
+            for name, val in statement_module.__dict__.items():
+                if name not in old_globals or val != old_globals[name]:
+                    new_globals[name] = val
+
+            if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
+                # this statement added an unpicklable global. store the statement and
+                # the names of all of the globals it added in the unpicklables
+                session.add_unpicklable(statement, new_globals.keys())
+                logging.debug('Storing this statement as an unpicklable.')
+            else:
+                # this statement didn't add any unpicklables. pickle and store the
+                # new globals back into the datastore
+                for name, val in new_globals.items():
+                    if not name.startswith('__'):
+                        session.set_global(name, val)
+
+            # save '_' special variable into the datastore
+            val = getattr(__builtin__, '_', None)
+
+            try:
+                session.set_global('_', val)
+            except (TypeError, pickle.PicklingError):
+                session.set_global('_', None)
+        finally:
+            sys.modules['__main__'] = old_main
+            sys.displayhook = old_displayhook
+            del __builtin__._
+
+        session.put()
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
@@ -377,6 +473,8 @@ class EvaluateHandler(webapp.RequestHandler):
         session_key = message.get('session')
         printer_key = message.get('printer')
 
+        live = Live()
+
         if session_key is not None:
             try:
                 session = Session.get(session_key)
@@ -387,7 +485,9 @@ class EvaluateHandler(webapp.RequestHandler):
             session = Session()
             session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
             session_key = session.put()
-            evaluate(PREEXEC, session)
+
+            live.evaluate(PREEXEC, session)
+            live.evaluate(PREEXEC_INTERNAL, session)
 
         try:
             printer = PRINTERS[printer_key]
@@ -395,7 +495,7 @@ class EvaluateHandler(webapp.RequestHandler):
             printer = None
 
         stream = StringIO()
-        evaluate(statement, session, printer, stream)
+        live.evaluate(statement, session, printer, stream)
 
         result = {
             'session': str(session_key),
