@@ -321,27 +321,59 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             return false;
         }
 
+        function inFirstLine() {
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    return this.getValue().lastIndexOf('\n', cursor-1) === -1;
+                }
+            }
+
+            return false;
+        }
+
+        function inLastLine() {
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    return this.getValue().indexOf('\n', cursor) === -1;
+                }
+            }
+
+            return false;
+        }
+
         switch (event.getKey()) {
         case SymPy.Keys.UP:
-            if (event.ctrlKey && !event.altKey) {
+            if ((event.ctrlKey && !event.altKey) || inFirstLine.call(this)) {
                 return prevInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.DOWN:
-            if (event.ctrlKey && !event.altKey) {
+            if ((event.ctrlKey && !event.altKey) || inLastLine.call(this)) {
                 return nextInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.K:
-            if (event.altKey && !event.ctrlKey) {
+            if ((event.altKey && !event.ctrlKey) || inFirstLine.call(this)) {
                 return prevInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
         case SymPy.Keys.J:
-            if (event.altKey && !event.ctrlKey) {
+            if ((event.altKey && !event.ctrlKey) || inLastLine.call(this)) {
                 return nextInHistory.call(this, event);
+            } else {
+                return true;
             }
-            break;
+        case SymPy.Keys.LEFT:
+            return true;
+        case SymPy.Keys.RIGHT:
+            return true;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 
