@@ -78,6 +78,45 @@ App Engine uses Python 2.5, so if the default Python isn't 2.5, then make
 sure to test your changes to the server part, if it runs properly on 2.5.
 Also don't use any modules that aren't supported by GAE.
 
+Updating SymPy
+--------------
+
+Make sure that you followed instructions above and SymPy's submodule is
+properly initialized. Assuming that you are in the directory where SymPy
+Live was cloned, issue::
+
+    $ cd sympy/
+    $ git fetch origin
+    $ git checkout sympy-0.7.0
+    $ cd ..
+    $ git add .
+    $ git ci -m "Updated SymPy to version 0.7.0"
+
+Now if you issue::
+
+    $ git show -v
+
+you should get::
+
+    commit 5138e824dc9fd46c243eea2d7c9581a9e58feb08
+    Author: Mateusz Paprocki <mattpap@gmail.com>
+    Date:   Wed Jul 6 07:45:19 2011 +0200
+
+        Updated SymPy to version 0.7.0
+
+        diff --git a/sympy b/sympy
+        index df7a135..c9470ac 160000
+        --- a/sympy
+        +++ b/sympy
+        @@ -1 +1 @@
+        -Subproject commit df7a135a4ff7eca361ebbb07ccbeabf8654a8d80
+        +Subproject commit c9470ac4f44e7dacfb026cf74529db3ec0822145
+
+This was done for SymPy's version 0.7.0, so in future updates of SymPy
+replace 0.7.0 with appropriate newer version (e.g. 0.7.1) and you are
+done (of course particular SHA signatures will be different in your
+case). If unsure, refer to git book: http://book.git-scm.com/5_submodules.html.
+
 Original info
 -------------
 
