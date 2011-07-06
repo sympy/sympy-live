@@ -453,6 +453,7 @@ class FrontPageHandler(webapp.RequestHandler):
             'banner': banner(),
             'printer': self.request.get('printer').lower() or '',
             'submit': self.request.get('submit').lower() or '',
+            'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
