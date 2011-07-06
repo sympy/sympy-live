@@ -59,6 +59,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     history: [''],
     historyCursor: 0,
     previousValue: "",
+    evaluating: false,
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
@@ -365,25 +366,26 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     evaluate: function() {
-        this.promptEl.addClass('processing');
+        if (!this.evaluating) {
+            this.evaluating = true;
+            this.promptEl.addClass('processing');
 
-        var data = {
-            statement: this.promptEl.getValue(),
-            printer: this.printerEl.getValue(),
-            session: this.session || null
-        };
+            var data = {
+                statement: this.promptEl.getValue(),
+                printer: this.printerEl.getValue(),
+                session: this.session || null
+            };
 
-        Ext.Ajax.request({
-            method: 'POST',
-            url: '/evaluate',
-            jsonData: Ext.encode(data),
-            success: function(response) {
-                this.done(response);
-            },
-            scope: this
-        });
-
-        return false;
+            Ext.Ajax.request({
+                method: 'POST',
+                url: '/evaluate',
+                jsonData: Ext.encode(data),
+                success: function(response) {
+                    this.done(response);
+                },
+                scope: this
+            });
+        }
     },
 
     done: function(response) {
@@ -429,6 +431,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.promptEl.removeClass('processing');
+        this.evaluating = false;
     },
 
     clear: function() {
