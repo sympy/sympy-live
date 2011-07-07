@@ -29,7 +29,7 @@ http://code.google.com/appengine/downloads.html, e.g.::
 On the Mac, it is a disk image with an application, which you should
 drag to your Applications folder.  Open the program and install the
 symlinks (it should ask you the first time you open the application, but
-if if doesn't, choose "Make Symlinks..." from the
+if it doesn't, choose "Make Symlinks..." from the
 GoogleAppEngineLauncher menu).
 
 Then clone sympy-live repository::
