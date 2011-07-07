@@ -26,6 +26,12 @@ http://code.google.com/appengine/downloads.html, e.g.::
     $ wget http://googleappengine.googlecode.com/files/google_appengine_1.5.1.zip
     $ unzip google_appengine_1.5.1.zip
 
+On the Mac, it is a disk image with an application, which you should
+drag to your Applications folder.  Open the program and install the
+symlinks (it should ask you the first time you open the application, but
+if if doesn't, choose "Make Symlinks..." from the
+GoogleAppEngineLauncher menu).
+
 Then clone sympy-live repository::
 
     $ git clone git://github.com/sympy/sympy-live.git
@@ -45,6 +51,16 @@ Development server
 Now you are ready to run development web server::
 
     $ ../google_appengine/dev_appserver.py .
+
+On the Mac, just run::
+
+    $ dev_appserver .
+
+(make sure you installed the symlinks as described above).  
+
+I couldn't figure out how to make it work in the GUI (it won't find the
+sympy git submodule).  If you figure out how to do it, please update
+this file and send a patch describing how to do it.
 
 This is a local server that runs on port 8080 (use ``--port`` option to
 change this). Open a web browser and go to http://localhost:8080. You
