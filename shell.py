@@ -138,7 +138,6 @@ def banner(quiet=False):
     return message
 
 class Live(object):
-    """ """
 
     _header = 'Traceback (most recent call last):\n'
     _file = '<string>'
@@ -225,16 +224,20 @@ class Live(object):
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """
         # the Python compiler doesn't like network line endings
-        source = statement.replace('\r\n', '\n')
+        source = statement.replace('\r\n', '\n').rstrip()
 
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
-        eval_source += '\n'
 
         try:
             self.compile(eval_source, 'eval')
         except (OverflowError, SyntaxError, ValueError):
             exec_source, eval_source = source, None
+
+        if exec_source is not None:
+            exec_source += '\n'
+        if eval_source is not None:
+            eval_source += '\n'
 
         # create a dedicated module to be used as this statement's __main__
         statement_module = new.module('__main__')
