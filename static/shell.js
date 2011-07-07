@@ -378,6 +378,44 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             return true;
         case SymPy.Keys.RIGHT:
             return true;
+        case SymPy.Keys.BACKSPACE:
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    var value = this.getValue();
+                    var spaces = 0;
+
+                    for (var i = cursor; i > 0; i--) {
+                        var ch = value[i-1];
+
+                        if (ch === '\n') {
+                            break;
+                        } else if (ch === ' ') {
+                            spaces++;
+                        } else {
+                            spaces = 0;
+                            break;
+                        }
+                    }
+
+                    if (spaces > 0) {
+                        var cutoff = cursor - this.tabWidth;
+
+                        if (cutoff >= i) {
+                            var start = value.slice(0, cutoff);
+                            var end = value.slice(cursor);
+
+                            this.setValue(start + end);
+
+                            event.stopEvent();
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            break;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 
