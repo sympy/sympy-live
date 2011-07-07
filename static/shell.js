@@ -363,17 +363,17 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 return true;
             }
         case SymPy.Keys.K:
-            if ((event.altKey && !event.ctrlKey) || inFirstLine.call(this)) {
+            if (event.altKey && !event.ctrlKey) {
                 return prevInHistory.call(this, event);
-            } else {
-                return true;
             }
+
+            break;
         case SymPy.Keys.J:
-            if ((event.altKey && !event.ctrlKey) || inLastLine.call(this)) {
+            if (event.altKey && !event.ctrlKey) {
                 return nextInHistory.call(this, event);
-            } else {
-                return true;
             }
+
+            break;
         case SymPy.Keys.LEFT:
             return true;
         case SymPy.Keys.RIGHT:
