@@ -130,7 +130,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.promptEl = Ext.DomHelper.append(el, {
             tag: 'textarea',
             cls: 'prompt',
-            rows: '4'
+            rows: '4',
+            spellcheck: 'false'
         }, true);
 
         this.toolbarEl = Ext.DomHelper.append(el, {
@@ -362,21 +363,59 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 return true;
             }
         case SymPy.Keys.K:
-            if ((event.altKey && !event.ctrlKey) || inFirstLine.call(this)) {
+            if (event.altKey && !event.ctrlKey) {
                 return prevInHistory.call(this, event);
-            } else {
-                return true;
             }
+
+            break;
         case SymPy.Keys.J:
-            if ((event.altKey && !event.ctrlKey) || inLastLine.call(this)) {
+            if (event.altKey && !event.ctrlKey) {
                 return nextInHistory.call(this, event);
-            } else {
-                return true;
             }
+
+            break;
         case SymPy.Keys.LEFT:
             return true;
         case SymPy.Keys.RIGHT:
             return true;
+        case SymPy.Keys.BACKSPACE:
+            if (this.supportsSelection) {
+                var cursor = this.getCursor();
+
+                if (cursor !== null) {
+                    var value = this.getValue();
+                    var spaces = 0;
+
+                    for (var i = cursor; i > 0; i--) {
+                        var ch = value[i-1];
+
+                        if (ch === '\n') {
+                            break;
+                        } else if (ch === ' ') {
+                            spaces++;
+                        } else {
+                            spaces = 0;
+                            break;
+                        }
+                    }
+
+                    if (spaces > 0) {
+                        var cutoff = cursor - this.tabWidth;
+
+                        if (cutoff >= i) {
+                            var start = value.slice(0, cutoff);
+                            var end = value.slice(cursor);
+
+                            this.setValue(start + end);
+
+                            event.stopEvent();
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            break;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
 

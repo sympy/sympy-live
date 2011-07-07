@@ -78,6 +78,21 @@ App Engine uses Python 2.5, so if the default Python isn't 2.5, then make
 sure to test your changes to the server part, if it runs properly on 2.5.
 Also don't use any modules that aren't supported by GAE.
 
+Pulling changes
+---------------
+
+In projects that don't use submodules, pulling changes boils down to::
+
+    $ git pull origin master
+
+in the simplest case. SymPy Live, however, requires additional effort::
+
+    $ git submodule update
+
+The above command assures that if there were any changes to submodules
+of the super-project, then those submodules will get updated to new
+versions. This is related to the following section.
+
 Updating SymPy
 --------------
 
@@ -112,10 +127,10 @@ you should get::
         -Subproject commit df7a135a4ff7eca361ebbb07ccbeabf8654a8d80
         +Subproject commit c9470ac4f44e7dacfb026cf74529db3ec0822145
 
-This was done for SymPy's version 0.7.0, so in future updates of SymPy
-replace 0.7.0 with appropriate newer version (e.g. 0.7.1) and you are
-done (of course particular SHA signatures will be different in your
-case). If unsure, refer to git book: http://book.git-scm.com/5_submodules.html.
+This was done for SymPy's version 0.7.0, so in future updates of SymPy replace
+0.7.0 with appropriate newer version (e.g. 0.7.1) and you are done (of course
+particular SHA signatures will be different in your case). If unsure, refer to
+``git help submodule`` or git book: http://book.git-scm.com/5_submodules.html.
 
 Original info
 -------------
