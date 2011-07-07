@@ -130,7 +130,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.promptEl = Ext.DomHelper.append(el, {
             tag: 'textarea',
             cls: 'prompt',
-            rows: '4'
+            rows: '4',
+            spellcheck: 'false'
         }, true);
 
         this.toolbarEl = Ext.DomHelper.append(el, {
