@@ -335,7 +335,10 @@ class Live(object):
                 # new globals back into the datastore
                 for name, val in new_globals.items():
                     if not name.startswith('__'):
-                        session.set_global(name, val)
+                        try:
+                            session.set_global(name, val)
+                        except (TypeError, pickle.PicklingError):
+                            pass
 
             # save '_' special variable into the datastore
             val = getattr(__builtin__, '_', None)
