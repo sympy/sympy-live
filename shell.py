@@ -202,11 +202,11 @@ class Live(object):
         string = StringIO(source).readline
 
         try:
-            tokens = tokenize.generate_tokens(string)
+            tokens = list(tokenize.generate_tokens(string))
         except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
             return None, source
 
-        for tok, _, (n, _), _, _ in reversed(list(tokens)):
+        for tok, _, (n, _), _, _ in reversed(tokens):
             if tok == tokenize.NEWLINE:
                 lines = source.split('\n')
 
