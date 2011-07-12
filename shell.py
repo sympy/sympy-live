@@ -350,7 +350,11 @@ class Live(object):
         finally:
             sys.modules['__main__'] = old_main
             sys.displayhook = old_displayhook
-            del __builtin__._
+
+            try:
+                del __builtin__._
+            except AttributeError:
+                pass
 
         session.put()
 
