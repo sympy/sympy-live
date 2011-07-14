@@ -202,11 +202,11 @@ class Live(object):
         string = StringIO(source).readline
 
         try:
-            tokens = tokenize.generate_tokens(string)
+            tokens = list(tokenize.generate_tokens(string))
         except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
             return None, source
 
-        for tok, _, (n, _), _, _ in reversed(list(tokens)):
+        for tok, _, (n, _), _, _ in reversed(tokens):
             if tok == tokenize.NEWLINE:
                 lines = source.split('\n')
 
@@ -328,14 +328,26 @@ class Live(object):
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
-                session.add_unpicklable(statement, new_globals.keys())
+                source = ""
+
+                if exec_source:
+                    source += exec_source
+                if eval_source:
+                    source += eval_source
+
+                source += "\n"
+
+                session.add_unpicklable(source, new_globals.keys())
                 logging.debug('Storing this statement as an unpicklable.')
             else:
                 # this statement didn't add any unpicklables. pickle and store the
                 # new globals back into the datastore
                 for name, val in new_globals.items():
                     if not name.startswith('__'):
-                        session.set_global(name, val)
+                        try:
+                            session.set_global(name, val)
+                        except (TypeError, pickle.PicklingError):
+                            pass
 
             # save '_' special variable into the datastore
             val = getattr(__builtin__, '_', None)
@@ -347,7 +359,11 @@ class Live(object):
         finally:
             sys.modules['__main__'] = old_main
             sys.displayhook = old_displayhook
-            del __builtin__._
+
+            try:
+                del __builtin__._
+            except AttributeError:
+                pass
 
         session.put()
 
