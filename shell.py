@@ -328,7 +328,16 @@ class Live(object):
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
-                session.add_unpicklable(statement, new_globals.keys())
+                source = ""
+
+                if exec_source:
+                    source += exec_source
+                if eval_source:
+                    source += eval_source
+
+                source += "\n"
+
+                session.add_unpicklable(source, new_globals.keys())
                 logging.debug('Storing this statement as an unpicklable.')
             else:
                 # this statement didn't add any unpicklables. pickle and store the
