@@ -54,28 +54,44 @@ SymPy.unescapeHTML = function(str) {
     return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 };
 
+SymPy.lstrip = function(str) {
+    return str.replace(/^\s+/, "");
+};
+
+SymPy.rstrip = function(str) {
+    return str.replace(/\s+$/, "");
+};
+
+SymPy.strip = function(str) {
+    return str.lstrip().rstrip();
+};
+
 Ext.USE_NATIVE_JSON = true;
 Ext.Ajax.timeout = 60000;
 
 SymPy.Shell = Ext.extend(Ext.util.Observable, {
-    banner: '',
+    banner: null,
     history: [''],
     historyCursor: 0,
     previousValue: "",
     evaluating: false,
-
     supportsSelection: false,
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
-
     printer: null,
     submit: null,
-
     tabWidth: 4,
+    basePath: null,
 
     constructor: function(config) {
         config = Ext.apply({}, config);
+
+        if (config.basePath) {
+            this.basePath = config.basePath;
+        } else {
+            this.basePath = this.getBasePath(config.baseName);
+        }
 
         if (config.banner) {
             this.banner = config.banner;
@@ -86,6 +102,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (elem) {
                 this.banner = elem.dom.innerHTML;
             }
+        }
+
+        if (this.banner) {
+            this.banner = SymPy.rstrip(this.banner) + '\n\n';
         }
 
         var index;
@@ -107,21 +127,43 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         SymPy.Shell.superclass.constructor.call(this, config);
     },
 
+    getBasePath: function(baseName) {
+        if (baseName) {
+            var scripts = document.getElementsByTagName('script');
+
+            var reStart = RegExp("^(https?://[^/]+)/");
+            var reEnd = RegExp("/" + baseName + "(\\?|$)");
+
+            for (var i = scripts.length - 1; i >= 0; --i) {
+                var src = scripts[i].src;
+
+                if (src.match(reEnd) && src.match(reStart)) {
+                    return RegExp.$1;
+                }
+            }
+        }
+
+        return null;
+    },
+
     render: function(el) {
         el = Ext.get(el) || Ext.getBody();
 
         this.outputEl = Ext.DomHelper.append(el, {
             tag: 'div',
-            cls: 'output',
-            children: {
+            cls: 'sympy-live-output'
+        }, true);
+
+        if (this.banner) {
+            Ext.DomHelper.append(this.outputEl, {
                 tag: 'div',
                 html: this.banner
-            }
-        }, true);
+            });
+        }
 
         this.caretEl = Ext.DomHelper.append(el, {
             tag: 'textarea',
-            cls: 'caret',
+            cls: 'sympy-live-caret',
             rows: '4',
             readonly: 'readonly',
             html: '&gt;&gt;&gt;'
@@ -129,14 +171,49 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl = Ext.DomHelper.append(el, {
             tag: 'textarea',
-            cls: 'prompt',
+            cls: 'sympy-live-prompt',
             rows: '4',
             spellcheck: 'false'
         }, true);
 
+        this.renderToolbar(el);
+
+        this.caretEl.on("focus", function(event) {
+            this.promptEl.focus();
+        }, this);
+
+        var keyEvent = Ext.isOpera ? "keypress" : "keydown";
+
+        this.promptEl.on(keyEvent, function(event) {
+            this.preHandleKey(event);
+            this.handleKey(event);
+            this.postHandleKey(event);
+        }, this);
+
+        this.evaluateEl.on("click", function(event) {
+            this.evaluate();
+        }, this);
+
+        this.clearEl.on("click", function(event) {
+            this.clear();
+        }, this);
+
+        this.promptEl.focus();
+
+        var task = {
+            run: this.updatePrompt,
+            scope: this,
+            interval: 100
+        }
+
+        var runner = new Ext.util.TaskRunner();
+        runner.start(task);
+    },
+
+    renderToolbar: function(el) {
         this.toolbarEl = Ext.DomHelper.append(el, {
             tag: 'p',
-            cls: 'toolbar',
+            cls: 'sympy-live-toolbar',
             children: [{
                 tag: 'button',
                 html: 'Evaluate'
@@ -145,7 +222,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'Clear'
             }, {
                 tag: 'span',
-                cls: 'separator',
+                cls: 'sympy-live-separator',
                 html: '|'
             }, {
                 tag: 'select',
@@ -172,7 +249,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 }]
             }, {
                 tag: 'span',
-                cls: 'separator',
+                cls: 'sympy-live-separator',
                 html: '|'
             }, {
                 tag: 'select',
@@ -190,7 +267,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'submits'
             }, {
                 tag: 'span',
-                cls: 'separator',
+                cls: 'sympy-live-separator',
                 html: '|'
             }, {
                 tag: 'span',
@@ -213,35 +290,16 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.submitTypes.indexOf(this.submit);
         this.submitEl.dom.selectedIndex = index;
+    },
 
-        this.caretEl.on("focus", function(event) {
-            this.promptEl.focus();
-        }, this);
+    disablePrompt: function() {
+        this.promptEl.blur();
+        this.promptEl.dom.setAttribute('readonly', 'readonly');
+    },
 
-        var keyEvent = Ext.isOpera ? "keypress" : "keydown";
-
-        this.promptEl.on(keyEvent, function(event) {
-            this.handleKey(event);
-        }, this);
-
-        this.evaluateEl.on("click", function(event) {
-            this.evaluate();
-        }, this);
-
-        this.clearEl.on("click", function(event) {
-            this.clear();
-        }, this);
-
+    enablePrompt: function() {
+        this.promptEl.dom.removeAttribute('readonly');
         this.promptEl.focus();
-
-        var task = {
-            run: this.updatePrompt,
-            scope: this,
-            interval: 100
-        }
-
-        var runner = new Ext.util.TaskRunner();
-        runner.start(task);
     },
 
     setValue: function(value) {
@@ -301,10 +359,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     handleKey: function(event) {
-        if (this.historyCursor == this.history.length-1) {
-            this.history[this.historyCursor] = this.getValue();
-        }
-
         function prevInHistory(event) {
             event.stopEvent();
 
@@ -462,10 +516,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         }
 
+        return true;
+    },
+
+    preHandleKey: function(event) {
+        if (this.historyCursor == this.history.length-1) {
+            this.history[this.historyCursor] = this.getValue();
+        }
+    },
+
+    postHandleKey: function(event) {
         this.historyCursor = this.history.length - 1;
         this.history[this.historyCursor] = this.getValue();
-
-        return true;
     },
 
     updatePrompt: function() {
@@ -515,7 +577,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     evaluate: function() {
         if (!this.evaluating) {
             this.evaluating = true;
-            this.promptEl.addClass('processing');
+            this.promptEl.addClass('sympy-live-processing');
 
             var data = {
                 statement: this.promptEl.getValue(),
@@ -525,7 +587,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             Ext.Ajax.request({
                 method: 'POST',
-                url: '/evaluate',
+                url: (this.basePath || '') + '/evaluate',
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
@@ -533,7 +595,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
-                    this.promptEl.removeClass('processing');
+                    this.promptEl.removeClass('sympy-live-processing');
                     this.evaluating = false;
                 },
                 scope: this
@@ -542,7 +604,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     done: function(response) {
-        var value = '\n' + this.prefixStatement();
+        var value = this.prefixStatement();
 
         this.clearValue();
         this.updatePrompt();
@@ -552,7 +614,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         Ext.DomHelper.append(this.outputEl, {
             tag: 'div',
-            cls: 'item',
             html: SymPy.escapeHTML(value)
         });
 
@@ -566,7 +627,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (result.length) {
             var element = Ext.DomHelper.append(this.outputEl, {
                 tag: 'div',
-                cls: 'item ' + (this.isLaTeX() ? 'hidden' : ''),
+                cls: this.isLaTeX() ? 'sympy-live-hidden' : '',
                 html: SymPy.escapeHTML(result)
             }, false);
 
@@ -574,7 +635,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             if (this.printerEl.getValue() == 'latex') {
                 function postprocessLaTeX() {
-                    Ext.get(element).removeClass('hidden');
+                    Ext.get(element).removeClass('sympy-live-hidden');
                     this.scrollToBottom();
                 }
 
@@ -588,11 +649,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     clear: function() {
-        var elements = this.outputEl.query('div.item');
+        var elements = this.outputEl.query('div');
 
         Ext.each(elements, function(elem) {
             Ext.get(elem).remove();
         });
+
+        if (this.banner) {
+            Ext.DomHelper.append(this.outputEl, {
+                tag: 'div',
+                html: this.banner
+            });
+        }
 
         this.clearValue();
         this.historyCursor = this.history.length-1;
