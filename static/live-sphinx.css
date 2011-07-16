@@ -1,0 +1,26 @@
+
+.sympy-live-base {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 10pt;
+    background-color: white;
+    border: 1px solid silver;
+}
+
+.sympy-live-logo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 10pt;
+    background-color: #f5f5f5;
+    border: 1px solid silver;
+}
