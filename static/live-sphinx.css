@@ -26,35 +26,35 @@
     cursor: pointer;
 }
 
-.sympy-live-element {
+.sympy-live-block {
     position: relative;
 }
 
-.sympy-live-element-toolbar {
+.sympy-live-block-toolbar {
     visibility: hidden;
     position: absolute;
     top: 0;
     right: 0;
 }
 
-.sympy-live-element-toolbar > span {
+.sympy-live-block-toolbar > span {
     padding-right: 5px;
     cursor: pointer;
     color: gray;
 }
 
-.sympy-live-element-toolbar > span:hover {
+.sympy-live-block-toolbar > span:hover {
     text-decoration: underline;
 }
 
-.sympy-live-element {
+.sympy-live-block {
     border: 1px solid transparent;
 }
 
-.sympy-live-element:hover {
+.sympy-live-block:hover {
     border: 1px solid silver;
 }
 
-.sympy-live-element:hover .sympy-live-element-toolbar {
+.sympy-live-block:hover .sympy-live-block-toolbar {
     visibility: visible;
 }

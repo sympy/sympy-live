@@ -3,7 +3,6 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
     baseEl: null,
     triggerEl: null,
     collapsed: true,
-    elementSelector: "div[class=highlight-python] pre",
 
     render: function(el) {
         var el = el || Ext.getBody();
@@ -91,107 +90,135 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
         }
     },
 
-    processElements: function() {
-        var nodes = Ext.DomQuery.select(this.elementSelector);
+    processBlocks: function(node) {
+        var children = node.childNodes;
 
-        Ext.each(nodes, function(node) {
-            var children = node.childNodes;
+        function isPrompt(obj) {
+            return obj.innerHTML === '&gt;&gt;&gt; ';
+        }
 
-            function isPrompt(obj) {
-                return obj.innerHTML === '&gt;&gt;&gt; ';
-            }
+        function isContinuation(obj) {
+            return obj.innerHTML === '... ';
+        }
 
-            function isContinuation(obj) {
-                return obj.innerHTML === '... ';
-            }
+        var blocks = [];
 
-            var blocks = [];
-            var doctest = true;
+        if ((children.length > 0) && isPrompt(children[0])) {
+            var lines = [];
+            var line = [];
 
-            if ((children.length > 0) && isPrompt(children[0])) {
-                var lines = [];
-                var line = [];
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                line.push(child);
 
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i];
-                    line.push(child);
-
-                    if (/^\n+$/.test(child.data)) {
-                        lines.push(line);
-                        line = [];
-                    }
-                }
-
-                if (line.length) {
+                if (/^\n+$/.test(child.data)) {
                     lines.push(line);
+                    line = [];
                 }
+            }
 
-                var elements = [];
-                var content = null;
+            if (line.length) {
+                lines.push(line);
+            }
 
-                function cloneNodes(line) {
-                    for (var i = 0; i < line.length; i++) {
-                        content.appendChild(line[i].cloneNode(true));
+            var elements = [];
+            var content = null;
+
+            function cloneNodes(line) {
+                for (var i = 0; i < line.length; i++) {
+                    content.appendChild(line[i].cloneNode(true));
+                }
+            }
+
+            function copyNodes(line) {
+                for (var i = 0; i < line.length; i++) {
+                    elements.push(line[i]);
+                }
+            }
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+
+                if (isPrompt(line[0])) {
+                    if (content) {
+                        elements.push(content);
+                        content = null;
                     }
-                }
 
-                function copyNodes(line) {
-                    for (var i = 0; i < line.length; i++) {
-                        elements.push(line[i]);
-                    }
-                }
-
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-
-                    if (isPrompt(line[0])) {
-                        if (content) {
-                            elements.push(content);
-                            content = null;
-                        }
-
-                        content = document.createElement('div');
-                        blocks.push(content);
+                    content = document.createElement('div');
+                    blocks.push(content);
+                    cloneNodes(line);
+                } else if (isContinuation(line[0])) {
+                    if (content) {
                         cloneNodes(line);
-                    } else if (isContinuation(line[0])) {
-                        if (content) {
-                            cloneNodes(line);
-                        } else {
-                            copyNodes(line);
-                        }
                     } else {
-                        if (content) {
-                            elements.push(content);
-                            content = null;
-                        }
-
                         copyNodes(line);
                     }
-                }
+                } else {
+                    if (content) {
+                        elements.push(content);
+                        content = null;
+                    }
 
-                if (content) {
-                    elements.push(content);
+                    copyNodes(line);
                 }
-
-                while (node.childNodes.length >= 1) {
-                    node.removeChild(node.firstChild);
-                }
-
-                for (var i = 0; i < elements.length; i++) {
-                    node.appendChild(elements[i]);
-                }
-            } else {
-                blocks = [node];
-                doctest = false;
             }
 
-            Ext.each(blocks, function(el) {
-                el = Ext.get(el);
-                el.addClass('sympy-live-element');
+            if (content) {
+                elements.push(content);
+            }
 
-                var code = el.dom.innerText || el.dom.textContent;
+            while (node.childNodes.length >= 1) {
+                node.removeChild(node.firstChild);
+            }
 
-                if (doctest) {
+            for (var i = 0; i < elements.length; i++) {
+                node.appendChild(elements[i]);
+            }
+        } else {
+            var block = document.createElement('div');
+
+            while (node.childNodes.length >= 1) {
+                var child = node.firstChild;
+                block.appendChild(child.cloneNode(true));
+                node.removeChild(child);
+            }
+
+            node.appendChild(block);
+            blocks = [block]
+        }
+
+        Ext.each(blocks, function(block) {
+            Ext.get(block).addClass('sympy-live-block');
+        });
+
+        return blocks;
+    },
+
+    getDOMText: function(node) {
+        // This is needed for cross-browser compatibility. Most browsers support
+        // ``innerText`` but, for example, Firefox implements ``textContent``.
+        return node.innerText || node.textContent;
+    },
+
+    processElements: function() {
+        var selector = 'div.highlight-python pre';
+        var nodes = Ext.DomQuery.select(selector);
+
+        Ext.each(nodes, function(node) {
+            var el = Ext.get(node);
+            var blocks;
+
+            if (el.hasClass('sympy-live-element')) {
+                blocks = Ext.DomQuery.select('div.sympy-live-block', node);
+            } else {
+                blocks = this.processBlocks(node);
+            }
+
+            Ext.each(blocks, function(block) {
+                var code = this.getDOMText(block);
+
+                if (code.indexOf(">>> ") === 0) {
                     var lines = code.split('\n');
 
                     for (var j = 0; j < lines.length; j++) {
@@ -203,9 +230,9 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
 
                 code = code.replace(/\n+$/, "");
 
-                var toolbar = Ext.DomHelper.append(el, {
+                var toolbar = Ext.DomHelper.append(block, {
                     tag: 'div',
-                    cls: 'sympy-live-element-toolbar'
+                    cls: 'sympy-live-block-toolbar'
                 }, true);
 
                 Ext.DomHelper.append(toolbar, {
