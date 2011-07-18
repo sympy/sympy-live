@@ -23,6 +23,15 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
             this.showShell();
         }, this);
 
+        var keyEvent = this.getKeyEvent();
+
+        Ext.get(document).on(keyEvent, function(event) {
+            if (event.getKey() == SymPy.Keys.L && event.altKey && event.ctrlKey && event.shiftKey) {
+                event.stopEvent();
+                this.toggleShell();
+            }
+        }, this);
+
         SymPy.SphinxShell.superclass.render.call(this, this.baseEl);
         this.hideShell();
     },
@@ -56,6 +65,14 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
         this.logoEl.hide();
         this.baseEl.show();
         this.enablePrompt();
+    },
+
+    toggleShell: function() {
+        if (this.baseEl.isVisible()) {
+            this.hideShell();
+        } else {
+            this.showShell();
+        }
     },
 
     handleKey: function(event) {

@@ -182,7 +182,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.focus();
         }, this);
 
-        var keyEvent = Ext.isOpera ? "keypress" : "keydown";
+        var keyEvent = this.getKeyEvent();
 
         this.promptEl.on(keyEvent, function(event) {
             this.preHandleKey(event);
@@ -290,6 +290,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.submitTypes.indexOf(this.submit);
         this.submitEl.dom.selectedIndex = index;
+    },
+
+    getKeyEvent: function() {
+        return Ext.isOpera ? "keypress" : "keydown";
     },
 
     disablePrompt: function() {
