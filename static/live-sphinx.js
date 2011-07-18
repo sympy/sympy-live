@@ -248,6 +248,18 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                 }, true).on('click', function(event) {
                     this.copyCode(code);
                 }, this);
+
+                Ext.get(block).on('click', function(event) {
+                    if (!event.shiftKey && event.ctrlKey) {
+                        if (event.altKey) {
+                            event.stopEvent();
+                            this.evaluateCode(code);
+                        } else {
+                            event.stopEvent();
+                            this.copyCode(code);
+                        }
+                    }
+                }, this);
             }, this);
         }, this);
     },
