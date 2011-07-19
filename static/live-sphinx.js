@@ -15,7 +15,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
         this.logoEl = Ext.DomHelper.append(el, {
             tag: 'div',
             cls: 'sympy-live-logo',
-            html: 'SymPy Live',
+            html: 'SymPy Live'
         }, true);
 
         this.logoEl.on('click', function() {
@@ -31,27 +31,42 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
             }
         }, this);
 
-        SymPy.SphinxShell.superclass.render.call(this, this.baseEl);
-        this.hideShell();
-    },
-
-    renderToolbar: function(el) {
-        SymPy.SphinxShell.superclass.renderToolbar.call(this, el);
-
-        this.hideEl = Ext.DomHelper.append(this.toolbarEl, {
-            tag: 'span',
-            cls: 'sympy-live-separator',
-            html: '|'
+        this.headerEl = Ext.DomHelper.append(this.baseEl, {
+            tag: 'div',
+            cls: 'sympy-live-header',
+            children: [{
+                tag: 'a',
+                href: 'http://sympy.org/',
+                target: '_blank',
+                html: 'SymPy'
+            }, {
+                tag: 'a',
+                href: 'http://github.com/sympy/sympy-live',
+                target: '_blank',
+                html: 'online shell'
+            }, {
+                tag: 'span',
+                html: 'running on the'
+            }, {
+                tag: 'a',
+                href: 'http://code.google.com/appengine/',
+                target: '_blank',
+                html: 'Google App Engine'
+            }]
         }, true);
 
-        this.hideEl = Ext.DomHelper.append(this.toolbarEl, {
-            tag: 'button',
-            html: 'Hide'
+        this.hideEl = Ext.DomHelper.append(this.headerEl, {
+            tag: 'a',
+            cls: 'sympy-live-hide',
+            html: 'hide'
         }, true);
 
         this.hideEl.on('click', function(event) {
             this.hideShell();
         }, this);
+
+        SymPy.SphinxShell.superclass.render.call(this, this.baseEl);
+        this.hideShell();
     },
 
     hideShell: function() {

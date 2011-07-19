@@ -26,6 +26,20 @@
     cursor: pointer;
 }
 
+.sympy-live-header {
+    padding-bottom: 5px;
+}
+
+.sympy-live-header > * {
+    margin-right: 1ex;
+}
+
+.sympy-live-hide {
+    cursor: pointer;
+    float: right;
+    margin: 0;
+}
+
 .sympy-live-block {
     position: relative;
 }
