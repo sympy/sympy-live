@@ -186,8 +186,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl.on(keyEvent, function(event) {
             this.preHandleKey(event);
-            this.handleKey(event);
-            this.postHandleKey(event);
+
+            if (!this.handleKey(event)) {
+                this.postHandleKey(event);
+            }
         }, this);
 
         this.evaluateEl.on("click", function(event) {
@@ -362,76 +364,72 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
     },
 
+    onFirstLine: function() {
+        if (this.supportsSelection) {
+            var cursor = this.getCursor();
+
+            if (cursor !== null) {
+                return this.getValue().lastIndexOf('\n', cursor-1) === -1;
+            }
+        }
+
+        return false;
+    },
+
+    onLastLine: function() {
+        if (this.supportsSelection) {
+            var cursor = this.getCursor();
+
+            if (cursor !== null) {
+                return this.getValue().indexOf('\n', cursor) === -1;
+            }
+        }
+
+        return false;
+    },
+
+    prevInHistory: function() {
+        if (this.historyCursor > 0) {
+            this.setValue(this.history[--this.historyCursor]);
+        }
+    },
+
+    nextInHistory: function() {
+        if (this.historyCursor < this.history.length - 1) {
+            this.setValue(this.history[++this.historyCursor]);
+        }
+    },
+
     handleKey: function(event) {
-        function prevInHistory(event) {
-            event.stopEvent();
-
-            if (this.historyCursor > 0) {
-                this.setValue(this.history[--this.historyCursor]);
-            }
-
-            return false;
-        }
-
-        function nextInHistory(event) {
-            event.stopEvent();
-
-            if (this.historyCursor < this.history.length - 1) {
-                this.setValue(this.history[++this.historyCursor]);
-            }
-
-            return false;
-        }
-
-        function inFirstLine() {
-            if (this.supportsSelection) {
-                var cursor = this.getCursor();
-
-                if (cursor !== null) {
-                    return this.getValue().lastIndexOf('\n', cursor-1) === -1;
-                }
-            }
-
-            return false;
-        }
-
-        function inLastLine() {
-            if (this.supportsSelection) {
-                var cursor = this.getCursor();
-
-                if (cursor !== null) {
-                    return this.getValue().indexOf('\n', cursor) === -1;
-                }
-            }
-
-            return false;
-        }
-
         switch (event.getKey()) {
         case SymPy.Keys.UP:
-            if ((event.ctrlKey && !event.altKey) || inFirstLine.call(this)) {
-                return prevInHistory.call(this, event);
-            } else {
-                return true;
+            if ((event.ctrlKey && !event.altKey) || this.onFirstLine()) {
+                event.stopEvent();
+                this.prevInHistory();
             }
+
+            return true;
         case SymPy.Keys.DOWN:
-            if ((event.ctrlKey && !event.altKey) || inLastLine.call(this)) {
-                return nextInHistory.call(this, event);
-            } else {
-                return true;
+            if ((event.ctrlKey && !event.altKey) || this.onLastLine()) {
+                event.stopEvent();
+                this.nextInHistory();
             }
+
+            return true;
         case SymPy.Keys.K:
             if (event.altKey && !event.ctrlKey) {
-                return prevInHistory.call(this, event);
+                event.stopEvent();
+                this.prevInHistory();
             }
 
-            break;
+            return true;
         case SymPy.Keys.J:
             if (event.altKey && !event.ctrlKey) {
-                return nextInHistory.call(this, event);
+                event.stopEvent();
+                this.nextInHistory();
             }
 
-            break;
+            return true;
         case SymPy.Keys.LEFT:
             return true;
         case SymPy.Keys.RIGHT:
@@ -467,7 +465,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                             this.setValue(start + end);
 
                             event.stopEvent();
-                            return false;
+                            return true;
                         }
                     }
                 }
@@ -480,7 +478,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.shiftKey == shiftEnter) {
                 event.stopEvent();
                 this.evaluate();
-                return false;
+                return true;
             } else if (this.supportsSelection) {
                 var cursor = this.getCursor();
 
@@ -505,7 +503,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     this.setValue(start + '\n' + spaces + end);
 
                     event.stopEvent();
-                    return false;
+                    return true;
                 }
             }
 
@@ -514,13 +512,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
                 event.stopEvent();
                 this.evaluate();
-                return false;
             }
 
-            break;
+            return true;
         }
 
-        return true;
+        return false;
     },
 
     preHandleKey: function(event) {
