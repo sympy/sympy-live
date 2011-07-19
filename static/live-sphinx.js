@@ -75,18 +75,25 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
     },
 
     handleKey: function(event) {
-        SymPy.SphinxShell.superclass.handleKey.call(this, event);
+        var result = SymPy.SphinxShell.superclass.handleKey.call(this, event);
 
-        switch (event.getKey()) {
-        case SymPy.Keys.H:
-            if (event.altKey && !event.ctrlKey) {
+        if (result) {
+            return result;
+        } else {
+            switch (event.getKey()) {
+            case SymPy.Keys.ESC:
                 this.hideShell();
+                return true;
+            case SymPy.Keys.H:
+                if (event.altKey && !event.ctrlKey) {
+                    this.hideShell();
+                    return true;
+                }
+
+                break;
             }
 
-            break;
-        case SymPy.Keys.ESC:
-            this.hideShell();
-            break;
+            return false;
         }
     },
 

@@ -420,16 +420,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.altKey && !event.ctrlKey) {
                 event.stopEvent();
                 this.prevInHistory();
+                return true;
             }
 
-            return true;
+            break;
         case SymPy.Keys.J:
             if (event.altKey && !event.ctrlKey) {
                 event.stopEvent();
                 this.nextInHistory();
+                return true;
             }
 
-            return true;
+            break;
         case SymPy.Keys.LEFT:
             return true;
         case SymPy.Keys.RIGHT:
@@ -512,9 +514,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.altKey && (!event.ctrlKey || event.shiftKey)) {
                 event.stopEvent();
                 this.evaluate();
+                return true;
             }
 
-            return true;
+            break;
         }
 
         return false;
