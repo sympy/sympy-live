@@ -118,7 +118,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                 var child = children[i];
                 line.push(child);
 
-                if (/^\n+$/.test(child.data)) {
+                if (/\n+$/.test(SymPy.getDOMText(child))) {
                     lines.push(line);
                     line = [];
                 }
@@ -143,12 +143,43 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                 }
             }
 
+            function pushContent() {
+                var child = content.lastChild,
+                    postfix = null;
+
+                if (SymPy.isTextNode(child)) {
+                    var text = SymPy.getDOMText(child);
+
+                    if (/(\n+)$/.test(text)) {
+                        var newlines = RegExp.$1;
+
+                        if (newlines.length > 1) {
+                            content.removeChild(child);
+
+                            var i = text.length - newlines.length + 1;
+
+                            var textPrefix = text.substring(0, i);
+                            var textPostfix = text.substring(i);
+
+                            content.appendChild(document.createTextNode(textPrefix));
+                            postfix = document.createTextNode(textPostfix);
+                        }
+                    }
+                }
+
+                elements.push(content);
+
+                if (postfix) {
+                    elements.push(postfix);
+                }
+            }
+
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
 
                 if (isPrompt(line[0])) {
                     if (content) {
-                        elements.push(content);
+                        pushContent();
                         content = null;
                     }
 
@@ -163,7 +194,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                     }
                 } else {
                     if (content) {
-                        elements.push(content);
+                        pushContent();
                         content = null;
                     }
 

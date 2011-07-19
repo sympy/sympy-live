@@ -72,6 +72,10 @@ SymPy.getDOMText = function(node) {
     return node.innerText || node.textContent;
 };
 
+SymPy.isTextNode = function(node) {
+    return node.nodeType === 3;
+};
+
 Ext.USE_NATIVE_JSON = true;
 Ext.Ajax.timeout = 60000;
 
