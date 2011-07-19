@@ -66,6 +66,12 @@ SymPy.strip = function(str) {
     return str.lstrip().rstrip();
 };
 
+SymPy.getDOMText = function(node) {
+    // This is needed for cross-browser compatibility. Most browsers support
+    // ``innerText`` but, for example, Firefox implements ``textContent``.
+    return node.innerText || node.textContent;
+};
+
 Ext.USE_NATIVE_JSON = true;
 Ext.Ajax.timeout = 60000;
 

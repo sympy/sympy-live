@@ -101,11 +101,11 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
         var children = node.childNodes;
 
         function isPrompt(obj) {
-            return obj.innerHTML === '&gt;&gt;&gt; ';
+            return SymPy.getDOMText(obj).indexOf('>>>') === 0;
         }
 
         function isContinuation(obj) {
-            return obj.innerHTML === '... ';
+            return SymPy.getDOMText(obj).indexOf('...') === 0;
         }
 
         var blocks = [];
@@ -202,12 +202,6 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
         return blocks;
     },
 
-    getDOMText: function(node) {
-        // This is needed for cross-browser compatibility. Most browsers support
-        // ``innerText`` but, for example, Firefox implements ``textContent``.
-        return node.innerText || node.textContent;
-    },
-
     processElements: function() {
         var selector = 'div.highlight-python pre';
         var nodes = Ext.DomQuery.select(selector);
@@ -223,7 +217,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
             }
 
             Ext.each(blocks, function(block) {
-                var code = this.getDOMText(block);
+                var code = SymPy.getDOMText(block);
 
                 if (code.indexOf(">>> ") === 0) {
                     var lines = code.split('\n');
