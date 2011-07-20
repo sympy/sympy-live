@@ -481,7 +481,16 @@ class FrontPageHandler(webapp.RequestHandler):
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
 
+    def _cross_site_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
+
+    def options(self):
+        self._cross_site_headers()
+
     def post(self):
+        self._cross_site_headers()
+
         try:
             message = simplejson.loads(self.request.body)
         except ValueError:
