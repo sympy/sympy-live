@@ -72,3 +72,7 @@
 .sympy-live-block:hover .sympy-live-block-toolbar {
     visibility: visible;
 }
+
+.sympy-live-python-prompt:hover {
+    cursor: pointer;
+}

@@ -261,6 +261,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
 
             Ext.each(blocks, function(block) {
                 var code = SymPy.getDOMText(block);
+                var prompt = null;
 
                 if (code.indexOf(">>> ") === 0) {
                     var lines = code.split('\n');
@@ -270,9 +271,19 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                     }
 
                     code = lines.join('\n');
+                    prompt = block.firstChild;
                 }
 
                 code = code.replace(/\n+$/, "");
+
+                if (prompt) {
+                    var el = Ext.get(prompt);
+
+                    el.addClass('sympy-live-python-prompt');
+                    el.on('click', function(event) {
+                        this.evaluateCode(code);
+                    }, this);
+                }
 
                 var toolbar = Ext.DomHelper.append(block, {
                     tag: 'div',
