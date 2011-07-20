@@ -38,9 +38,9 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
                 html: 'SymPy'
             }, {
                 tag: 'a',
-                href: 'http://github.com/sympy/sympy-live',
+                href: this.basePath || this.defaultBasePath,
                 target: '_blank',
-                html: 'online shell'
+                html: 'Live'
             }, {
                 tag: 'span',
                 html: 'running on the'

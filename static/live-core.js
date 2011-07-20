@@ -93,6 +93,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     submit: null,
     tabWidth: 4,
     basePath: null,
+    defaultBasePath: 'http://live.sympy.org',
 
     constructor: function(config) {
         config = Ext.apply({}, config);
