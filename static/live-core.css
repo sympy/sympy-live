@@ -61,6 +61,6 @@
     margin-left: 0.5em;
 }
 
-.processing {
+.sympy-live-processing {
     background-image: url("/static/spinner.gif");
 }

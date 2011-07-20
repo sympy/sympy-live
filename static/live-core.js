@@ -663,7 +663,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
         }
 
-        this.promptEl.removeClass('processing');
+        this.promptEl.removeClass('sympy-live-processing');
         this.evaluating = false;
     },
 
