@@ -540,8 +540,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     postHandleKey: function(event) {
+        this.updateHistory(this.getValue());
+    },
+
+    updateHistory: function(value) {
         this.historyCursor = this.history.length - 1;
-        this.history[this.historyCursor] = this.getValue();
+        this.history[this.historyCursor] = value;
     },
 
     updatePrompt: function() {

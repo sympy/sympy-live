@@ -1,8 +1,5 @@
 
 SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
-    baseEl: null,
-    triggerEl: null,
-    collapsed: true,
 
     render: function(el) {
         var el = el || Ext.getBody();
@@ -318,6 +315,7 @@ SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
 
     copyCode: function(code) {
         this.setValue(code);
+        this.updateHistory(code);
         this.updatePrompt();
         this.showShell();
     }
