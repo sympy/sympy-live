@@ -1,13 +1,4 @@
-body {
-    font-family: monospace;
-    font-size: 10pt;
-}
-
-.header {
-    width: 50em;
-}
-
-.output {
+.sympy-live-output {
     font-family: monospace;
     font-size: 10pt;
     margin: 0 0 10px 0;
@@ -19,20 +10,21 @@ body {
     background-color: #f5f5f5;
 }
 
-.output > div {
+.sympy-live-output > div {
     white-space: pre;
     word-wrap: break-word;
 }
 
-.output > div.hidden {
+.sympy-live-output > div.sympy-live-hidden {
     visibility: hidden;
 }
 
-.caret {
+.sympy-live-caret {
     font-family: monospace;
     font-size: 10pt;
     width: 2.5em;
     border: 1px solid silver;
+    margin: 0;
     padding: 5px;
     margin-right: 0;
     border-right: 0;
@@ -43,11 +35,12 @@ body {
     resize: none;
 }
 
-.prompt {
+.sympy-live-prompt {
     font-family: monospace;
     font-size: 10pt;
     width: 47.5em;
     border: 1px solid silver;
+    margin: 0;
     padding: 5px;
     margin-left: 0;
     border-left: 0;
@@ -60,32 +53,14 @@ body {
     resize: none;
 }
 
-.toolbar {
+.sympy-live-toolbar {
+    margin: 5px 0 0 0;
+}
+
+.sympy-live-toolbar > * {
     margin-left: 0.5em;
 }
 
-.toolbar > * {
-    margin-left: 0.5em;
-}
-
-.processing {
+.sympy-live-processing {
     background-image: url("/static/spinner.gif");
-}
-
-.message {
-    color: #8AD;
-    font-weight: bold;
-    font-style: italic;
-}
-
-.error {
-    color: #F44;
-}
-
-.username {
-    font-weight: bold;
-}
-
-#banner {
-    display: none;
 }
