@@ -511,9 +511,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     }
 
                     var start = value.slice(0, cursor);
-                    var end = value.slice(cursor+1);
+                    var end = value.slice(cursor);
 
                     this.setValue(start + '\n' + spaces + end);
+                    this.setCursor(cursor + 1 + spaces.length);
 
                     event.stopEvent();
                     return true;
