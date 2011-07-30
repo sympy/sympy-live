@@ -121,7 +121,7 @@ Live was cloned, issue::
     $ git checkout sympy-0.7.0
     $ cd ..
     $ git add .
-    $ git ci -m "Updated SymPy to version 0.7.0"
+    $ git commit -m "Updated SymPy to version 0.7.0"
 
 Now if you issue::
 
