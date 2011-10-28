@@ -30,7 +30,8 @@ On the Mac, it is a disk image with an application, which you should
 drag to your Applications folder.  Open the program and install the
 symlinks (it should ask you the first time you open the application, but
 if it doesn't, choose "Make Symlinks..." from the
-GoogleAppEngineLauncher menu).
+GoogleAppEngineLauncher menu).  Note that you will have to do this again
+each time you update the AppEngine program.
 
 Then clone sympy-live repository::
 
