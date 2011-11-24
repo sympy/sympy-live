@@ -7,17 +7,13 @@
 
     <script type="text/javascript" src="/static/external/ext-core.js"></script>
     <script type="text/javascript" src="/static/external/iscroll-lite.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/live-core.css" />
+    <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
     <script type="text/javascript" src="/static/live-core.js"></script>
     <script type="text/javascript" src="/static/live-mobile.js"></script>
     <style type="text/css">
       body {
         font-family: monospace;
         font-size: 10pt;
-      }
-
-      .header {
-        width: 50em;
       }
 
       .username {
@@ -72,7 +68,7 @@
       <a href="https://github.com/sympy/sympy-live">online shell</a>
       running on the
       <a href="http://code.google.com/appengine/">Google App Engine</a>.
-      <span style="float: right">
+      <span>
         {% if user %}
         <span class="username">{{ user.nickname }}</span>
         (<a href="{{ logout_url }}">log out</a>)

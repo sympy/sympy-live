@@ -1,0 +1,79 @@
+.sympy-live-output {
+    font-family: monospace;
+    font-size: 10pt;
+    margin: 0 0 10px 0;
+    padding: 5px;
+    border: 1px solid silver;
+    background-color: #f5f5f5;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+    width: 90%;
+    margin: 0 2% 0 2%;
+    height: 300px;
+}
+
+.sympy-live-output > div {
+    white-space: pre;
+    word-wrap: break-word;
+}
+
+.sympy-live-output > div.sympy-live-hidden {
+    visibility: hidden;
+}
+
+.sympy-live-caret {
+    font-family: monospace;
+    font-size: 10pt;
+    border: 1px solid silver;
+    margin: 0;
+    padding: 5px;
+    margin-right: 0;
+    border-right: 0;
+    padding-right: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    resize: none;
+    width: 19%;
+    margin-left: 2%;
+}
+
+.sympy-live-prompt {
+    font-family: monospace;
+    font-size: 10pt;
+    border: 1px solid silver;
+    margin: 0;
+    padding: 5px;
+    margin-left: 0;
+    border-left: 0;
+    padding-left: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    background-position: top right;
+    background-repeat: no-repeat;
+    resize: none;
+    width: 70%;
+    margin: 0 2% 0 0;
+}
+
+.sympy-live-toolbar {
+    margin: 5px 0 0 0;
+}
+
+.sympy-live-toolbar > * {
+    margin-left: 0.5em;
+}
+
+.sympy-live-processing { background-image: url("/static/spinner.gif"); }
+
+@media only screen and (max-width: 320px){
+    body {
+        width: 320px;
+    }
+}
+@media only screen and (min-width: 321px), only screen and (max-width: 480px){
+    body {
+        width: 480px;
+    }
+}

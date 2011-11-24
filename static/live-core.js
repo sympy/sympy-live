@@ -487,7 +487,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
-
             if (event.shiftKey == shiftEnter) {
                 event.stopEvent();
                 this.evaluate();
