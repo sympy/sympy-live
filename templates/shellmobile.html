@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>SymPy Live</title>
+
+    <script type="text/javascript" src="/static/external/ext-core.js"></script>
+    <script type="text/javascript" src="/static/external/iscroll-lite.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/live-core.css" />
+    <script type="text/javascript" src="/static/live-core.js"></script>
+    <script type="text/javascript" src="/static/live-mobile.js"></script>
+    <style type="text/css">
+      body {
+        font-family: monospace;
+        font-size: 10pt;
+      }
+
+      .header {
+        width: 50em;
+      }
+
+      .username {
+        font-weight: bold;
+      }
+
+      #banner {
+        display: none;
+      }
+    </style>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        extensions: ["MathMenu.js", "MathZoom.js"],
+        showProcessingMessages: false,
+        tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']],
+          displayMath: [['$$','$$'], ['\[','\]']]
+        },
+        TeX: {
+          extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
+        },
+        menuSettings: {
+          context: "Browser",
+          zoom: "Hover",
+          ALT: true
+        },
+        MathZoom: {
+        delay: 100
+        }
+      });
+    </script>
+
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
+
+    <script type="text/javascript">
+      Ext.onReady(function() {
+        var shell = new SymPy.MobileShell({
+          printer: "{{ printer }}",
+          submit: "{{ submit }}",
+          tabWidth: {{ tabWidth }}
+        });
+
+        var el = Ext.get('shell');
+        shell.render(el);
+      });
+    </script>
+  </head>
+  <body>
+    <p class="header">
+      <a href="http://sympy.org/">SymPy</a>
+      <a href="https://github.com/sympy/sympy-live">online shell</a>
+      running on the
+      <a href="http://code.google.com/appengine/">Google App Engine</a>.
+      <span style="float: right">
+        {% if user %}
+        <span class="username">{{ user.nickname }}</span>
+        (<a href="{{ logout_url }}">log out</a>)
+        {% else %}
+        <a href="{{ login_url }}">log in</a>
+        {% endif %}
+      </span>
+    </p>
+    <div id="banner">{{ banner }}</div>
+    <div id="shell"></div>
+  </body>
+</html>
