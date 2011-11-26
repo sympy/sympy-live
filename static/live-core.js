@@ -239,6 +239,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: '|'
             }, {
                 tag: 'select',
+                id: 'output-format',
                 children: [{
                     tag: 'option',
                     value: 'repr',
@@ -266,6 +267,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: '|'
             }, {
                 tag: 'select',
+                id: 'submit-behavior',
                 children: [{
                     tag: 'option',
                     value: 'enter',

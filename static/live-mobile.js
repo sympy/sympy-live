@@ -7,22 +7,19 @@ SymPy.MobileShell = Ext.extend(
         },
         renderToolbar: function(el) {
             SymPy.MobileShell.superclass.renderToolbar.call(this, el);
-            Ext.DomHelper.overwrite(
-                this.toolbarEl.down('span:last-child'),
+            Ext.DomHelper.insertAfter(
+                this.promptEl,
                 {
-                    tag: 'span',
+                    tag: 'div',
+                    id: 'sympy-live-toolbar-history',
                     children: [{
-                                   tag: 'span',
-                                   cls: 'sympy-live-separator',
-                                   html: 'History'
-                               }, {
                                    tag: 'button',
                                    id: 'button-history-prev',
-                                   html: 'Prev'
+                                   html: '\u2191'
                                }, {
                                    tag: 'button',
                                    id: 'button-history-next',
-                                   html: 'Next'
+                                   html: '\u2193'
                                }]
                 }, true);
             var insertEl = Ext.get(
@@ -41,9 +38,35 @@ SymPy.MobileShell = Ext.extend(
         },
         render: function(el) {
             SymPy.MobileShell.superclass.render.call(this, el);
-            this.historyPrevEl.on("click", function(event){
-                this.prevInHistory();
-            }, this);
+            var shell = Ext.get("shell");
+            Ext.each(
+                this.toolbarEl.query('.sympy-live-separator'),
+                function(n){
+                    Ext.get(n).remove();
+                }
+            );
+            Ext.get("output-format")
+                .appendTo(shell)
+                .insertBefore(this.outputEl);
+            Ext.DomHelper.insertBefore(
+                this.outputEl,
+                {
+                    'tag': 'span',
+                    'cls': 'sympy-live-separator',
+                    'html': '|'
+                }
+            );
+            this.toolbarEl.down('span')
+                .appendTo(shell)
+                .insertBefore(this.outputEl);
+            Ext.get("submit-behavior")
+                .appendTo(shell)
+                .insertBefore(this.outputEl);
+            this.toolbarEl.down('span').remove();
+            this.historyPrevEl
+                .on("click", function(event){
+                        this.prevInHistory();
+                    }, this);
             this.historyNextEl.on("click", function(event){
                 this.nextInHistory();
             }, this);

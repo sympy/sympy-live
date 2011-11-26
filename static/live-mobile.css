@@ -8,6 +8,7 @@
     -webkit-overflow-scrolling: touch;
     margin: 0 3px 10px 3px;
     height: 300px;
+    min-width: 200px;
 }
 
 .sympy-live-output > div {
@@ -48,9 +49,9 @@
     background-position: top right;
     background-repeat: no-repeat;
     resize: none;
-    margin: 0 10px 0 0px;
+    margin: 0 0px 0 0px;
     position: absolute;
-    right: 3px;
+    right: 40px;
     left: 43px;
 }
 
@@ -60,6 +61,20 @@
 
 .sympy-live-toolbar > * {
     margin-left: 0.5em;
+}
+
+#sympy-live-toolbar-history {
+    display: inline-block;
+    width: 30px;
+    height: 76px;
+    position: absolute;
+    right: 10px;
+}
+
+#sympy-live-toolbar-history button {
+    display: inline;
+    width: 100%;
+    height: 50%;
 }
 
 .sympy-live-processing { background-image: url("/static/spinner.gif"); }
