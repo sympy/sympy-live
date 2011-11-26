@@ -38,6 +38,7 @@ SymPy.MobileShell = Ext.extend(
         },
         render: function(el) {
             SymPy.MobileShell.superclass.render.call(this, el);
+            this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
             var shell = Ext.get("shell");
             Ext.each(
                 this.toolbarEl.query('.sympy-live-separator'),
