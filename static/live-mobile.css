@@ -49,9 +49,10 @@
     background-position: top right;
     background-repeat: no-repeat;
     resize: none;
-    margin: 0 0px 0 0px;
     position: absolute;
+    margin: 0;
     right: 40px;
+    position: absolute;
     left: 43px;
 }
 
