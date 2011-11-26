@@ -7,11 +7,10 @@
     <title>SymPy Live</title>
 
     <script type="text/javascript" src="/static/external/ext-core.js"></script>
-    <script type="text/javascript" src="/static/external/iscroll-lite.js"></script>
-		<link rel="stylesheet" href="static/style.css" type="text/css" />
-		<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
-		<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
-        <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
+	<link rel="stylesheet" href="static/style.css" type="text/css" />
+	<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
+	<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
     <script type="text/javascript" src="/static/live-core.js"></script>
     <script type="text/javascript" src="/static/live-mobile.js"></script>
     <style type="text/css">
@@ -67,22 +66,31 @@
     </script>
   </head>
   <body>
-    <p class="header">
-      <a href="http://sympy.org/">SymPy</a>
-      <a href="https://github.com/sympy/sympy-live">online shell</a>
-      running on the
-      <a href="http://code.google.com/appengine/">Google App Engine</a>.
-      <span>
-        {% if user %}
-        <span class="username">{{ user.nickname }}</span>
-        (<a href="{{ logout_url }}">log out</a>)
-        {% else %}
-        <a href="{{ login_url }}">log in</a>
-        {% endif %}
-      </span>
-    </p>
+    <div id="header">
+      <h1><a href="index.html"> <img src="static/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
+      <button id="menu">&#8942;</button>
+    </div>
+    <div id="user">
+      {% if user %}
+      <span class="username">{{ user.nickname }}</span>
+      (<a href="{{ logout_url }}">log out</a>)
+      {% else %}
+      <a href="{{ login_url }}">log in</a>
+      {% endif %}
+    </div>
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
     <div id="shell"></div>
+    <div id="main-navigation">
+        <ul>
+            <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
+            <li class="first"><a href="http://www.sympy.org/download.html">Download</a></li>
+            <li class="first"><a href="http://www.sympy.org/docs.html">Documentation</a></li>
+            <li class="first"><a href="http://www.sympy.org/support.html">Support</a></li>
+            <li class="first"><a href="http://www.sympy.org/screenshots.html">Screenshots</a></li>
+            <li class="first"><a href="http://www.sympy.org/development.html">Development</a></li>
+			<li class="active first"><a href="">Online Shell</a></li>
+        </ul>
+      </div>
   </body>
 </html>

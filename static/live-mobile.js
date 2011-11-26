@@ -63,13 +63,16 @@ SymPy.MobileShell = Ext.extend(
                 .appendTo(shell)
                 .insertBefore(this.outputEl);
             this.toolbarEl.down('span').remove();
-            this.historyPrevEl
-                .on("click", function(event){
-                        this.prevInHistory();
-                    }, this);
+            this.historyPrevEl.on("click", function(event){
+                this.prevInHistory();
+            }, this);
             this.historyNextEl.on("click", function(event){
                 this.nextInHistory();
             }, this);
+            Ext.get("menu").on("click", function(event){
+                Ext.get("main-navigation").toggle(true);
+                Ext.get("main-navigation").down("ul").toggle(true);
+            });
         },
         handleKey: function(event) {
             if (event.getKey() == SymPy.Keys.ENTER) {
