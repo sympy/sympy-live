@@ -239,6 +239,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: '|'
             }, {
                 tag: 'select',
+                id: 'output-format',
                 children: [{
                     tag: 'option',
                     value: 'repr',
@@ -266,6 +267,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: '|'
             }, {
                 tag: 'select',
+                id: 'submit-behavior',
                 children: [{
                     tag: 'option',
                     value: 'enter',
@@ -487,7 +489,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         case SymPy.Keys.ENTER:
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
-
             if (event.shiftKey == shiftEnter) {
                 event.stopEvent();
                 this.evaluate();
