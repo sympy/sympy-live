@@ -1,32 +1,39 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
+		<script language="javascript">
+		function transition_about(){
+			if (document.getElementById('about').style.height == "175px") {
+			document.getElementById('about').style.height = "35px"; }
+			else { 
+			document.getElementById('about').style.height = "175px"; 
+			}
+		}
+		function transition_example(){
+			if (document.getElementById('example').style.height == "175px") {
+			document.getElementById('example').style.height = "35px"; }
+			else { 
+			document.getElementById('example').style.height = "175px"; 
+			}
+		}
+		function transition_other_shells(){
+						if (document.getElementById('other_shells').style.height == "80px") {
+			document.getElementById('other_shells').style.height = "35px"; }
+			else { 
+			document.getElementById('other_shells').style.height = "80px"; 
+			}
+		}
+		</script>
+        <script type="text/javascript" src="static/external/ext-core.js"></script>
 
-        <script type="text/javascript" src="/static/external/ext-core.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="/static/live-core.css" />
-        <script type="text/javascript" src="/static/live-core.js"></script>
-
-        <style type="text/css">
-            body {
-                font-family: monospace;
-                font-size: 10pt;
-            }
-
-            .header {
-                width: 50em;
-            }
-
-            .username {
-                font-weight: bold;
-            }
-
-            #banner {
-                display: none;
-            }
-        </style>
+        <link rel="stylesheet" type="text/css" href="static/live-core.css" />
+        <script type="text/javascript" src="static/live-core.js"></script>
+		<link rel="stylesheet" href="static/style.css" type="text/css" />
+		<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
+		<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
 
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({
@@ -52,7 +59,7 @@
 
         <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
-        <script type="text/javascript">
+       <script type="text/javascript">
             Ext.onReady(function() {
                 var shell = new SymPy.Shell({
                     printer: "{{ printer }}",
@@ -66,26 +73,48 @@
         </script>
     </head>
     <body>
-        <p class="header">
-            <a href="http://sympy.org/">SymPy</a>
-            <a href="https://github.com/sympy/sympy-live">online shell</a>
-            running on the
-            <a href="http://code.google.com/appengine/">Google App Engine</a>.
-            <span style="float: right">
-            {% if user %}
-                <span class="username">{{ user.nickname }}</span>
-                (<a href="{{ logout_url }}">log out</a>)
-            {% else %}
-                <a href="{{ login_url }}">log in</a>
-            {% endif %}
-            </span>
-        </p>
+	<div id="container">
+	<div id="header">
+      <h1><a href="index.html"> <img src="static/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
+    
+      <div id="main-navigation">
+        
+        
+        <ul>
+            <li class=" first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
+            <li class=" first"><a href="http://www.sympy.org/download.html">Download</a></li>
+            <li class=" first"><a href="http://www.sympy.org/docs.html">Documentation</a></li>
+            <li class=" first"><a href="http://www.sympy.org/support.html">Support</a></li>
+            <li class=" first"><a href="http://www.sympy.org/screenshots.html">Screenshots</a></li>
+            <li class=" first"><a href="http://www.sympy.org/development.html">Development</a></li>
+			<li class="active first"><a href="">Online Shell</a></li>
+        </ul>
+        
+        <div class="clear"></div>
+      </div>
+    </div>
+	</div>
+        <div id="mainpage">
+            <div id="left"><div class="right_title">SymPy Online Shell</div>
 
         <div id="banner">{{ banner }}</div>
         <div id="shell"></div>
-
-        <h3>About</h3>
-        <p>
+</div><div id="right">
+<div class="right_title">More Information</div>
+        <div id="user"><div class="title"><h3>{% if user %}
+                {{ user.nickname }}
+            {% else %}
+                <a href="{{ login_url }}">Log In</a>
+            {% endif %}</h3></div><div class="arrow">{% if user %}
+                (<a href="{{ logout_url }}">log out</a>)
+            {% else %}
+            {% endif %}</div> 
+			</div><br/><div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div> 
+<div class="content">
+This <a href="http://sympy.org/">SymPy</a>
+            <a href="https://github.com/sympy/sympy-live">Online Shell</a> is running on the
+            <a href="http://code.google.com/appengine/">Google App Engine</a>.
+			<p></p>
 This is just a regular Python shell, with the following command executed by default:
 <pre>
 &gt;&gt;&gt; from __future__ import division
@@ -93,26 +122,41 @@ This is just a regular Python shell, with the following command executed by defa
 &gt;&gt;&gt; x, y, z, t = symbols('x y z t')
 &gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)
 &gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
-</pre>
-            </p>
-            <h3>Example session</h3>
-            <p>
+</pre></div>
+			</div><br/>
+            <div id="example" onclick="transition_example();"><div class="title"><h3>Example session</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+<div class="content">
 <pre>
 &gt;&gt;&gt; expr = (x + y)**5
 &gt;&gt;&gt; expand(expr)
 x**5 + 5*x**4*y + 10*x**3*y**2 + 10*x**2*y**3 + 5*x*y**4 + y**5
 &gt;&gt;&gt; sin(x).series(x, 0, 5)
 x - 1/6*x**3 + O(x**5)
-&gt;&gt;&gt; integrate(1/(x**3 + 1), x)
-log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/3
 </pre>
-            More information at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.
+<!-- Commented out as doesn't fit into new design; feel free to replace with another example -->
+<!-- &gt;&gt;&gt; integrate(1/(x**3 + 1), x)
+log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/3 -->
+<br/>
+            More information can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.
             <br/>
             <br/>
-            Other shells:
+			</div>
+			</div>
+			<br/>
+			<div id="other_shells" onclick="transition_other_shells();"><div class="title"><h3>Other Online Shells</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div><div class="content">
             <ul>
-                <li><a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the dimensions of the ndsi browser.</li>
+                <li><a href="http://live.sympy.org/shelldsi">Nintendo DSi Calculator</a> which is adapted for the dimensions of the DSi browser.</li>
             </ul>
-        </p>
+		</div>
+		</div>
+		</div>
+		</div>
+		 <div id="footer2">
+              <div class="align_left">Copyright &copy; 2011 SymPy Development Team.</div>
+              <div class="right_align">This page is open source. Fork <a href="https://github.com/sympy/sympy.github.com">the project on GitHub</a> to edit it.</div>
+        </div>
+      </div>
+		<div id="w3_validator"> <a href="http://validator.w3.org/check?uri=referer"><img
+      src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></div>
     </body>
 </html>
