@@ -58,6 +58,7 @@ from google.appengine.ext.webapp import template
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
+import detectmobile
 
 PRINTERS = {
     'repr': srepr,
@@ -461,6 +462,8 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
+        if detectmobile.isMobile(self.request.headers):
+            self.redirect('/shellmobile')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
