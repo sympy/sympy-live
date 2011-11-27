@@ -1,0 +1,163 @@
+.sympy-live-output {
+    font-family: monospace;
+    font-size: 10pt;
+    padding: 5px;
+    border: 1px solid silver;
+    background-color: #f5f5f5;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 3px 10px 3px;
+    height: 300px;
+    min-width: 200px;
+    width: 100%;
+}
+
+.sympy-live-output > div {
+    white-space: pre;
+    word-wrap: break-word;
+}
+
+.sympy-live-output > div.sympy-live-hidden {
+    visibility: hidden;
+}
+
+.sympy-live-caret {
+    font-family: monospace;
+    font-size: 10pt;
+    border: 1px solid silver;
+    margin: 0;
+    padding: 5px;
+    border-right: 0;
+    padding-right: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    resize: none;
+    width: 30px;
+    margin-left: 3px;
+}
+
+.sympy-live-prompt {
+    font-family: monospace;
+    font-size: 10pt;
+    border: 1px solid silver;
+    padding: 5px;
+    border-left: 0;
+    padding-left: 0;
+    outline: none;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    background-position: top right;
+    background-repeat: no-repeat;
+    resize: none;
+    position: absolute;
+    margin: 0;
+    right: 40px;
+    position: absolute;
+    left: 40px;
+}
+
+.sympy-live-toolbar {
+    margin: 5px 0 0 0;
+}
+
+.sympy-live-toolbar > * {
+    margin-left: 0.5em;
+}
+
+#sympy-live-toolbar-history {
+    display: inline-block;
+    width: 30px;
+    height: 76px;
+    position: absolute;
+    right: 10px;
+}
+
+#sympy-live-toolbar-history button {
+    display: inline;
+    width: 100%;
+    height: 50%;
+}
+
+.sympy-live-processing { background-image: url("/static/spinner.gif"); }
+
+@media only screen and (max-width: 320px) {
+    .sympy-live-output {
+        height: 240px;
+    }
+}
+@media only screen and (min-width: 321px) and (max-width: 959px) {
+    .sympy-live-output {
+        height: 160px;
+    }
+}
+@media only screen and (min-width: 540px) and (max-width: 959px) {
+    .sympy-live-output {
+        height: 480px;
+    }
+}
+@media only screen and (min-width: 960px) {
+    .sympy-live-output {
+        height: 270px;
+    }
+}
+/* Style overrides */
+#header {
+    text-align: center;
+    background-color: #3b5526;
+    height: 40px;
+}
+#header h1 {
+    font-size: 12px;
+    display: inline-block;
+}
+#header img {
+    height: 30px;
+    width: 30px;
+}
+#header h1 a:link {
+    color: #FFF;
+}
+#header h1 a:visited {
+    color: #FFF;
+}
+#header h1 a:hover {
+    color: #FFF;
+}
+#header h1 a:active {
+    color: #FFF;
+}
+#main-navigation {
+    width: 100%;
+    height: 350px;
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    bottom: 0px;
+    display: none;
+}
+#main-navigation ul {
+    display: none;
+}
+#main-navigation ul li {
+    display: block;
+    float: none;
+    height: 40px;
+    padding: 5px;
+    margin: 0;
+}
+#menu {
+    background-color: #3b5526;
+    border: 1px solid #000;
+    color: #fff;
+    font-weight: bold;
+    float: right;
+    display: inline-block;
+    margin: 5px 0 5px 0;
+}
+#user {
+    border: none;
+    padding: 5px;
+    margin: 2px;
+    height: 20px;
+}
