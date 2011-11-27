@@ -36,8 +36,7 @@ body {
 #left {
 	padding:10px 10px 10px 10px;
 	background-color:white;
-	min-width:500px;
-	max-width:60%;
+	width:60%;
 	float:left;
 	border-color:#81B953;
 	border-width:2px;
@@ -62,7 +61,7 @@ body {
 	border-width:2px;
 	border-style:solid;
 	background-color:white;
-	max-width:38%;
+	width:38%;
 	float:right;
 	margin: 4px 0px 4px 4px;
   	-moz-border-radius-topleft: 4px;

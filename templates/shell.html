@@ -20,10 +20,10 @@
 			}
 		}
 		function transition_other_shells(){
-						if (document.getElementById('other_shells').style.height == "80px") {
+						if (document.getElementById('other_shells').style.height == "95px") {
 			document.getElementById('other_shells').style.height = "35px"; }
 			else { 
-			document.getElementById('other_shells').style.height = "80px"; 
+			document.getElementById('other_shells').style.height = "95px"; 
 			}
 		}
 		</script>
@@ -106,7 +106,7 @@
             {% else %}
                 <a href="{{ login_url }}">Log In</a>
             {% endif %}</h3></div><div class="arrow">{% if user %}
-                (<a href="{{ logout_url }}">log out</a>)
+                <a href="{{ logout_url }}">Log Out</a>
             {% else %}
             {% endif %}</div> 
 			</div><br/><div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div> 
@@ -145,8 +145,8 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 			<br/>
 			<div id="other_shells" onclick="transition_other_shells();"><div class="title"><h3>Other Online Shells</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div><div class="content">
             <ul>
-                <li><a href="/shelldsi">nintendo dsi calculator</a> which is adapted for the dimensions of the ndsi browser.</li>
-                <li><a href="/shellmobile">mobile shell</a> which is adapted for mobile browsers.</li>
+                <li><a href="/shelldsi">Nintendo DSi Calculator</a> which is adapted for the dimensions of the DSi browser.</li>
+                <li><a href="/shellmobile">Mobile Shell</a> which is adapted for mobile browsers.</li>
             </ul>
 		</div>
 		</div>
