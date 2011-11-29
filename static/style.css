@@ -199,6 +199,12 @@ body {
 .content {
 	margin-top:45px;
 }
+.recent {
+    float: right;
+    background-color: #F5F5F5;
+    border: 1px solid silver;
+    width: 30em;
+}
 #w3_validator {
 	position:fixed;
 	bottom:5px;

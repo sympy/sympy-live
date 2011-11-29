@@ -96,7 +96,15 @@
 	</div>
         <div id="mainpage">
             <div id="left"><div class="right_title">SymPy Online Shell</div>
-
+        
+        <div id="recent_searches" class="recent" >
+            <p><b>Recent Searches</b></p>
+        
+            {% for search in searches %}
+                {{ search.query|escape }}</br>
+            {% endfor %} 
+        </div>
+        
         <div id="banner">{{ banner }}</div>
         <div id="shell"></div>
 </div><div id="right">
