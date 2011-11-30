@@ -622,12 +622,15 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     evaluate: function() {
-        if (!this.evaluating) {
+        var statement = this.promptEl.getValue();
+        // make sure the statement is not only whitespace
+        // use statement != "" if pure whitespace should be evaluated
+        if (!this.evaluating && !statement.match(/^\s*$/)) {
             this.evaluating = true;
             this.promptEl.addClass('sympy-live-processing');
 
             var data = {
-                statement: this.promptEl.getValue(),
+                statement: statement,
                 printer: this.printerEl.getValue(),
                 session: this.session || null,
                 privacy: this.recordEl.getValue()
