@@ -8,30 +8,30 @@
 		function transition_about(){
 			if (document.getElementById('about').style.height == "175px") {
 			document.getElementById('about').style.height = "35px"; }
-			else { 
-			document.getElementById('about').style.height = "175px"; 
+			else {
+			document.getElementById('about').style.height = "175px";
 			}
 		}
 		function transition_example(){
 			if (document.getElementById('example').style.height == "175px") {
 			document.getElementById('example').style.height = "35px"; }
-			else { 
-			document.getElementById('example').style.height = "175px"; 
+			else {
+			document.getElementById('example').style.height = "175px";
 			}
 		}
 		function transition_other_shells(){
 						if (document.getElementById('other_shells').style.height == "95px") {
 			document.getElementById('other_shells').style.height = "35px"; }
-			else { 
-			document.getElementById('other_shells').style.height = "95px"; 
+			else {
+			document.getElementById('other_shells').style.height = "95px";
 			}
 		}
-		
+
 		function expand_history(){
 						if (document.getElementById('recent_title').style.height == "225px") {
 			document.getElementById('recent_title').style.height = "35px"; }
-			else { 
-			document.getElementById('recent_title').style.height = "225px"; 
+			else {
+			document.getElementById('recent_title').style.height = "225px";
 			}
 		}
 		</script>
@@ -84,10 +84,10 @@
 	<div id="container">
 	<div id="header">
       <h1><a href=""> <img src="static/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
-    
+
       <div id="main-navigation">
-        
-        
+
+
         <ul>
             <li class=" first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
             <li class=" first"><a href="http://www.sympy.org/download.html">Download</a></li>
@@ -97,16 +97,16 @@
             <li class=" first"><a href="http://www.sympy.org/development.html">Development</a></li>
 			<li class="active first"><a href="">Online Shell</a></li>
         </ul>
-        
+
         <div class="clear"></div>
       </div>
     </div>
 	</div>
         <div id="mainpage">
             <div id="left"><div class="right_title">SymPy Online Shell</div>
-        
-        
-        
+
+
+
         <div id="banner">{{ banner }}</div>
         <div id="shell"></div>
 </div><div id="right">
@@ -119,8 +119,8 @@
             {% endif %}</h3></div><div class="arrow">{% if user %}
                 <a href="{{ logout_url }}">Log Out</a>
             {% else %}
-            {% endif %}</div> 
-			</div><br/><div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div> 
+            {% endif %}</div>
+			</div><br/><div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 <div class="content">
 This <a href="http://sympy.org/">SymPy</a>
             <a href="https://github.com/sympy/sympy-live">Online Shell</a> is running on the
@@ -166,25 +166,25 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 		    <div class="arrow" onclick="expand_history();">
                 <img height="25" width="25" alt="Arrow" src="static/arrow.png">
             </div>
-		
+
             <div id="recent_title" onclick="expand_history();">
             <h3>Recent Searches</h3>
-            
+
             <div class="history_content">
             {% for search in searches %}
                 {{ search.query|escape }}</br>
-            {% endfor %} 
+            {% endfor %}
             </div>
             </div>
         </div>
 		</div>
 		</div>
-		
+
 		 <div id="footer2">
               <div class="align_left">Copyright &copy; 2011 SymPy Development Team.</div>
-              <div class="right_align">This page is open source. Fork <a href="https://github.com/sympy/sympy.github.com">the project on GitHub</a> to edit it.</div>
+              <div class="right_align">SymPy Live is open source. Fork <a href="https://github.com/sympy/sympy-live/">the project on GitHub</a> to edit it.</div>
         </div>
-      
+
 		<div id="w3_validator"> <a href="http://validator.w3.org/check?uri=referer"><img
       src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></div>
     </body>
