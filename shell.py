@@ -119,6 +119,13 @@ These commands were executed:
 Documentation can be found at http://www.sympy.org\
 """
 
+
+# The blueprint used to store user queries
+class Searches(db.Model):
+  query = db.StringProperty()
+  timestamp = db.DateTimeProperty(auto_now_add=True)
+
+
 def banner(quiet=False):
     from sympy import __version__ as sympy_version
     python_version = "%d.%d.%d" % sys.version_info[:3]
@@ -462,6 +469,10 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
+        #Get the 10 most recent queries
+        searches_query = Searches.all().order('-timestamp')
+        results = searches_query.fetch(10)
+    
         if detectmobile.isMobile(self.request.headers):
             self.redirect('/shellmobile')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
@@ -476,6 +487,7 @@ class FrontPageHandler(webapp.RequestHandler):
             'printer': self.request.get('printer').lower() or '',
             'submit': self.request.get('submit').lower() or '',
             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
+            'searches': results,
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
@@ -499,7 +511,17 @@ class EvaluateHandler(webapp.RequestHandler):
         except ValueError:
             self.error(400)
             return
-
+        
+        # Code modified to store each query in a database
+        statement = message.get('statement')
+        privacy = message.get('privacy')       
+        
+        if privacy == 'off' and statement != '':
+            searches = Searches()
+            searches.query = statement
+            logging.debug(searches.query)
+            searches.put() 
+        
         statement = message.get('statement')
 
         session_key = message.get('session')
