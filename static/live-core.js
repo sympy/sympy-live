@@ -89,7 +89,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
-    recordTypes: ['yes', 'no'],
+    recordTypes: ['on', 'off'],
     printer: null,
     submit: null,
     tabWidth: 4,
@@ -129,7 +129,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.submit = (index == -1) ? 'shift-enter' : config.submit;
         
         index = this.recordTypes.indexOf(config.record);
-        this.record = (index == -1) ? 'yes' : config.record;
+        this.record = (index == -1) ? 'on' : config.record;
         
         delete config.printer;
         delete config.submit;
@@ -297,18 +297,19 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: '|'
             }, {
                 tag: 'span',
-                html: 'Keep Searches Private?'
+                html: 'Privacy'
             }, {
                 tag: 'select',
                 children: [{
                     tag: 'option',
-                    value: 'yes',
-                    html: 'Yes'
+                    value: 'on',
+                    html: 'On'
                     }, {
                     tag: 'option',
-                    value: 'no',
-                    html: 'No'
+                    value: 'off',
+                    html: 'Off'
             }]
+        }]
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
@@ -629,7 +630,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 statement: this.promptEl.getValue(),
                 printer: this.printerEl.getValue(),
                 session: this.session || null,
-                forbidden: this.recordEl.getValue()
+                privacy: this.recordEl.getValue()
             };
 
             Ext.Ajax.request({

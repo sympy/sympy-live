@@ -514,9 +514,9 @@ class EvaluateHandler(webapp.RequestHandler):
         
         # Code modified to store each query in a database
         statement = message.get('statement')
-        query_forbidden = message.get('forbidden')       
+        privacy = message.get('privacy')       
         
-        if query_forbidden == 'no' and statement != '':
+        if privacy == 'off' and statement != '':
             searches = Searches()
             searches.query = statement
             logging.debug(searches.query)
