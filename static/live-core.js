@@ -89,6 +89,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
+    recordTypes: ['on', 'off'],
     printer: null,
     submit: null,
     tabWidth: 4,
@@ -126,7 +127,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.submitTypes.indexOf(config.submit);
         this.submit = (index == -1) ? 'shift-enter' : config.submit;
-
+        
+        index = this.recordTypes.indexOf(config.record);
+        this.record = (index == -1) ? 'on' : config.record;
+        
         delete config.printer;
         delete config.submit;
 
@@ -287,7 +291,25 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }, {
                 tag: 'span',
                 html: 'Ctrl-Up/Down for history'
+            }, {
+                tag: 'span',
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
+                tag: 'span',
+                html: 'Privacy'
+            }, {
+                tag: 'select',
+                children: [{
+                    tag: 'option',
+                    value: 'on',
+                    html: 'On'
+                    }, {
+                    tag: 'option',
+                    value: 'off',
+                    html: 'Off'
             }]
+        }]
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
@@ -297,6 +319,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
+        this.recordEl = this.toolbarEl.down('select:nth(3)');
 
         var index;
 
@@ -305,6 +328,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.submitTypes.indexOf(this.submit);
         this.submitEl.dom.selectedIndex = index;
+        
+        index = this.recordTypes.indexOf(this.record);
+        this.recordEl.dom.selectedIndex = index;
     },
 
     getKeyEvent: function() {
@@ -603,7 +629,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             var data = {
                 statement: this.promptEl.getValue(),
                 printer: this.printerEl.getValue(),
-                session: this.session || null
+                session: this.session || null,
+                privacy: this.recordEl.getValue()
             };
 
             Ext.Ajax.request({
