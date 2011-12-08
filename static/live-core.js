@@ -627,6 +627,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         // use statement != "" if pure whitespace should be evaluated
         if (!this.evaluating && !statement.match(/^\s*$/)) {
             this.evaluating = true;
+            this.promptEl.set({"disabled": "disabled"});
             this.promptEl.addClass('sympy-live-processing');
 
             var data = {
@@ -636,25 +637,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 privacy: this.recordEl.getValue()
             };
 
-            Ext.Ajax.request({
-                method: 'POST',
-                url: (this.basePath || '') + '/evaluate',
-                jsonData: Ext.encode(data),
-                success: function(response) {
-                    this.done(response);
-                },
-                failure: function(response) {
-                    this.clearValue();
-                    this.updatePrompt();
-                    this.promptEl.removeClass('sympy-live-processing');
-                    this.evaluating = false;
-                },
-                scope: this
-            });
+            this.queue(data);
         }
     },
 
-    done: function(response) {
+    queue: function(data) {
         var value = this.prefixStatement();
 
         this.clearValue();
@@ -670,6 +657,25 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.scrollToBottom();
 
+        Ext.Ajax.request({
+            method: 'POST',
+            url: (this.basePath || '') + '/evaluate',
+            jsonData: Ext.encode(data),
+            success: function(response) {
+                this.done(response);
+            },
+            failure: function(response) {
+                this.clearValue();
+                this.updatePrompt();
+                this.promptEl.removeClass('sympy-live-processing');
+                this.promptEl.set({disabled: null}, false);
+                this.evaluating = false;
+            },
+            scope: this
+        });
+    },
+
+    done: function(response) {
         var response = Ext.decode(response.responseText);
         this.session = response.session;
 
@@ -696,6 +702,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.promptEl.removeClass('sympy-live-processing');
+        this.promptEl.set({disabled: null}, false);
         this.evaluating = false;
     },
 
