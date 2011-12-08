@@ -637,42 +637,38 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 privacy: this.recordEl.getValue()
             };
 
-            this.queue(data);
+            var value = this.prefixStatement();
+
+            this.clearValue();
+            this.updatePrompt();
+
+            this.history.push('');
+            this.historyCursor = this.history.length - 1;
+
+            Ext.DomHelper.append(this.outputEl, {
+                tag: 'div',
+                html: SymPy.escapeHTML(value)
+            });
+
+            this.scrollToBottom();
+
+            Ext.Ajax.request({
+                method: 'POST',
+                url: (this.basePath || '') + '/evaluate',
+                jsonData: Ext.encode(data),
+                success: function(response) {
+                    this.done(response);
+                },
+                failure: function(response) {
+                    this.clearValue();
+                    this.updatePrompt();
+                    this.promptEl.removeClass('sympy-live-processing');
+                    this.promptEl.set({disabled: null}, false);
+                    this.evaluating = false;
+                },
+                scope: this
+            });
         }
-    },
-
-    queue: function(data) {
-        var value = this.prefixStatement();
-
-        this.clearValue();
-        this.updatePrompt();
-
-        this.history.push('');
-        this.historyCursor = this.history.length - 1;
-
-        Ext.DomHelper.append(this.outputEl, {
-            tag: 'div',
-            html: SymPy.escapeHTML(value)
-        });
-
-        this.scrollToBottom();
-
-        Ext.Ajax.request({
-            method: 'POST',
-            url: (this.basePath || '') + '/evaluate',
-            jsonData: Ext.encode(data),
-            success: function(response) {
-                this.done(response);
-            },
-            failure: function(response) {
-                this.clearValue();
-                this.updatePrompt();
-                this.promptEl.removeClass('sympy-live-processing');
-                this.promptEl.set({disabled: null}, false);
-                this.evaluating = false;
-            },
-            scope: this
-        });
     },
 
     done: function(response) {
