@@ -57,7 +57,7 @@ On the Mac, just run::
 
     $ dev_appserver .
 
-(make sure you installed the symlinks as described above).  
+(make sure you installed the symlinks as described above).
 
 I couldn't figure out how to make it work in the GUI (it won't find the
 sympy git submodule).  If you figure out how to do it, please update
@@ -74,6 +74,10 @@ Assuming that sympy-live works properly (also across different mainstream
 web browsers), you can upload your changes to Google App Engine::
 
     $ ../appcfg.py update .
+
+Or, in Mac OS X, just open the GoogleAppEngineLauncher program, add the
+project if you haven't already, and click "Deploy" in the toolbar.  And
+then it should just work (follow the log that comes up to see.
 
 This requires admin privileges to http://sympy-live.appspot.com. If you
 don't have access to this App Engine application, you can make your own.
