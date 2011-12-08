@@ -627,6 +627,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         // use statement != "" if pure whitespace should be evaluated
         if (!this.evaluating && !statement.match(/^\s*$/)) {
             this.evaluating = true;
+            this.promptEl.set({"disabled": "disabled"});
             this.promptEl.addClass('sympy-live-processing');
 
             var data = {
@@ -635,6 +636,21 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 session: this.session || null,
                 privacy: this.recordEl.getValue()
             };
+
+            var value = this.prefixStatement();
+
+            this.clearValue();
+            this.updatePrompt();
+
+            this.history.push('');
+            this.historyCursor = this.history.length - 1;
+
+            Ext.DomHelper.append(this.outputEl, {
+                tag: 'div',
+                html: SymPy.escapeHTML(value)
+            });
+
+            this.scrollToBottom();
 
             Ext.Ajax.request({
                 method: 'POST',
@@ -647,6 +663,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     this.clearValue();
                     this.updatePrompt();
                     this.promptEl.removeClass('sympy-live-processing');
+                    this.promptEl.set({disabled: null}, false);
                     this.evaluating = false;
                 },
                 scope: this
@@ -655,21 +672,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     done: function(response) {
-        var value = this.prefixStatement();
-
-        this.clearValue();
-        this.updatePrompt();
-
-        this.history.push('');
-        this.historyCursor = this.history.length - 1;
-
-        Ext.DomHelper.append(this.outputEl, {
-            tag: 'div',
-            html: SymPy.escapeHTML(value)
-        });
-
-        this.scrollToBottom();
-
         var response = Ext.decode(response.responseText);
         this.session = response.session;
 
@@ -696,6 +698,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.promptEl.removeClass('sympy-live-processing');
+        this.promptEl.set({disabled: null}, false);
         this.evaluating = false;
     },
 
