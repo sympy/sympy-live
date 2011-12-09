@@ -123,14 +123,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         var index;
 
         index = this.printerTypes.indexOf(config.printer);
-        this.printer = (index == -1) ? 'ascii' : config.printer;
+        this.printer = (index == -1) ? this.getCookie('sympy-printer', 'ascii') : config.printer;
 
         index = this.submitTypes.indexOf(config.submit);
-        this.submit = (index == -1) ? 'shift-enter' : config.submit;
-        
+        this.submit = (index == -1) ? this.getCookie('sympy-submit', 'shift-enter') : config.submit;
+
         index = this.recordTypes.indexOf(config.record);
-        this.record = (index == -1) ? 'on' : config.record;
-        
+        this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
+
         delete config.printer;
         delete config.submit;
 
@@ -328,7 +328,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.submitTypes.indexOf(this.submit);
         this.submitEl.dom.selectedIndex = index;
-        
+
         index = this.recordTypes.indexOf(this.record);
         this.recordEl.dom.selectedIndex = index;
     },
@@ -630,6 +630,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.set({"disabled": "disabled"});
             this.promptEl.addClass('sympy-live-processing');
 
+            this.setCookie('sympy-printer', this.printerEl.getValue());
+            this.setCookie('sympy-submit', this.submitEl.getValue());
+            this.setCookie('sympy-privacy', this.recordEl.getValue());
+
             var data = {
                 statement: statement,
                 printer: this.printerEl.getValue(),
@@ -718,5 +722,28 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearValue();
         this.historyCursor = this.history.length-1;
+    },
+
+    setCookie: function(name, value) {
+        var expiration = new Date();
+        expiration.setYear(expiration.getFullYear() + 1);
+        value = escape(value) + "; expires=" + expiration.toUTCString();
+        document.cookie = name + "=" + value;
+    },
+
+    getCookie: function(name, default_value) {
+        var result = null;
+        var i, x, y, cookies = document.cookie.split(";");
+        for (i = 0; i < cookies.length; i++) {
+            x = cookies[i].substr(0, cookies[i].indexOf("="));
+            y = cookies[i].substr(cookies[i].indexOf("=")+1);
+            x = x.replace(/^\s+|\s+$/g,"");
+            if (x == name) {
+                result = unescape(y);
+                break;
+            }
+        }
+
+        return (result) ? result : default_value;
     }
 });
