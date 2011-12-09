@@ -116,7 +116,7 @@ from sympy import *
 VERBOSE_MESSAGE = """\
 These commands were executed:
 %(source)s
-Documentation can be found at http://www.sympy.org\
+Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>\
 """
 
 
@@ -472,7 +472,7 @@ class FrontPageHandler(webapp.RequestHandler):
         #Get the 10 most recent queries
         searches_query = Searches.all().order('-timestamp')
         results = searches_query.fetch(10)
-    
+
         if detectmobile.isMobile(self.request.headers):
             self.redirect('/shellmobile')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
@@ -511,17 +511,17 @@ class EvaluateHandler(webapp.RequestHandler):
         except ValueError:
             self.error(400)
             return
-        
+
         # Code modified to store each query in a database
         statement = message.get('statement')
-        privacy = message.get('privacy')       
-        
+        privacy = message.get('privacy')
+
         if privacy == 'off' and statement != '':
             searches = Searches()
             searches.query = statement
             logging.debug(searches.query)
-            searches.put() 
-        
+            searches.put()
+
         statement = message.get('statement')
 
         session_key = message.get('session')
