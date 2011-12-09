@@ -116,7 +116,7 @@ from sympy import *
 VERBOSE_MESSAGE = """\
 These commands were executed:
 %(source)s
-Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>\
+Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.\
 """
 
 
