@@ -215,6 +215,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.clear();
         }, this);
 
+        this.printerEl.on("change", function(event) {
+          this.updateSettings();
+        }, this);
+
+        this.submitEl.on("change", function(event) {
+          this.updateSettings();
+        }, this);
+
+        this.recordEl.on("change", function(event) {
+          this.updateSettings();
+        }, this);
+
         this.promptEl.focus();
 
         var task = {
@@ -630,10 +642,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.set({"disabled": "disabled"});
             this.promptEl.addClass('sympy-live-processing');
 
-            this.setCookie('sympy-printer', this.printerEl.getValue());
-            this.setCookie('sympy-submit', this.submitEl.getValue());
-            this.setCookie('sympy-privacy', this.recordEl.getValue());
-
             var data = {
                 statement: statement,
                 printer: this.printerEl.getValue(),
@@ -722,6 +730,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearValue();
         this.historyCursor = this.history.length-1;
+    },
+
+    updateSettings: function() {
+        this.setCookie('sympy-printer', this.printerEl.getValue());
+        this.setCookie('sympy-submit', this.submitEl.getValue());
+        this.setCookie('sympy-privacy', this.recordEl.getValue());
     },
 
     setCookie: function(name, value) {
