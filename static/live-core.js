@@ -300,6 +300,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'Privacy'
             }, {
                 tag: 'select',
+                id: 'privacy',
                 children: [{
                     tag: 'option',
                     value: 'on',

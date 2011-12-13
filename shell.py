@@ -122,8 +122,9 @@ Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy
 
 # The blueprint used to store user queries
 class Searches(db.Model):
-  query = db.StringProperty()
-  timestamp = db.DateTimeProperty(auto_now_add=True)
+    user_id = db.UserProperty()
+    query = db.StringProperty()
+    timestamp = db.DateTimeProperty(auto_now_add=True)
 
 
 def banner(quiet=False):
@@ -471,12 +472,14 @@ class FrontPageHandler(webapp.RequestHandler):
     def get(self):
         #Get the 10 most recent queries
         searches_query = Searches.all().order('-timestamp')
-        results = searches_query.fetch(10)
-
+        search_results = searches_query.fetch(10)
+        
+        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp').fetch(10)
+        
         if detectmobile.isMobile(self.request.headers):
             self.redirect('/shellmobile')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
-
+        
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
             'python_version': sys.version,
@@ -487,7 +490,8 @@ class FrontPageHandler(webapp.RequestHandler):
             'printer': self.request.get('printer').lower() or '',
             'submit': self.request.get('submit').lower() or '',
             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
-            'searches': results,
+            'searches': search_results,
+            'saved_searches': saved_searches,
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
@@ -518,11 +522,9 @@ class EvaluateHandler(webapp.RequestHandler):
 
         if privacy == 'off' and statement != '':
             searches = Searches()
+            searches.user_id = users.get_current_user()
             searches.query = statement
-            logging.debug(searches.query)
             searches.put()
-
-        statement = message.get('statement')
 
         session_key = message.get('session')
         printer_key = message.get('printer')
@@ -668,6 +670,18 @@ class StatementHandler(webapp.RequestHandler):
     # evaluate the statement in session's globals
     evaluate(statement, session, printer, self.response.out)
 
+
+class DeleteHistory(webapp.RequestHandler):
+    """Deletes all of the user's history"""
+    
+    def get(self):
+        results = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+        
+        for result in results:
+            db.delete(result)
+    
+        self.response.out.write("Your queries have been deleted.")
+
 def main():
   application = webapp.WSGIApplication([
       ('/', FrontPageHandler),
@@ -676,6 +690,7 @@ def main():
       ('/helpdsi', HelpDsiFrontPageHandler),
       ('/shellmobile', ShellMobileFrontPageHandler),
       ('/shell.do', StatementHandler),
+      ('/delete', DeleteHistory),
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)
