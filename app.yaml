@@ -1,4 +1,4 @@
-application: sympytest
+application: sympy-live
 version: 3
 
 runtime: python
