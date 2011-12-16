@@ -123,7 +123,7 @@ Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy
 # The blueprint used to store user queries
 class Searches(db.Model):
     user_id = db.UserProperty()
-    query = db.StringProperty()
+    query = db.StringProperty(multiline=True)
     timestamp = db.DateTimeProperty(auto_now_add=True)
 
 
@@ -474,7 +474,7 @@ class FrontPageHandler(webapp.RequestHandler):
         searches_query = Searches.all().order('-timestamp')
         search_results = searches_query.fetch(10)
         
-        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp').fetch(10)
+        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
         
         if detectmobile.isMobile(self.request.headers):
             self.redirect('/shellmobile')

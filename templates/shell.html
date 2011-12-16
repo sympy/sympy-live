@@ -5,7 +5,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
         
-        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script type="text/javascript" src="static/external/ext-core.js"></script>
 		<script type="text/javascript">
 		function transition_about(){
 			if (document.getElementById('about').style.height == "175px") {
@@ -51,14 +51,18 @@
 		    var confirm_delete = confirm("Are you sure you want to clear your search history?");
             if (confirm_delete==true)
             {   
-                $.get('/delete', function(data) {
-                    $('#saved_searches').html(data);
+                Ext.Ajax.request({
+                    method: 'GET',
+                    url: (this.basePath || '') + '/delete',
+                    success: function(response) {
+                        var response = response.responseText;
+                        Ext.fly('saved_searches').update(response);
+                    },
                 });
             }
 		}
 		</script>
-        <script type="text/javascript" src="static/external/ext-core.js"></script>
-
+		
         <link rel="stylesheet" type="text/css" href="static/live-core.css" />
         <script type="text/javascript" src="static/live-core.js"></script>
 		<link rel="stylesheet" href="static/style.css" type="text/css" />
@@ -157,7 +161,7 @@
                 </div>
                 <div class="title" id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
                 
-                <div class="content">
+                <div id="saved_searches" class="content">
                 {% for search in saved_searches %}
                     {% if search.query %}
                         {{ search.query|escape }}</br>
