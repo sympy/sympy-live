@@ -27,7 +27,7 @@ SymPy.MobileShell = Ext.extend(
             var submitEl = Ext.get(
                 this.submitEl.query('option[value="shift-enter"]')[0]);
             insertEl.set({value: "enter-inserts-newline"}).update("inserts newline");
-            submitEl.set({value: "enter-submits"}).update("submits"); 
+            submitEl.set({value: "enter-submits"}).update("submits");
             this.submitEl.next().remove();
             Ext.DomHelper.insertBefore(this.submitEl,{
                  tag: 'span',
@@ -66,9 +66,11 @@ SymPy.MobileShell = Ext.extend(
             this.toolbarEl.down('span').remove();
             this.historyPrevEl.on("click", function(event){
                 this.prevInHistory();
+                this.promptEl.focus();
             }, this);
             this.historyNextEl.on("click", function(event){
                 this.nextInHistory();
+                this.promptEl.focus();
             }, this);
             Ext.get("menu").on("click", function(event){
                 Ext.get("main-navigation").toggle(true);

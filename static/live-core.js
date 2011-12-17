@@ -209,10 +209,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.evaluateEl.on("click", function(event) {
             this.evaluate();
+            this.promptEl.focus();
         }, this);
 
         this.clearEl.on("click", function(event) {
             this.clear();
+            this.promptEl.focus();
         }, this);
 
         this.printerEl.on("change", function(event) {
@@ -224,7 +226,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, this);
 
         this.recordEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.promptEl.focus();
