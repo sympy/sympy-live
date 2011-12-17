@@ -125,6 +125,7 @@ class Searches(db.Model):
     user_id = db.UserProperty()
     query = db.StringProperty(multiline=True)
     timestamp = db.DateTimeProperty(auto_now_add=True)
+    private = db.BooleanProperty()
 
 
 def banner(quiet=False):
@@ -471,7 +472,7 @@ class FrontPageHandler(webapp.RequestHandler):
 
     def get(self):
         #Get the 10 most recent queries
-        searches_query = Searches.all().order('-timestamp')
+        searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
         
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
@@ -519,12 +520,16 @@ class EvaluateHandler(webapp.RequestHandler):
         # Code modified to store each query in a database
         statement = message.get('statement')
         privacy = message.get('privacy')
-
-        if privacy == 'off' and statement != '':
+        
+        if statement != '':
             searches = Searches()
             searches.user_id = users.get_current_user()
             searches.query = statement
-            searches.put()
+        
+        if privacy == 'off': searches.private = False
+        if privacy == 'on': searches.private = True
+        
+        searches.put()
 
         session_key = message.get('session')
         printer_key = message.get('printer')
