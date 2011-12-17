@@ -59,8 +59,23 @@
 
 .sympy-live-toolbar > * {
     margin-left: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
+}
+
+#fs-popup {
+    background: #000;
+    left: 50%;
+    width: 400px;
+    margin-left: -200px;
+    height: 50px;
+    top: 50%;
+    margin-top: -25px;
+    border-radius: 5px;
+    opacity: .8;
+    text-align: center;
+    line-height: 50px;
 }
