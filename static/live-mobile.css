@@ -12,7 +12,6 @@ body {
     margin: 0 3px 10px 3px;
     height: 300px;
     min-width: 200px;
-    width: 100%;
 }
 
 .sympy-live-output > div {
