@@ -86,6 +86,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     previousValue: "",
     evaluating: false,
     supportsSelection: false,
+    fullscreenMode: false,
+    leftHeight: $('#left').height(),
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
@@ -783,104 +785,121 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     fullscreen: function() {
-
-        var popup = $('<div id="fs-popup">Escape to close fullscreen mode.</div>');
+        var popup = $('<div class="sympy-live-fullscreen-popup">Escape to close fullscreen mode.</div>');
         popup.css({
             'font-size': 20,
             'color' : '#fff',
             'z-index' : 1000,
             'position' : 'absolute'
         });
-
+        
         var shell = $('#shell'),
             leftdiv = $('#left'),
             ld = {
                 pos : leftdiv.offset(),
                 width : '55%',
-                height : leftdiv.height(),
+                height : '560px',
                 border : 2
             };
-
-        function fsmake(){
-            //browser viewport dimensions
-            var bheight = $(window).height(),
-                bwidth = $(window).width();
-            
-            leftdiv.css({
-                'margin' : 0,
-                'position' : 'absolute',
-                'z-index' : 500
-            }).animate({
-                'width' : bwidth,
-                'height' : bheight,
-                'top' : 0,
-                'left' : 0,
-                'border-width' : 0,
-                'padding' : 0
-            }, 100);
-            $('.sympy-live-output').css({
-                'width' : bwidth-32,
-                'height' : bheight-250
-            });
+        
+        if(!(this.fullscreenMode)){
+            this.leftHeight = leftdiv.height();
         }
 
-        // some styles to make it look better
-        leftdiv.css({
-            'top' : ld.pos.top,
-            'left' : ld.pos.left
-        });
-        shell.css('padding', 10);
-        $('body').css('overflow', 'hidden');
-        $('.right_title').css('padding-top', 20);
-
-        $('html, body').animate({ scrollTop: 0 }, 100);
-        fsmake();
-
-        // window resizing -> new dimensions
+        if(this.fullscreenMode){
+            $(window).off("resize");
+            this.closeFullscreen(ld);
+            this.fullscreenMode = false;
         
-        $(window).on("resize", function() {
-            clearTimeout(id);
-            id = setTimeout(function(){
-                fsmake();
-            }, 200);
-        });
-        
-        $(popup).appendTo('body').hide().fadeIn(500).delay(1000).fadeOut(500);
+        }else{
 
-        // enabling escape key to close fullscreen mode
-        var keyEvent = this.getKeyEvent();
-        Ext.get(document).on(keyEvent, function(event) {
-            if(event.getKey() == 27){
-                $(window).off("resize");
-                this.closefs(ld);
+            this.fullscreenMode = true;
+            
+            function fullscreenResize(){
+                //browser viewport dimensions
+                var bheight = $(window).height(),
+                    bwidth = $(window).width();
+                
+                leftdiv.css({
+                    'margin' : 0,
+                    'position' : 'absolute',
+                    'z-index' : 500
+                }).animate({
+                    'width' : bwidth,
+                    'height' : bheight,
+                    'top' : 0,
+                    'left' : 0,
+                    'border-width' : 0,
+                    'padding' : 0
+                }, 100);
+                $('.sympy-live-output').css({
+                    'width' : bwidth-32,
+                    'height' : bheight-250
+                });
             }
-        }, this);
+            
+            // some styles to make it look better
+            leftdiv.css({
+                'top' : ld.pos.top,
+                'left' : ld.pos.left
+            });
+            shell.css('padding', 10);
+            $('body').css('overflow', 'hidden');
+            $('.right_title').css('padding-top', 20);
+            
+            $('html, body').animate({ scrollTop: 0 }, 100);
+            fullscreenResize();
+            
+            // window resizing -> new dimensions
+            
+            $(window).on("resize", function() {
+                // information about this timeout: 
+                // http://stackoverflow.com/questions/5534363/why-does-the-jquery-resize-event-fire-twice
+                clearTimeout(id);
+                id = setTimeout(function(){
+                    fullscreenResize();
+                }, 200);
+            });
+            
+            $(popup).appendTo('body').hide().fadeIn(500).delay(1000).fadeOut(500);
+
+            // enabling escape key to close fullscreen mode
+            var keyEvent = this.getKeyEvent();
+            Ext.get(document).on(keyEvent, function(event) {
+                if(event.getKey() == SymPy.Keys.ESC){
+                    $(window).off("resize");
+                    this.closeFullscreen(ld);
+                    this.fullscreenMode = false;
+                }
+            }, this);
+        }
     },
 
-    closefs : function(ld) {
-        var shell = $('#shell'),
-            leftdiv = $('#left');
-        this.fs = false;
-        fs = false;
-        $('#shell').css('padding', 0);
-        $('body').css('overflow', 'auto');
-        $('.right_title').css('padding-top', 0);
-        
-        leftdiv.css({
-           position : 'static',
-           margin : '4px 0 4px 4px'
-        });
-        leftdiv.animate({
-            top : ld.pos.top,
-            left : ld.pos.left,
-            width : ld.width,
-            height : ld.height,
-            borderWidth : ld.border,
-            padding: 10
-        }, 100);
-        $('.sympy-live-output').css({
-            'width' : '95%',
-            'height' : '20em'
-        });
+    closeFullscreen : function(ld) {
+        if(this.fullscreenMode){
+            var shell = $('#shell'),
+                leftdiv = $('#left');
+            $('#shell').css('padding', 0);
+            $('body').css('overflow', 'auto');
+            $('.right_title').css('padding-top', 0);
+            
+            leftdiv.css({
+               position : 'static',
+               margin : '4px 0 4px 4px'
+            });
+            leftdiv.animate({
+                top : ld.pos.top,
+                left : ld.pos.left,
+                width : ld.width,
+                height : this.leftHeight,
+                borderWidth : ld.border,
+                padding: 10
+            }, 100);
+            $('.sympy-live-output').css({
+                'width' : '95%',
+                'height' : '20em'
+            });
+        }
+        this.fullscreenMode = false;
     }
 });
