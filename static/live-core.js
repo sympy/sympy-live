@@ -809,17 +809,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if(this.fullscreenMode){
             $(window).off("resize");
             this.closeFullscreen(ld);
-            this.fullscreenMode = false;
-        
+            this.fullscreenMode = false;        
         }else{
-
             this.fullscreenMode = true;
-            
+                 
             function fullscreenResize(){
                 //browser viewport dimensions
-                var bheight = $(window).height(),
-                    bwidth = $(window).width();
-                
+                var bheight = $(window).height(), bwidth = $(window).width();                
                 leftdiv.css({
                     'margin' : 0,
                     'position' : 'absolute',
@@ -837,7 +833,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'height' : bheight-250
                 });
             }
-            
+                        
             // some styles to make it look better
             leftdiv.css({
                 'top' : ld.pos.top,
@@ -850,8 +846,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             $('html, body').animate({ scrollTop: 0 }, 100);
             fullscreenResize();
             
-            // window resizing -> new dimensions
-            
+            // window resizing -> new dimensions            
             $(window).on("resize", function() {
                 // information about this timeout: 
                 // http://stackoverflow.com/questions/5534363/why-does-the-jquery-resize-event-fire-twice
@@ -859,8 +854,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 id = setTimeout(function(){
                     fullscreenResize();
                 }, 200);
-            });
-            
+            });            
             $(popup).appendTo('body').hide().fadeIn(500).delay(1000).fadeOut(500);
 
             // enabling escape key to close fullscreen mode
@@ -881,8 +875,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 leftdiv = $('#left');
             $('#shell').css('padding', 0);
             $('body').css('overflow', 'auto');
-            $('.right_title').css('padding-top', 0);
-            
+            $('.right_title').css('padding-top', 0);            
             leftdiv.css({
                position : 'static',
                margin : '4px 0 4px 4px'
