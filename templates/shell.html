@@ -41,8 +41,10 @@
         
 		function expand_history(){
 			if (document.getElementById('recent_searches').style.height == "225px") {
+			    document.getElementById('recent_searches').style.overflow = "hidden";
 			    document.getElementById('recent_searches').style.height = "35px"; 
 			} else {
+			    document.getElementById('recent_searches').style.overflow = "auto"; 
 			    document.getElementById('recent_searches').style.height = "225px";
 			}
 		}
@@ -164,7 +166,7 @@
                 <div id="saved_searches" class="content">
                 {% for search in saved_searches %}
                     {% if search.query %}
-                        {{ search.query|escape }}</br>
+                        <pre>{{ search.query|escape }}</pre></br>
                     {% endif %}
                 {% endfor %}
                 </div>
@@ -222,7 +224,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
             
             <div class="content">
             {% for search in searches %}
-                {{ search.query|escape }}</br>
+                <pre>{{ search.query|escape }}</pre></br>
             {% endfor %}
             </div>
         </div>

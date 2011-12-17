@@ -580,7 +580,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     updatePrompt: function() {
         var value = this.getValue();
-
+        
         if (this.previousValue != value) {
             var prompt = ">>>",
                 lines = value.split('\n');
@@ -605,7 +605,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     prefixStatement: function() {
         var lines = this.getValue().split('\n');
-
+        alert(lines);
+        
         lines[0] = ">>> " + lines[0];
 
         var i = 1,
@@ -636,6 +637,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.setCookie('sympy-privacy', this.recordEl.getValue());
 
             var data = {
+                print_statement: this.getValue().split('\n'),
                 statement: statement,
                 printer: this.printerEl.getValue(),
                 session: this.session || null,

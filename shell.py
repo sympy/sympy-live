@@ -516,15 +516,18 @@ class EvaluateHandler(webapp.RequestHandler):
         except ValueError:
             self.error(400)
             return
-
+        
         # Code modified to store each query in a database
+        print_statement = '\n'.join(message.get('print_statement'))
+        logging.debug(print_statement)
         statement = message.get('statement')
+        logging.debug(statement)
         privacy = message.get('privacy')
         
         if statement != '':
             searches = Searches()
             searches.user_id = users.get_current_user()
-            searches.query = statement
+            searches.query = print_statement
         
         if privacy == 'off': searches.private = False
         if privacy == 'on': searches.private = True
