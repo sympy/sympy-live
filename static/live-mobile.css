@@ -1,6 +1,10 @@
+
+body {
+    font-size: 10pt;
+}
 .sympy-live-output {
     font-family: monospace;
-    font-size: 10pt;
+    font-size: 100%;
     padding: 5px;
     border: 1px solid silver;
     background-color: #f5f5f5;
@@ -23,7 +27,7 @@
 
 .sympy-live-caret {
     font-family: monospace;
-    font-size: 10pt;
+    font-size: 100%;
     border: 1px solid silver;
     margin: 0;
     padding: 5px;
@@ -33,13 +37,13 @@
     overflow: hidden;
     background-color: #f5f5f5;
     resize: none;
-    width: 30px;
+    width: 50px;
     margin-left: 3px;
 }
 
 .sympy-live-prompt {
     font-family: monospace;
-    font-size: 10pt;
+    font-size: 100%;
     border: 1px solid silver;
     padding: 5px;
     border-left: 0;
@@ -54,7 +58,7 @@
     margin: 0;
     right: 40px;
     position: absolute;
-    left: 40px;
+    left: 59px;
 }
 
 .sympy-live-toolbar {
@@ -64,6 +68,13 @@
 .sympy-live-toolbar > * {
     margin-left: 0.5em;
 }
+.sympy-live-toolbar > button {
+    margin-left: 0.5em;
+    background-color: #3b5526;
+    color: #FFF;
+}
+
+
 
 #sympy-live-toolbar-history {
     display: inline-block;
@@ -71,12 +82,16 @@
     height: 76px;
     position: absolute;
     right: 10px;
+
 }
 
 #sympy-live-toolbar-history button {
+    margin-left: 0.5em;
     display: inline;
     width: 100%;
-    height: 50%;
+    height: 49.9%;
+    background-color: #3b5526;
+    color: #FFF;
 }
 
 .sympy-live-processing { background-image: url("/static/spinner.gif"); }
@@ -105,15 +120,15 @@
 #header {
     text-align: center;
     background-color: #3b5526;
-    height: 40px;
+    height: 50px;
 }
 #header h1 {
-    font-size: 12px;
+    font-size: 120%;
     display: inline-block;
 }
 #header img {
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
 }
 #header h1 a:link {
     color: #FFF;
@@ -153,7 +168,7 @@
     font-weight: bold;
     float: right;
     display: inline-block;
-    margin: 5px 0 5px 0;
+    margin: 10px 0 5px 0;
 }
 #user {
     border: none;
@@ -161,3 +176,4 @@
     margin: 2px;
     height: 20px;
 }
+#user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
