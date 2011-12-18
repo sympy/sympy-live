@@ -609,7 +609,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     updatePrompt: function() {
         var value = this.getValue();
-        
+
         if (this.previousValue != value) {
             var prompt = ">>>",
                 lines = value.split('\n');
@@ -634,7 +634,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     prefixStatement: function() {
         var lines = this.getValue().split('\n');
-        
+
         lines[0] = ">>> " + lines[0];
 
         var i = 1,
@@ -792,7 +792,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             'z-index' : 1000,
             'position' : 'absolute'
         });
-        
+
         var shell = $('#shell'),
             leftdiv = $('#left'),
             ld = {
@@ -801,7 +801,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 height : '560px',
                 border : 2
             };
-        
+
         if(!(this.fullscreenMode)){
             this.leftHeight = leftdiv.height();
         }
@@ -812,7 +812,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.fullscreenMode = false;
         }else{
             this.fullscreenMode = true;
- 
+
             function fullscreenResize(){
                 //browser viewport dimensions
                 var bheight = $(window).height(), bwidth = $(window).width();
@@ -843,13 +843,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             shell.css('padding', 10);
             $('body').css('overflow', 'hidden');
             $('.right_title').css('padding-top', 20);
-            
+
             $('html, body').animate({ scrollTop: 0 }, 100);
             fullscreenResize();
-            
+
             // window resizing -> new dimensions
             $(window).on("resize", function() {
-                // information about this timeout: 
+                // information about this timeout:
                 // http://stackoverflow.com/questions/5534363/why-does-the-jquery-resize-event-fire-twice
                 clearTimeout(id);
                 id = setTimeout(function(){
