@@ -4,6 +4,8 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
+        
+        <script type="text/javascript" src="static/external/ext-core.js"></script>
 		<script type="text/javascript">
 		function transition_about(){
 			if (document.getElementById('about').style.height == "175px") {
@@ -26,17 +28,43 @@
 			document.getElementById('other_shells').style.height = "95px";
 			}
 		}
-
-		function expand_history(){
-						if (document.getElementById('recent_title').style.height == "225px") {
-			document.getElementById('recent_title').style.height = "35px"; }
-			else {
-			document.getElementById('recent_title').style.height = "225px";
+        
+        function expand_userhistory(){
+            if (document.getElementById('user_searches').style.height == "225px") {
+	            document.getElementById('user_searches').style.overflow = "hidden";
+	            document.getElementById('user_searches').style.height = "35px";
+			} else {
+			    document.getElementById('user_searches').style.overflow = "auto"; 
+			    document.getElementById('user_searches').style.height = "225px";
 			}
 		}
+        
+		function expand_history(){
+			if (document.getElementById('recent_searches').style.height == "225px") {
+			    document.getElementById('recent_searches').style.overflow = "hidden";
+			    document.getElementById('recent_searches').style.height = "35px"; 
+			} else {
+			    document.getElementById('recent_searches').style.overflow = "auto"; 
+			    document.getElementById('recent_searches').style.height = "225px";
+			}
+		}
+		
+		function clear_searches(){    
+		    var confirm_delete = confirm("Are you sure you want to clear your search history?");
+            if (confirm_delete==true)
+            {   
+                Ext.Ajax.request({
+                    method: 'GET',
+                    url: (this.basePath || '') + '/delete',
+                    success: function(response) {
+                        var response = response.responseText;
+                        Ext.fly('saved_searches').update(response);
+                    },
+                });
+            }
+		}
 		</script>
-        <script type="text/javascript" src="static/external/ext-core.js"></script>
-
+		
         <link rel="stylesheet" type="text/css" href="static/live-core.css" />
         <script type="text/javascript" src="static/live-core.js"></script>
 		<link rel="stylesheet" href="static/style.css" type="text/css" />
@@ -120,7 +148,30 @@
                 <a href="{{ logout_url }}">Log Out</a>
             {% else %}
             {% endif %}</div>
-			</div><br/><div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			</div>
+			
+			<!--Show saved searches only if the user is logged in-->
+			{% if user %}
+			<br/>
+			<div id="user_searches">
+		        <div class="arrow" onclick="expand_userhistory();">
+                    <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+                </div>
+
+                <div class="title" onclick="expand_userhistory();">
+                <h3 style="display:block;">My Searches&nbsp;</h3>
+                </div>
+                <div class="title" id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
+                
+                <div id="saved_searches" class="content">
+                {% for search in saved_searches %}
+                    {% if search.query %}
+                        <pre>{{ search.query|escape }}</pre></br>
+                    {% endif %}
+                {% endfor %}
+                </div>
+        </div>{% endif %}<br/>
+            <div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 <div class="content">
 This <a href="http://sympy.org/">SymPy</a>
             <a href="https://github.com/sympy/sympy-live">Online Shell</a> is running on the
@@ -162,19 +213,19 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 		</div>
 		</div>
 		<br/>
-		<div id="recent_searches" class="recent" >
+		<div id="recent_searches">
 		    <div class="arrow" onclick="expand_history();">
                 <img height="25" width="25" alt="Arrow" src="static/arrow.png">
             </div>
 
-            <div id="recent_title" onclick="expand_history();">
+            <div class="title" onclick="expand_history();">
             <h3>Recent Searches</h3>
-
-            <div class="history_content">
-            {% for search in searches %}
-                {{ search.query|escape }}</br>
-            {% endfor %}
             </div>
+            
+            <div class="content">
+            {% for search in searches %}
+                <pre>{{ search.query|escape }}</pre></br>
+            {% endfor %}
             </div>
         </div>
 		</div>
