@@ -819,7 +819,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 leftdiv.css({
                     'margin' : 0,
                     'position' : 'absolute',
-                    'z-index' : 500
+                    'z-index' : 500,
+                    'background-color' : '#e4ebe4'
                 }).animate({
                     'width' : bwidth,
                     'height' : bheight,
@@ -878,7 +879,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             $('.right_title').css('padding-top', 0);
             leftdiv.css({
                position : 'static',
-               margin : '4px 0 4px 4px'
+               margin : '4px 0 4px 4px',
+               backgroundColor : 'white'
             });
             leftdiv.animate({
                 top : ld.pos.top,
