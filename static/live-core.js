@@ -209,22 +209,27 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.evaluateEl.on("click", function(event) {
             this.evaluate();
+            this.promptEl.focus();
         }, this);
 
         this.clearEl.on("click", function(event) {
             this.clear();
+            this.promptEl.focus();
         }, this);
 
         this.printerEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.submitEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.recordEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.promptEl.focus();
@@ -443,12 +448,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (this.historyCursor > 0) {
             this.setValue(this.history[--this.historyCursor]);
         }
+        this.promptEl.focus();
     },
 
     nextInHistory: function() {
         if (this.historyCursor < this.history.length - 1) {
             this.setValue(this.history[++this.historyCursor]);
         }
+        this.promptEl.focus();
     },
 
     handleKey: function(event) {
@@ -670,16 +677,19 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
+                    this.promptEl.focus();
                 },
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
                     this.promptEl.removeClass('sympy-live-processing');
                     this.promptEl.set({disabled: null}, false);
+                    this.promptEl.focus();
                     this.evaluating = false;
                 },
                 scope: this
             });
+            this.promptEl.focus();
         }
     },
 
@@ -711,6 +721,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl.removeClass('sympy-live-processing');
         this.promptEl.set({disabled: null}, false);
+        this.promptEl.focus();
         this.evaluating = false;
     },
 
