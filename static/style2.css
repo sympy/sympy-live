@@ -22,12 +22,10 @@ hr {
 button {
     background: #e4ebe4;
     border: 1px solid #000;
-    padding-top: 0.8em;
-    padding-right: 1.2em;
-    padding-left: 1.2em;
-    padding-bottom: 0.8em;
+    padding: 0.5em;
     border-radius: 4px;
     color: #3b5526;
+    font-size: 12pt;
 }
 button:hover {
     color: #81b953;
