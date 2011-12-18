@@ -145,7 +145,7 @@ body {
   	-webkit-border-bottom-right-radius: 4px;
 }
 
-#recent_title {
+#recent_searches {
     padding: 0px 5px 5px 5px;
 	height:35px;
 	overflow:hidden;
@@ -162,6 +162,43 @@ body {
   	-webkit-border-bottom-left-radius: 4px;
   	-moz-border-radius-bottomright: 4px;
   	-webkit-border-bottom-right-radius: 4px;
+  	
+  	border-style:solid;
+	border-width:1px;
+  	
+  	padding: 0px 5px 5px 5px;
+  	
+  	color: #222222;
+    font-family: helvetica,arial,sans-serif;
+    font-size: 14px;
+}
+
+#user_searches {
+    padding: 0px 5px 5px 5px;
+	height:35px;
+	overflow:hidden;
+	-moz-transition: all .5s ease-out;
+	-webkit-transition: all .5s ease-out;
+	-o-transition: all .5s ease-out;
+	transition: all .5s ease-out;
+	background-color:#e4ebe4;
+	-moz-border-radius-topleft: 4px;
+  	-webkit-border-top-left-radius: 4px;
+  	-moz-border-radius-topright: 4px;
+  	-webkit-border-top-right-radius: 4px;
+  	-moz-border-radius-bottomleft: 4px;
+  	-webkit-border-bottom-left-radius: 4px;
+  	-moz-border-radius-bottomright: 4px;
+  	-webkit-border-bottom-right-radius: 4px;
+  	
+  	border-style:solid;
+	border-width:1px;
+  	
+  	padding: 0px 5px 5px 5px;
+  	
+  	color: #222222;
+    font-family: helvetica,arial,sans-serif;
+    font-size: 14px;
 }
 
 /*  #other_shells:hover {
@@ -217,34 +254,14 @@ body {
 	margin-top:7.5px;
 }
 
-.history_content {
-    margin-top:5px;
+#clear_searches {
+    margin-top:14px;
 }
 
 .content {
 	margin-top:45px;
 }
 
-.recent {
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-  	
-  	border-style:solid;
-	border-width:1px;
-  	
-  	padding: 0px 5px 5px 5px;
-  	
-  	color: #222222;
-    font-family: helvetica,arial,sans-serif;
-    font-size: 14px;
-}
 #w3_validator {
 	position:fixed;
 	bottom:5px;

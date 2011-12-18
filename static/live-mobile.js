@@ -65,12 +65,12 @@ SymPy.MobileShell = Ext.extend(
                 .insertBefore(this.outputEl);
             this.toolbarEl.down('span').remove();
             this.historyPrevEl.on("click", function(event){
+                this.promptEl.focus(1000);
                 this.prevInHistory();
-                this.promptEl.focus();
             }, this);
             this.historyNextEl.on("click", function(event){
+                this.promptEl.focus(1000);
                 this.nextInHistory();
-                this.promptEl.focus();
             }, this);
             Ext.get("menu").on("click", function(event){
                 Ext.get("main-navigation").toggle(true);
