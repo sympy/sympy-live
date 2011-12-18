@@ -519,9 +519,7 @@ class EvaluateHandler(webapp.RequestHandler):
         
         # Code modified to store each query in a database
         print_statement = '\n'.join(message.get('print_statement'))
-        logging.debug(print_statement)
         statement = message.get('statement')
-        logging.debug(statement)
         privacy = message.get('privacy')
         
         if statement != '':

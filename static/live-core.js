@@ -605,7 +605,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     prefixStatement: function() {
         var lines = this.getValue().split('\n');
-        alert(lines);
         
         lines[0] = ">>> " + lines[0];
 
