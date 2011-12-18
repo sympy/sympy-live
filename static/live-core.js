@@ -317,6 +317,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'Privacy'
             }, {
                 tag: 'select',
+                id: 'privacy',
                 children: [{
                     tag: 'option',
                     value: 'on',
@@ -598,7 +599,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     updatePrompt: function() {
         var value = this.getValue();
-
+        
         if (this.previousValue != value) {
             var prompt = ">>>",
                 lines = value.split('\n');
@@ -623,7 +624,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     prefixStatement: function() {
         var lines = this.getValue().split('\n');
-
+        
         lines[0] = ">>> " + lines[0];
 
         var i = 1,
@@ -650,6 +651,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.addClass('sympy-live-processing');
 
             var data = {
+                print_statement: this.getValue().split('\n'),
                 statement: statement,
                 printer: this.printerEl.getValue(),
                 session: this.session || null,
