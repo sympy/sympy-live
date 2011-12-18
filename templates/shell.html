@@ -173,7 +173,7 @@
                 {% endfor %}
                 </div>
         </div>{% endif %}<br/>
-            <div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+            <div id="about"><div class="title" onclick="transition_about();"><h3>About this page</h3></div><div class="arrow" onclick="transition_about();"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 <div class="content">
         <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
         running on the
@@ -188,7 +188,7 @@ This is just a regular Python shell, with the following commands executed by def
 &gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
 </pre></div>
 			</div><br/>
-            <div id="example" onclick="transition_example();"><div class="title"><h3>Example session</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+            <div id="example"><div class="title" onclick="transition_example();"><h3>Example session</h3></div><div class="arrow" onclick="transition_example();"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 <div class="content">
 <pre>
 &gt;&gt;&gt; expr = (x + y)**5
@@ -207,7 +207,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 			</div>
 			</div>
 			<br/>
-			<div id="other_shells" onclick="transition_other_shells();"><div class="title"><h3>Other Online Shells</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div><div class="content">
+			<div id="other_shells"><div class="title" onclick="transition_other_shells();"><h3>Other Online Shells</h3></div><div class="arrow" onclick="transition_other_shells();"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div><div class="content">
             <ul>
                 <li><a href="/shelldsi">Nintendo DSi Calculator</a> which is adapted for the dimensions of the DSi browser.</li>
                 <li><a href="/shellmobile">Mobile Shell</a> which is adapted for mobile browsers.</li>
