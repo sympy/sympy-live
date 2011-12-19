@@ -60,6 +60,11 @@
 .sympy-live-toolbar > * {
     margin-left: 0.5em;
 }
+.sympy-live-toolbar > button {
+    margin-left: 0.5em;
+    background-color: #3b5526;
+    color: #FFF;
+}
 
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
