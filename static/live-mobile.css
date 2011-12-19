@@ -66,6 +66,13 @@ body {
 .sympy-live-toolbar > * {
     margin-left: 0.5em;
 }
+.sympy-live-toolbar > button {
+    margin-left: 0.5em;
+    background-color: #3b5526;
+    color: #FFF;
+}
+
+
 
 #sympy-live-toolbar-history {
     display: inline-block;
@@ -73,12 +80,16 @@ body {
     height: 76px;
     position: absolute;
     right: 10px;
+
 }
 
 #sympy-live-toolbar-history button {
+    margin-left: 0.5em;
     display: inline;
     width: 100%;
     height: 49.9%;
+    background-color: #3b5526;
+    color: #FFF;
 }
 
 .sympy-live-processing { background-image: url("/static/spinner.gif"); }
@@ -163,3 +174,4 @@ body {
     margin: 2px;
     height: 20px;
 }
+#user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
