@@ -1,3 +1,11 @@
+button {
+    background: #e4ebe4;
+    border: 1px solid #000;
+    padding: 0.5em;
+    border-radius: 4px;
+    color: #3b5526;
+}
+
 .sympy-live-output {
     font-family: monospace;
     font-size: 10pt;
