@@ -82,6 +82,26 @@
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
     <div id="shell"></div>
+    <div id="searches-container">
+      <div id="saved-searches-container" {% if not user %}style="display:none;"{% endif %}>
+        <h3>Saved Searches <img src="static/arrow.png" alt="Arrow" /></h3>
+        Click to copy.
+        <ul id="saved-searches">
+          {% for search in saved_searches %}
+          <li><pre>{{ search.query|escape }}</pre></li>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="recent-searches-container">
+        <h3>Recent Searches <img src="static/arrow.png" alt="Arrow" /></h3>
+        Click to copy.
+        <ul id="recent-searches">
+          {% for search in searches %}
+          <li><pre>{{ search.query|escape }}</pre></li>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
     <div id="main-navigation">
         <ul>
             <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>

@@ -144,7 +144,7 @@ body {
     width: 100%;
     height: 350px;
     position: absolute;
-    top: 40px;
+    top: 50px;
     left: 0px;
     bottom: 0px;
     display: none;
@@ -175,3 +175,29 @@ body {
     height: 20px;
 }
 #user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
+
+#searches-container h3 {
+    font-family: monospace;
+    font-size: 100%;
+}
+#searches-container ul {
+    list-style-type: none;
+}
+#searches-container ul li {
+    border-bottom: 1px solid #3b5526;
+    margin-bottom: 0.5em;
+    padding: 0.5em 0;
+}
+
+#searches-container ul li:last-child {
+    border: none;
+}
+
+#searches-container pre {
+    display: inline;
+}
+
+#searches-container img {
+    width: 1em;
+    height: 1em;
+}

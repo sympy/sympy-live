@@ -38,6 +38,7 @@ SymPy.MobileShell = Ext.extend(
         },
         render: function(el) {
             SymPy.MobileShell.superclass.render.call(this, el);
+            this.renderSearches();
             this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
             var shell = Ext.get("shell");
             Ext.each(
@@ -117,5 +118,51 @@ SymPy.MobileShell = Ext.extend(
                 }
             }
             SymPy.MobileShell.superclass.handleKey.call(this, event);
+        },
+        renderSearches: function(){
+            this.savedSearches = Ext.get("saved-searches");
+            this.recentSearches = Ext.get("recent-searches");
+            var setupEval = (function(el){
+                var nodes = el.query("Li");
+                var shell = this;  // closure
+                Ext.each(nodes, function(node){
+                    node = Ext.get(node);
+                    node.on("click", function(event){
+                        // We don't want the query to show up twice
+                        var origPrivacy = shell.recordEl.getValue();
+                        shell.recordEl.dom.value =  "on";
+                        shell.setValue(this.first("pre").dom.innerHTML);
+                        shell.evaluate();
+                        Ext.get(document.body).scrollTo("top", 0);
+                        shell.recordEl.dom.value = origPrivacy;
+                    }, node);
+                });
+            });
+            setupEval.call(this, this.recentSearches);
+            setupEval.call(this, this.savedSearches);
+            var toggle = function(){
+                var height = null;
+                return (function(event){
+                    height = height || this.getHeight();
+                    if (this.isVisible()){
+                        this.animate({
+                            height: {to: 0},
+                            opacity: {to: 0}
+                        }, 0.5, function(){this.toggle();});
+                    }
+                    else {
+                        this.animate({
+                            height: {to: height},
+                            opacity: {to: 1}
+                        }, 0.5, function(){this.toggle();});
+                    }
+                });
+            }
+            Ext.get("recent-searches-container").
+                first("h3").
+                on("click", toggle(), this.recentSearches);
+            Ext.get("saved-searches-container").
+                first("h3").
+                on("click", toggle(), this.savedSearches);
         }
     });
