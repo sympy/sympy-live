@@ -131,9 +131,13 @@ SymPy.MobileShell = Ext.extend(
                         // We don't want the query to show up twice
                         var origPrivacy = shell.recordEl.getValue();
                         shell.recordEl.dom.value =  "on";
+                        // And we're going to scroll to the output
+                        var scrollY = shell.outputEl.getTop();
+
                         shell.setValue(this.first("pre").dom.innerHTML);
                         shell.evaluate();
-                        Ext.get(document.body).scrollTo("top", 0);
+
+                        Ext.get(document.body).scrollTo("top", scrollY);
                         shell.recordEl.dom.value = origPrivacy;
                     }, node);
                 });
