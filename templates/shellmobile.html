@@ -6,11 +6,11 @@
         <meta name="viewport"
               content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>SymPy Live</title>
-
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/external/ext-core.js"></script>
-	<link rel="stylesheet" href="static/style.css" type="text/css" />
+	<!-- <link rel="stylesheet" href="static/style.css" type="text/css" /> -->
 	<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
-	<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
+	<!-- <link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" /> -->
     <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
     <script type="text/javascript" src="/static/live-core.js"></script>
     <script type="text/javascript" src="/static/live-mobile.js"></script>
@@ -82,6 +82,26 @@
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
     <div id="shell"></div>
+    <div id="recent_searches_container">
+      <label for="recent_searches">Recent Searches:</label>
+      <select id="recent_searches">
+        <option></option>
+        {% for search in searches %}
+        <option>{{ search.query|escape }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if user %}
+    <div id="saved_searches_container">
+      <label for="saved_searches">Saved Searches:</label>
+      <select id="saved_searches">
+        <option></option>
+        {% for search in saved_searches %}
+        <option>{{ search.query|escape }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
     <div id="main-navigation">
         <ul>
             <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
