@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
-        
+
         <script type="text/javascript" src="static/external/ext-core.js"></script>
 		<script type="text/javascript">
 		function transition_about(){
@@ -28,31 +28,31 @@
 			document.getElementById('other_shells').style.height = "95px";
 			}
 		}
-        
+
         function expand_userhistory(){
             if (document.getElementById('user_searches').style.height == "225px") {
 	            document.getElementById('user_searches').style.overflow = "hidden";
 	            document.getElementById('user_searches').style.height = "35px";
 			} else {
-			    document.getElementById('user_searches').style.overflow = "auto"; 
+			    document.getElementById('user_searches').style.overflow = "auto";
 			    document.getElementById('user_searches').style.height = "225px";
 			}
 		}
-        
+
 		function expand_history(){
 			if (document.getElementById('recent_searches').style.height == "225px") {
 			    document.getElementById('recent_searches').style.overflow = "hidden";
-			    document.getElementById('recent_searches').style.height = "35px"; 
+			    document.getElementById('recent_searches').style.height = "35px";
 			} else {
-			    document.getElementById('recent_searches').style.overflow = "auto"; 
+			    document.getElementById('recent_searches').style.overflow = "auto";
 			    document.getElementById('recent_searches').style.height = "225px";
 			}
 		}
-		
-		function clear_searches(){    
+
+		function clear_searches(){
 		    var confirm_delete = confirm("Are you sure you want to clear your search history?");
             if (confirm_delete==true)
-            {   
+            {
                 Ext.Ajax.request({
                     method: 'GET',
                     url: (this.basePath || '') + '/delete',
@@ -64,7 +64,9 @@
             }
 		}
 		</script>
-		
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
         <link rel="stylesheet" type="text/css" href="static/live-core.css" />
         <script type="text/javascript" src="static/live-core.js"></script>
 		<link rel="stylesheet" href="static/style.css" type="text/css" />
@@ -149,7 +151,7 @@
             {% else %}
             {% endif %}</div>
 			</div>
-			
+
 			<!--Show saved searches only if the user is logged in-->
 			{% if user %}
 			<br/>
@@ -162,7 +164,7 @@
                 <h3 style="display:block;">My Searches&nbsp;</h3>
                 </div>
                 <div class="title" id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
-                
+
                 <div id="saved_searches" class="content">
                 {% for search in saved_searches %}
                     {% if search.query %}
@@ -221,7 +223,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
             <div class="title" onclick="expand_history();">
             <h3>Recent Searches</h3>
             </div>
-            
+
             <div class="content">
             {% for search in searches %}
                 <pre>{{ search.query|escape }}</pre></br>
