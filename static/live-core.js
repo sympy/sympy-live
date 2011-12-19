@@ -86,6 +86,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     previousValue: "",
     evaluating: false,
     supportsSelection: false,
+    fullscreenMode: false,
+    leftHeight: $('#left').height(),
 
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
@@ -209,22 +211,31 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.evaluateEl.on("click", function(event) {
             this.evaluate();
+            this.promptEl.focus();
+        }, this);
+
+        this.fullscreenEl.on("click", function(event) {
+            this.fullscreen();
         }, this);
 
         this.clearEl.on("click", function(event) {
             this.clear();
+            this.promptEl.focus();
         }, this);
 
         this.printerEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.submitEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.recordEl.on("change", function(event) {
-          this.updateSettings();
+            this.updateSettings();
+            this.promptEl.focus();
         }, this);
 
         this.promptEl.focus();
@@ -312,6 +323,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'Privacy'
             }, {
                 tag: 'select',
+                id: 'privacy',
                 children: [{
                     tag: 'option',
                     value: 'on',
@@ -320,14 +332,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     tag: 'option',
                     value: 'off',
                     html: 'Off'
+                }]
+            }, {
+                tag: 'button',
+                html: 'Fullscreen'
             }]
-        }]
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
 
         this.evaluateEl = this.toolbarEl.down('button:nth(1)');
         this.clearEl = this.toolbarEl.down('button:nth(2)');
+        this.fullscreenEl = this.toolbarEl.down('button:nth(3)');
 
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
@@ -443,12 +459,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (this.historyCursor > 0) {
             this.setValue(this.history[--this.historyCursor]);
         }
+        this.promptEl.focus();
     },
 
     nextInHistory: function() {
         if (this.historyCursor < this.history.length - 1) {
             this.setValue(this.history[++this.historyCursor]);
         }
+        this.promptEl.focus();
     },
 
     handleKey: function(event) {
@@ -643,6 +661,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.promptEl.addClass('sympy-live-processing');
 
             var data = {
+                print_statement: this.getValue().split('\n'),
                 statement: statement,
                 printer: this.printerEl.getValue(),
                 session: this.session || null,
@@ -670,16 +689,19 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
+                    this.promptEl.focus();
                 },
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
                     this.promptEl.removeClass('sympy-live-processing');
                     this.promptEl.set({disabled: null}, false);
+                    this.promptEl.focus();
                     this.evaluating = false;
                 },
                 scope: this
             });
+            this.promptEl.focus();
         }
     },
 
@@ -711,6 +733,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl.removeClass('sympy-live-processing');
         this.promptEl.set({disabled: null}, false);
+        this.promptEl.focus();
         this.evaluating = false;
     },
 
@@ -759,5 +782,119 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         return (result) ? result : default_value;
+    },
+
+    fullscreen: function() {
+        var popup = $('<div class="sympy-live-fullscreen-popup">Escape to close fullscreen mode.</div>');
+        popup.css({
+            'font-size': 20,
+            'color' : '#fff',
+            'z-index' : 1000,
+            'position' : 'absolute'
+        });
+
+        var shell = $('#shell'),
+            leftdiv = $('#left'),
+            ld = {
+                pos : leftdiv.offset(),
+                width : '55%',
+                height : '560px',
+                border : 2
+            };
+
+        if(!(this.fullscreenMode)){
+            this.leftHeight = leftdiv.height();
+        }
+
+        if(this.fullscreenMode){
+            $(window).off("resize");
+            this.closeFullscreen(ld);
+            this.fullscreenMode = false;
+        }else{
+            this.fullscreenMode = true;
+
+            function fullscreenResize(){
+                //browser viewport dimensions
+                var bheight = $(window).height(), bwidth = $(window).width();
+                leftdiv.css({
+                    'margin' : 0,
+                    'position' : 'absolute',
+                    'z-index' : 500,
+                    'background-color' : '#e4ebe4'
+                }).animate({
+                    'width' : bwidth,
+                    'height' : bheight,
+                    'top' : 0,
+                    'left' : 0,
+                    'border-width' : 0,
+                    'padding' : 0
+                }, 100);
+                $('.sympy-live-output').css({
+                    'width' : bwidth-32,
+                    'height' : bheight-250
+                });
+            }
+
+            // some styles to make it look better
+            leftdiv.css({
+                'top' : ld.pos.top,
+                'left' : ld.pos.left
+            });
+            shell.css('padding', 10);
+            $('body').css('overflow', 'hidden');
+            $('.right_title').css('padding-top', 20);
+
+            $('html, body').animate({ scrollTop: 0 }, 100);
+            fullscreenResize();
+
+            // window resizing -> new dimensions
+            $(window).on("resize", function() {
+                // information about this timeout:
+                // http://stackoverflow.com/questions/5534363/why-does-the-jquery-resize-event-fire-twice
+                clearTimeout(id);
+                id = setTimeout(function(){
+                    fullscreenResize();
+                }, 200);
+            });
+            $(popup).appendTo('body').hide().fadeIn(500).delay(1000).fadeOut(500);
+
+            // enabling escape key to close fullscreen mode
+            var keyEvent = this.getKeyEvent();
+            Ext.get(document).on(keyEvent, function(event) {
+                if(event.getKey() == SymPy.Keys.ESC){
+                    $(window).off("resize");
+                    this.closeFullscreen(ld);
+                    this.fullscreenMode = false;
+                }
+            }, this);
+        }
+    },
+
+    closeFullscreen : function(ld) {
+        if(this.fullscreenMode){
+            var shell = $('#shell'),
+                leftdiv = $('#left');
+            $('#shell').css('padding', 0);
+            $('body').css('overflow', 'auto');
+            $('.right_title').css('padding-top', 0);
+            leftdiv.css({
+               position : 'static',
+               margin : '4px 0 4px 4px',
+               backgroundColor : 'white'
+            });
+            leftdiv.animate({
+                top : ld.pos.top,
+                left : ld.pos.left,
+                width : ld.width,
+                height : this.leftHeight,
+                borderWidth : ld.border,
+                padding: 10
+            }, 100);
+            $('.sympy-live-output').css({
+                'width' : '95%',
+                'height' : '20em'
+            });
+        }
+        this.fullscreenMode = false;
     }
 });
