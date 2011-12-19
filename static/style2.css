@@ -25,6 +25,7 @@ button {
     padding: 0.5em;
     border-radius: 4px;
     color: #3b5526;
+    font-size: 12pt;
 }
 button:hover {
     color: #81b953;
