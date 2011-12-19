@@ -85,19 +85,19 @@
     <div id="searches-container">
       <div id="saved-searches-container" {% if not user %}style="display:none;"{% endif %}>
         <h3>Saved Searches <img src="static/arrow.png" alt="Arrow" /></h3>
-        Click to copy.
+        <p>Press to evaluate.</p>
         <ul id="saved-searches">
           {% for search in saved_searches %}
-          <li><pre>{{ search.query|escape }}</pre></li>
+          <li><button><pre>{{ search.query|escape }}</pre></button></li>
           {% endfor %}
         </select>
       </div>
       <div id="recent-searches-container">
         <h3>Recent Searches <img src="static/arrow.png" alt="Arrow" /></h3>
-        Click to copy.
+        <p>Press to evaluate.</p>
         <ul id="recent-searches">
           {% for search in searches %}
-          <li><pre>{{ search.query|escape }}</pre></li>
+          <li><button><pre>{{ search.query|escape }}</pre></button></li>
           {% endfor %}
         </select>
       </div>

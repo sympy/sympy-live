@@ -183,14 +183,19 @@ body {
 #searches-container ul {
     list-style-type: none;
 }
-#searches-container ul li {
-    border-bottom: 1px solid #3b5526;
-    margin-bottom: 0.5em;
-    padding: 0.5em 0;
+#searches-container ul li button {
+    border: 1px solid #000;
+    border-bottom: none;
+    background-color: #3b5526;
+    color: #FFF;
+    border-radius: 4px;
+    padding: 0.25em 0.5em;
+    width: 100%;
+    text-align: left;
 }
 
 #searches-container ul li:last-child {
-    border: none;
+    border-bottom: 1px solid #000;
 }
 
 #searches-container pre {

@@ -123,7 +123,7 @@ SymPy.MobileShell = Ext.extend(
             this.savedSearches = Ext.get("saved-searches");
             this.recentSearches = Ext.get("recent-searches");
             var setupEval = (function(el){
-                var nodes = el.query("Li");
+                var nodes = el.query("button");
                 var shell = this;  // closure
                 Ext.each(nodes, function(node){
                     node = Ext.get(node);
