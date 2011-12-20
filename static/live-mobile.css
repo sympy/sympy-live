@@ -193,7 +193,7 @@ body {
 #searches-container ul {
     list-style-type: none;
     overflow: auto;
-    max-height: 300px;
+    max-height: 150px;
     -webkit-overflow-scrolling: touch;
 }
 #searches-container ul li button {
@@ -218,4 +218,7 @@ body {
 #searches-container img {
     width: 1em;
     height: 1em;
+}
+#recent-searches-container {
+    border-top: 1px solid #000;
 }
