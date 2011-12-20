@@ -146,7 +146,7 @@ SymPy.MobileShell = Ext.extend(
             setupEval.call(this, this.recentSearches);
             setupEval.call(this, this.savedSearches);
             var toggle = (function(event){
-                    $(this.dom).slideToggle();
+                $(this.dom).parent().toggleClass('hidden');
             });
             Ext.get("recent-searches-container").
                 first("h3").
@@ -154,8 +154,7 @@ SymPy.MobileShell = Ext.extend(
             Ext.get("saved-searches-container").
                 first("h3").
                 on("click", toggle, this.savedSearches);
-            $("#recent-searches").slideToggle();
-            $("#saved-searches").slideToggle();
+            $("#searches-container > div").addClass("hidden");
             $("#saved-searches-clear").click(function(){
                 if(confirm("Delete history?") === true){
                     $.ajax({

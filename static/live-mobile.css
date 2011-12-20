@@ -215,10 +215,52 @@ body {
     display: inline;
 }
 
-#searches-container img {
+#searches-container div img {
     width: 1em;
     height: 1em;
+    -moz-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+    -webkit-transform: rotate(-180deg) translate(0px, 0px);
+    -moz-transform: rotate(-180deg) translate(0px, 0px);
+    -o-transform: rotate(-180deg) translate(0px, 0px);
+    -ms-transform: rotate(-180deg) translate(0px, 0px);
+    -transform: rotate(-180deg) translate(0px, 0px);
+}
+#searches-container div.hidden img {
+    width: 1em;
+    height: 1em;
+    -webkit-transform: rotate(0deg) translate(0px, 0px);
+    -moz-transform: rotate(0deg) translate(0px, 0px);
+    -o-transform: rotate(0deg) translate(0px, 0px);
+    -ms-transform: rotate(0deg) translate(0px, 0px);
+    -transform: rotate(0deg) translate(0px, 0px);
 }
 #saved-searches-container {
     border-bottom: 1px solid #000;
+}
+#recent-searches-container, #saved-searches-container {
+    height: 220px;
+    overflow: visible;
+    -webkit-transition: all 0.5s ease-out;
+    -moz-transition: all 0.5s ease-out;
+    -o-transition: all 0.5s ease-out;
+    -ms-transition: all 0.5s ease-out;	
+    transition: all 0.5s ease-out;
+}
+#recent-searches-container.hidden, #saved-searches-container.hidden {
+    height: 32px;
+    overflow: hidden;
+}
+#searches-container div ul {
+    opacity: 1;
+    -webkit-transition: all 0.5s ease-out;
+    -moz-transition: all 0.5s ease-out;
+    -o-transition: all 0.5s ease-out;
+    -ms-transition: all 0.5s ease-out;	
+    transition: all 0.5s ease-out;
+}
+#searches-container div.hidden ul {
+    opacity: 0;
 }
