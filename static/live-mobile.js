@@ -154,7 +154,6 @@ SymPy.MobileShell = Ext.extend(
             Ext.get("saved-searches-container").
                 first("h3").
                 on("click", toggle, this.savedSearches);
-            $("#searches-container > div").addClass("hidden");
             $("#saved-searches-clear").click(function(){
                 if(confirm("Delete history?") === true){
                     $.ajax({
