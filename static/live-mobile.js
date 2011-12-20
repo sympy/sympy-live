@@ -77,6 +77,7 @@ SymPy.MobileShell = Ext.extend(
                 Ext.get("main-navigation").toggle(true);
                 Ext.get("main-navigation").down("ul").toggle(true);
             });
+            Ext.get(document.body).scrollTo("top", this.outputEl.getTop());
         },
         handleKey: function(event) {
             if (event.getKey() == SymPy.Keys.ENTER) {
