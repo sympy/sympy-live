@@ -182,6 +182,9 @@ body {
 }
 #searches-container ul {
     list-style-type: none;
+    overflow: auto;
+    max-height: 300px;
+    -webkit-overflow-scrolling: touch;
 }
 #searches-container ul li button {
     border: 1px solid #000;
