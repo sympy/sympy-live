@@ -157,7 +157,7 @@
                 {{ user.nickname }}
             {% else %}
                 <a href="{{ login_url }}">Log In</a>
-            {% endif %}</h3></div><div class="arrow">{% if user %}
+            {% endif %}</h3></div><div id="logout_link">{% if user %}
                 <a href="{{ logout_url }}">Log Out</a>
             {% else %}
             {% endif %}</div>
@@ -171,11 +171,7 @@
 				<div id="user_searches_arrow">
                     <img height="25" width="25" alt="Arrow" src="static/arrow.png">
                 </div>
-
-                <div class="title">
-                <h3 style="display:block;">My Searches&nbsp;</h3>
-                </div>
-                <div class="title" id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
+                <div class="title"><h3 style="display:block;">My Searches&nbsp;</h3></div>
                 </div></a>
                 <div id="saved_searches" class="content">
                 {% for search in saved_searches %}
@@ -184,6 +180,7 @@
                     {% endif %}
                 {% endfor %}
                 </div>
+				<div id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
         </div>{% endif %}<br/>
             <div id="about">
 			<a href="#"><div class="clickable_top" onclick="transition_about();">

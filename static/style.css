@@ -18,7 +18,7 @@ body {
 }
 #saved_searches, #recent_searches_content {
 overflow:auto;
-height:180px;
+height:165px;
 }
 #footer2 {
 	padding-left:5px;
@@ -111,7 +111,12 @@ float:left;
 	float:left;
 
 }
-
+#logout_link {
+float:right;
+	text-align:center;
+	margin-right:10px;
+	margin-top:12.5px;
+}
 #other_shells_arrow, #recent_searches_arrow, #example_arrow, #about_arrow, #user_searches_arrow {
 	float:right;
 	text-align:center;
@@ -129,7 +134,7 @@ float:left;
 }
 
 #clear_searches {
-    margin-top:14px;
+text-align:center;
 }
 
 .content {
