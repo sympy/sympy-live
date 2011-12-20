@@ -2,6 +2,15 @@ body {
     font-size: 10pt;
     margin-left: 8px;
 }
+button {
+    background: #e4ebe4;
+    border: 1px solid #000;
+    padding: 0.5em;
+    border-radius: 4px;
+    color: #3b5526;
+    font-size: 12pt;
+}
+
 .sympy-live-output {
     font-family: monospace;
     font-size: 100%;
@@ -176,6 +185,7 @@ body {
     float: right;
     display: inline-block;
     margin: 10px 0 110px 0;
+    padding: 0.35em;
 }
 
 
