@@ -81,10 +81,9 @@
     </div>
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
-    <div id="shell"></div>
     <div id="searches-container">
       <div id="saved-searches-container" {% if not user %}style="display:none;"{% endif %}>
-        <h3>Saved Searches<img src="static/arrow.png" alt="Arrow" /></h3>
+        <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
         <div id="saved-searches">
           <p>Press to evaluate.</p>
           <p>
@@ -110,6 +109,7 @@
         </div>
       </div>
     </div>
+    <div id="shell"></div>
     <div id="main-navigation">
         <ul>
             <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
