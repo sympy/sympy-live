@@ -82,7 +82,7 @@
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
     <div id="searches-container">
-      <div id="saved-searches-container" {% if not user %}style="display:none;"{% endif %}>
+      <div id="saved-searches-container" class="hidden" {% if not user %}style="display:none;"{% endif %}>
         <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
         <div id="saved-searches">
           <p>Press to evaluate.</p>
@@ -97,7 +97,7 @@
           </ul>
         </div>
       </div>
-      <div id="recent-searches-container">
+      <div id="recent-searches-container" class="hidden">
         <h3>Recent Searches<img src="static/arrow.png" alt="Arrow" /></h3>
         <div id="recent-searches">
           <p>Press to evaluate.</p>

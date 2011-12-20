@@ -209,6 +209,7 @@ body {
 
 #searches-container ul li:last-child {
     border-bottom: 1px solid #000;
+    border-radius: 4px;
 }
 
 #searches-container pre {
