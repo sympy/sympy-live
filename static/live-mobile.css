@@ -219,6 +219,6 @@ body {
     width: 1em;
     height: 1em;
 }
-#recent-searches-container {
-    border-top: 1px solid #000;
+#saved-searches-container {
+    border-bottom: 1px solid #000;
 }
