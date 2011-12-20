@@ -188,7 +188,7 @@ body {
     text-decoration: underline;
 }
 #searches-container h3 img {
-    margin-left: 0.25em;
+    float: right;
 }
 #searches-container ul {
     list-style-type: none;
