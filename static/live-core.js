@@ -248,6 +248,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         var runner = new Ext.util.TaskRunner();
         runner.start(task);
+
+        this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
     },
 
     renderToolbar: function(el) {
