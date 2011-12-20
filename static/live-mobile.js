@@ -147,19 +147,20 @@ SymPy.MobileShell = Ext.extend(
             var toggle = function(){
                 var height = null;
                 return (function(event){
-                    height = height || this.getHeight();
-                    if (this.isVisible()){
-                        this.animate({
-                            height: {to: 0},
-                            opacity: {to: 0}
-                        }, 0.5, function(){this.toggle();});
-                    }
-                    else {
-                        this.animate({
-                            height: {to: height},
-                            opacity: {to: 1}
-                        }, 0.5, function(){this.toggle();});
-                    }
+                    $(this.dom).slideToggle();
+                    // height = height || this.getHeight();
+                    // if (this.isVisible()){
+                    //     this.animate({
+                    //         height: {to: 0},
+                    //         opacity: {to: 0}
+                    //     }, 0.5, function(){this.toggle();});
+                    // }
+                    // else {
+                    //     this.animate({
+                    //         height: {to: height},
+                    //         opacity: {to: 1}
+                    //     }, 0.5, function(){this.toggle();});
+                    // }
                 });
             }
             Ext.get("recent-searches-container").
@@ -168,5 +169,15 @@ SymPy.MobileShell = Ext.extend(
             Ext.get("saved-searches-container").
                 first("h3").
                 on("click", toggle(), this.savedSearches);
+            $("#recent-searches").slideToggle();
+            $("#saved-searches").slideToggle();
+            // this.recentSearches.animate({
+            //     height: {to: 0},
+            //     opacity: {to: 0}
+            // }, 0.5, function(){this.toggle();});
+            // this.savedSearches.animate({
+            //     height: {to: 0},
+            //     opacity: {to: 0}
+            // }, 0.5, function(){this.toggle();});
         }
     });
