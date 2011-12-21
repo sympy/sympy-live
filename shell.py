@@ -474,13 +474,13 @@ class FrontPageHandler(webapp.RequestHandler):
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
-        
+
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-        
+
         if detectmobile.isMobile(self.request.headers):
             self.redirect('/shellmobile')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
-        
+
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
             'python_version': sys.version,
@@ -516,20 +516,20 @@ class EvaluateHandler(webapp.RequestHandler):
         except ValueError:
             self.error(400)
             return
-        
+
         # Code modified to store each query in a database
         print_statement = '\n'.join(message.get('print_statement'))
         statement = message.get('statement')
         privacy = message.get('privacy')
-        
+
         if statement != '':
             searches = Searches()
             searches.user_id = users.get_current_user()
             searches.query = print_statement
-        
+
         if privacy == 'off': searches.private = False
         if privacy == 'on': searches.private = True
-        
+
         searches.put()
 
         session_key = message.get('session')
@@ -637,7 +637,10 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
       session = Session()
       session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
       session_key = session.put()
-
+    #Get the 10 most recent queries
+    searches_query = Searches.all().filter('private', False).order('-timestamp')
+    search_results = searches_query.fetch(10)
+    saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
     template_file = os.path.join(os.path.dirname(__file__), 'templates',
                                  'shellmobile.html')
     session_url = '/shellmobile?session=%s' % session_key
@@ -647,7 +650,9 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
              'logout_url': users.create_logout_url(session_url),
-             'tabWidth': self.request.get('tabWidth').lower() or 'undefined'
+             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
+             'searches': searches_query,
+             'saved_searches': saved_searches
              }
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
@@ -679,13 +684,13 @@ class StatementHandler(webapp.RequestHandler):
 
 class DeleteHistory(webapp.RequestHandler):
     """Deletes all of the user's history"""
-    
+
     def get(self):
         results = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-        
+
         for result in results:
             db.delete(result)
-    
+
         self.response.out.write("Your queries have been deleted.")
 
 def main():
