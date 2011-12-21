@@ -2,7 +2,13 @@ body {
     font-family: monospace;
     font-size: 10pt;
 }
-
+#left, #right, #footer2, #user , #example, #about, #other_shells, #recent_searches, #user_searches {
+	-webkit-border-radius: 4px 4px 4px 4px;
+	-moz-border-radius: 4px 4px 4px 4px;
+	-o-border-radius: 4px 4px 4px 4px;
+	-ms-border-radius: 4px 4px 4px 4px;
+	-border-radius: 4px 4px 4px 4px;
+	}
 .header {
     width: 50em;
 }
@@ -10,12 +16,13 @@ body {
 .username {
     font-weight: bold;
 }
-
+#saved_searches, #recent_searches_content {
+overflow:auto;
+height:165px;
+}
 #footer2 {
 	padding-left:5px;
 	padding-right:5px;
-    -webkit-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px 4px;
     height:25px;
     line-height:25px;
     margin-left:20px;
@@ -29,54 +36,52 @@ body {
 
 #mainpage {
 	min-width:960px;
-	min-height:560px;
+	min-height:500px;
 	padding:0 20px;
 	margin-top:20px;
 }
+#other_shells_arrow_clicked, #recent_searches_arrow_clicked, #example_arrow_clicked, #about_arrow_clicked, #user_searches_arrow_clicked  {
+	float:right;
+	text-align:center;
+	margin-right:10px;
+	margin-top:7.5px;
+    -moz-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+	-webkit-transform: rotate(-180deg) translate(0px, 0px);
+	-moz-transform: rotate(-180deg) translate(0px, 0px);
+	-o-transform: rotate(-180deg) translate(0px, 0px);
+	-ms-transform: rotate(-180deg) translate(0px, 0px);
+	-transform: rotate(-180deg) translate(0px, 0px);
+	
+}
+.clickable_top {
+width:100%;
+height:35px;
+float:left;
+}
 #left {
-	padding:10px 10px 10px 10px;
-	background-color:white;
 	width:55%;
 	float:left;
-	border-color:#81B953;
-	border-width:2px;
-	border-style:solid;
-	margin: 4px 0px 4px 4px;
-	-moz-border-radius-topleft: 4px;
-	-webkit-border-top-left-radius: 4px;
-	-moz-border-radius-topright: 4px;
-	-webkit-border-top-right-radius: 4px;
-	-moz-border-radius-bottomleft: 4px;
-	-webkit-border-bottom-left-radius: 4px;
-	-moz-border-radius-bottomright: 4px;
-	-webkit-border-bottom-right-radius: 4px;
-	-moz-box-shadow: 10px 10px 5px #888;
-	-webkit-box-shadow: 10px 10px 5px #888;
-	box-shadow: 10px 10px 5px #888;
 }
 #right {
-	padding:10px 10px 10px 10px;
 	overflow:hidden;
+	width:38%;
+	float:right;
+}
+#left, #right {
 	border-color:#81B953;
 	border-width:2px;
 	border-style:solid;
+	padding:10px 10px 10px 10px;
 	background-color:white;
-	width:38%;
-	float:right;
 	margin: 4px 0px 4px 4px;
-  	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
 	-moz-box-shadow: 10px 10px 5px #888;
 	-webkit-box-shadow: 10px 10px 5px #888;
 	box-shadow: 10px 10px 5px #888;
-}
-#user {
+	}
+#user , #example, #about, #other_shells, #recent_searches, #user_searches{
 	padding: 0px 5px 5px 5px;
 	height:35px;
 	overflow:hidden;
@@ -87,156 +92,14 @@ body {
 	border-style:solid;
 	border-width:1px;
 	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-}
-#about {
-	padding: 0px 5px 5px 5px;
-	height:35px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-out;
-	-webkit-transition: all .5s ease-out;
-	-o-transition: all .5s ease-out;
-	transition: all .5s ease-out;
-	border-style:solid;
-	border-width:1px;
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-}
-/* #about:hover {
-   height:175px;
-   overflow:hidden;
-   -moz-transition: all .5s ease-in;
-   -webkit-transition: all .5s ease-in;
-   -o-transition: all .5s ease-in;
-   transition: all .5s ease-in;
-   } No longer needed due to request to make them onclick only. */
-#other_shells {
-	padding: 0px 5px 5px 5px;
-	height:35px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-out;
-	-webkit-transition: all .5s ease-out;
-	-o-transition: all .5s ease-out;
-	transition: all .5s ease-out;
-	border-style:solid;
-	border-width:1px;
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
 }
 
-#recent_searches {
-    padding: 0px 5px 5px 5px;
-	height:35px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-out;
-	-webkit-transition: all .5s ease-out;
-	-o-transition: all .5s ease-out;
-	transition: all .5s ease-out;
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-  	
-  	border-style:solid;
-	border-width:1px;
-  	
-  	padding: 0px 5px 5px 5px;
-  	
+#recent_searches, #user_searches {  	
   	color: #222222;
     font-family: helvetica,arial,sans-serif;
     font-size: 14px;
 }
 
-#user_searches {
-    padding: 0px 5px 5px 5px;
-	height:35px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-out;
-	-webkit-transition: all .5s ease-out;
-	-o-transition: all .5s ease-out;
-	transition: all .5s ease-out;
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-  	
-  	border-style:solid;
-	border-width:1px;
-  	
-  	padding: 0px 5px 5px 5px;
-  	
-  	color: #222222;
-    font-family: helvetica,arial,sans-serif;
-    font-size: 14px;
-}
-
-/*  #other_shells:hover {
-	height:80px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-in;
-    -webkit-transition: all .5s ease-in;
-    -o-transition: all .5s ease-in;
-    transition: all .5s ease-in;
-	} No longer needed due to request to make them onclick only. */
-#example {
-	padding: 0px 5px 5px 5px;
-	height:35px;
-	overflow:hidden;
-	-moz-transition: all .5s ease-out;
-	-webkit-transition: all .5s ease-out;
-	-o-transition: all .5s ease-out;
-	transition: all .5s ease-out;
-	border-style:solid;
-	border-width:1px;
-	background-color:#e4ebe4;
-	-moz-border-radius-topleft: 4px;
-  	-webkit-border-top-left-radius: 4px;
-  	-moz-border-radius-topright: 4px;
-  	-webkit-border-top-right-radius: 4px;
-  	-moz-border-radius-bottomleft: 4px;
-  	-webkit-border-bottom-left-radius: 4px;
-  	-moz-border-radius-bottomright: 4px;
-  	-webkit-border-bottom-right-radius: 4px;
-}
-/* #example:hover {
-   height:175px;
-   overflow:hidden;
-   -moz-transition: all .5s ease-in;
-   -webkit-transition: all .5s ease-in;
-   -o-transition: all .5s ease-in;
-   transition: all .5s ease-in;
-   } No longer needed due to request to make them onclick only. */
 .right_title {
 	font-size:35px;
 	font-weight:bold;
@@ -246,16 +109,32 @@ body {
 }
 .title {
 	float:left;
+
 }
-.arrow {
+#logout_link {
+float:right;
+	text-align:center;
+	margin-right:10px;
+	margin-top:12.5px;
+}
+#other_shells_arrow, #recent_searches_arrow, #example_arrow, #about_arrow, #user_searches_arrow {
 	float:right;
 	text-align:center;
 	margin-right:10px;
 	margin-top:7.5px;
+	-moz-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+	-webkit-transform: rotate(0deg) translate(0px, 0px);
+	-moz-transform: rotate(0deg) translate(0px, 0px);
+	-o-transform: rotate(0deg) translate(0px, 0px);
+	-ms-transform: rotate(0deg) translate(0px, 0px);
+	-transform: rotate(0deg) translate(0px, 0px);
 }
 
 #clear_searches {
-    margin-top:14px;
+text-align:center;
 }
 
 .content {
