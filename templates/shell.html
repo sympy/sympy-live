@@ -9,43 +9,54 @@
 		<script type="text/javascript">
 		function transition_about(){
 			if (document.getElementById('about').style.height == "175px") {
-			document.getElementById('about').style.height = "35px"; }
+			document.getElementById('about').style.height = "35px";
+			document.getElementById('about_arrow_clicked').id='about_arrow';			}
 			else {
 			document.getElementById('about').style.height = "175px";
+			document.getElementById('about_arrow').id='about_arrow_clicked';
 			}
 		}
 		function transition_example(){
 			if (document.getElementById('example').style.height == "175px") {
-			document.getElementById('example').style.height = "35px"; }
+			document.getElementById('example').style.height = "35px";
+			document.getElementById('example_arrow_clicked').id='example_arrow';			}
 			else {
 			document.getElementById('example').style.height = "175px";
+			document.getElementById('example_arrow').id='example_arrow_clicked';
 			}
 		}
 		function transition_other_shells(){
-						if (document.getElementById('other_shells').style.height == "95px") {
-			document.getElementById('other_shells').style.height = "35px"; }
+			if (document.getElementById('other_shells').style.height == "95px") {
+			document.getElementById('other_shells').style.height = "35px";
+			document.getElementById('other_shells_arrow_clicked').id='other_shells_arrow';
+			}
 			else {
 			document.getElementById('other_shells').style.height = "95px";
+			document.getElementById('other_shells_arrow').id='other_shells_arrow_clicked';
 			}
 		}
 
         function expand_userhistory(){
             if (document.getElementById('user_searches').style.height == "225px") {
-	            document.getElementById('user_searches').style.overflow = "hidden";
+	            <!-- document.getElementById('user_searches').style.overflow = "hidden"; -->
 	            document.getElementById('user_searches').style.height = "35px";
+				document.getElementById('user_searches_arrow_clicked').id='user_searches_arrow';
 			} else {
-			    document.getElementById('user_searches').style.overflow = "auto";
+			    <!--document.getElementById('user_searches').style.overflow = "auto"; -->
 			    document.getElementById('user_searches').style.height = "225px";
+				document.getElementById('user_searches_arrow').id='user_searches_arrow_clicked';
 			}
 		}
 
 		function expand_history(){
 			if (document.getElementById('recent_searches').style.height == "225px") {
-			    document.getElementById('recent_searches').style.overflow = "hidden";
-			    document.getElementById('recent_searches').style.height = "35px";
+			    <!-- document.getElementById('recent_searches').style.overflow = "hidden"; -->
+			    document.getElementById('recent_searches').style.height = "35px"; 
+				document.getElementById('recent_searches_arrow_clicked').id='recent_searches_arrow';
 			} else {
-			    document.getElementById('recent_searches').style.overflow = "auto";
+			    <!-- document.getElementById('recent_searches').style.overflow = "auto";  -->
 			    document.getElementById('recent_searches').style.height = "225px";
+				document.getElementById('recent_searches_arrow').id='recent_searches_arrow_clicked';
 			}
 		}
 
@@ -146,7 +157,7 @@
                 {{ user.nickname }}
             {% else %}
                 <a href="{{ login_url }}">Log In</a>
-            {% endif %}</h3></div><div class="arrow">{% if user %}
+            {% endif %}</h3></div><div id="logout_link">{% if user %}
                 <a href="{{ logout_url }}">Log Out</a>
             {% else %}
             {% endif %}</div>
@@ -156,15 +167,12 @@
 			{% if user %}
 			<br/>
 			<div id="user_searches">
-		        <div class="arrow" onclick="expand_userhistory();">
+		        <a href="#user_searches"><div class="clickable_top" onclick="expand_userhistory();">
+				<div id="user_searches_arrow">
                     <img height="25" width="25" alt="Arrow" src="static/arrow.png">
                 </div>
-
-                <div class="title" onclick="expand_userhistory();">
-                <h3 style="display:block;">My Searches&nbsp;</h3>
-                </div>
-                <div class="title" id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
-
+                <div class="title"><h3 style="display:block;">My Searches&nbsp;</h3></div>
+                </div></a>
                 <div id="saved_searches" class="content">
                 {% for search in saved_searches %}
                     {% if search.query %}
@@ -172,8 +180,13 @@
                     {% endif %}
                 {% endfor %}
                 </div>
+				<div id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
         </div>{% endif %}<br/>
-            <div id="about" onclick="transition_about();"><div class="title"><h3>About this page</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+            <div id="about">
+			<a href="#about"><div class="clickable_top" onclick="transition_about();">
+			<div class="title"><h3>About this page</h3></div>
+			<div id="about_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			</div></a>
 <div class="content">
         <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
         running on the
@@ -188,7 +201,11 @@ This is just a regular Python shell, with the following commands executed by def
 &gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
 </pre></div>
 			</div><br/>
-            <div id="example" onclick="transition_example();"><div class="title"><h3>Example session</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+            <div id="example">
+			<a href="#example"><div class="clickable_top" onclick="transition_example();">
+			<div class="title"><h3>Example session</h3></div>
+			<div id="example_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			</div></a>
 <div class="content">
 <pre>
 &gt;&gt;&gt; expr = (x + y)**5
@@ -207,7 +224,14 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 			</div>
 			</div>
 			<br/>
-			<div id="other_shells" onclick="transition_other_shells();"><div class="title"><h3>Other Online Shells</h3></div><div class="arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div><div class="content">
+			<div id="other_shells">
+			
+				<a href="#other_shells"><div class="clickable_top" onclick="transition_other_shells();"> 
+					<div class="title"><h3>Other Online Shells</h3></div>
+					<div id="other_shells_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+				</div></a>
+				
+				<div class="content">
             <ul>
                 <li><a href="/shelldsi">Nintendo DSi Calculator</a> which is adapted for the dimensions of the DSi browser.</li>
                 <li><a href="/shellmobile">Mobile Shell</a> which is adapted for mobile browsers.</li>
@@ -216,15 +240,15 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 		</div>
 		<br/>
 		<div id="recent_searches">
-		    <div class="arrow" onclick="expand_history();">
-                <img height="25" width="25" alt="Arrow" src="static/arrow.png">
-            </div>
-
-            <div class="title" onclick="expand_history();">
+		    <a href="#recent_searches"><div class="clickable_top" onclick="expand_history();"> 
+			<div class="title">
             <h3>Recent Searches</h3>
             </div>
-
-            <div class="content">
+			<div id="recent_searches_arrow">
+                <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+            </div>
+			</div></a>
+            <div id="recent_searches_content" class="content">
             {% for search in searches %}
                 <pre>{{ search.query|escape }}</pre></br>
             {% endfor %}
