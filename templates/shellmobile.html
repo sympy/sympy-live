@@ -85,11 +85,8 @@
       <div id="saved-searches-container" class="hidden" {% if not user %}style="display:none;"{% endif %}>
         <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
         <div id="saved-searches">
-          <p>Press to evaluate.</p>
-          <p>
-            <a href="javascript:void 0;" id="saved-searches-clear">
-              Clear History</a>
-          </p>
+          <p>Press to evaluate. <a href="javascript:void 0;"
+              id="saved-searches-clear"> Clear History</a></p>
           <ul id="saved-searches-list">
             {% for search in saved_searches %}
             <li><button><pre>{{ search.query|escape }}</pre></button></li>
