@@ -651,14 +651,26 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.outputEl.dom.scrollTop = this.outputEl.dom.scrollHeight;
     },
 
+    setEvaluating: function(state) {
+      if (state) {
+          this.evaluating = true;
+          this.promptEl.addClass('sympy-live-processing');
+          this.evaluateEl.set({'disabled': 'disabled'});
+          this.evaluateEl.addClass('sympy-live-evaluate-disabled');
+      } else {
+          this.evaluating = false;
+          this.promptEl.removeClass('sympy-live-processing');
+          this.evaluateEl.set({disabled: null}, false);
+          this.evaluateEl.removeClass('sympy-live-evaluate-disabled');
+      }
+    },
+
     evaluate: function() {
         var statement = this.promptEl.getValue();
         // make sure the statement is not only whitespace
         // use statement != "" if pure whitespace should be evaluated
         if (!this.evaluating && !statement.match(/^\s*$/)) {
-            this.evaluating = true;
-            this.promptEl.set({"disabled": "disabled"});
-            this.promptEl.addClass('sympy-live-processing');
+            this.setEvaluating(true);
 
             var data = {
                 print_statement: this.getValue().split('\n'),
@@ -694,10 +706,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
-                    this.promptEl.removeClass('sympy-live-processing');
-                    this.promptEl.set({disabled: null}, false);
+                    this.setEvaluating(false);
                     this.promptEl.focus();
-                    this.evaluating = false;
                 },
                 scope: this
             });
@@ -731,10 +741,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
         }
 
-        this.promptEl.removeClass('sympy-live-processing');
-        this.promptEl.set({disabled: null}, false);
+        this.setEvaluating(false);
         this.promptEl.focus();
-        this.evaluating = false;
     },
 
     clear: function() {
