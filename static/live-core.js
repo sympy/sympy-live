@@ -92,6 +92,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
     recordTypes: ['on', 'off'],
+    autocompleteTypes: ['tab', 'ctrl-space'],
     printer: null,
     submit: null,
     tabWidth: 4,
@@ -132,6 +133,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
+
+        index = this.recordTypes.indexOf(config.record);
+        this.autocomplete = (index == -1) ?
+            this.getCookie('sympy-autocomplete', 'tab') : config.autocomplete;
 
         delete config.printer;
         delete config.submit;
@@ -193,6 +198,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             spellcheck: 'false'
         }, true);
 
+        this.completionsEl = Ext.DomHelper.append(el, {
+            tag: 'ul',
+            cls: 'sympy-live-autocompletions'
+        }, true);
+
         this.renderToolbar(el);
 
         this.caretEl.on("focus", function(event) {
@@ -229,6 +239,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, this);
 
         this.submitEl.on("change", function(event) {
+            this.updateSettings();
+            this.promptEl.focus();
+        }, this);
+
+        this.autocompleteEl.on("change", function(event) {
             this.updateSettings();
             this.promptEl.focus();
         }, this);
@@ -607,6 +622,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
 
             break;
+        case SymPy.Keys.TAB:
+            if (this.autocompleteEl.getValue() === "tab") {
+                this.complete();
+                event.stopEvent();
+            }
+            break;
         }
 
         return false;
@@ -706,10 +727,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 url: (this.basePath || '') + '/autocomplete',
                 jsonData: Ext.encode(data),
                 success: function(response) {
-                    self.displayCompletions(Ext.decode(response.responseText));
+                    this.displayCompletions(Ext.decode(response.responseText));
                 },
                 failure: function(response) {
-                    self.completionError(response);
+                    this.completionError(response);
                 },
                 scope: this
             });
@@ -819,6 +840,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.setCookie('sympy-printer', this.printerEl.getValue());
         this.setCookie('sympy-submit', this.submitEl.getValue());
         this.setCookie('sympy-privacy', this.recordEl.getValue());
+        this.setCookie('sympy-autocomplete', this.autocompleteEl.getValue());
     },
 
     setCookie: function(name, value) {
@@ -845,6 +867,27 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     displayCompletions: function(responseJSON) {
+        var completions = responseJSON['completions'];
+        this.completionsEl.dom.innerHTML = '';
+        console.log(completions);
+        if (completions.length === 1){
+            this.setValue(completions[0]);
+        }
+        else if(completions.length > 0){
+            Ext.each(completions, function(c){
+                Ext.DomHelper.append(this.completionsEl, {
+                    tag: 'li',
+                    html: c
+                }, true);
+            }, this);
+        }
+        else {
+            Ext.DomHelper.append(this.completionsEl, {
+                tag: 'li',
+                cls: 'sympy-live-autocompletions-none',
+                html: '&lt;No completions&gt;'
+            }, true);
+        }
     },
 
     completionError: function(response) {

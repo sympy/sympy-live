@@ -562,7 +562,7 @@ class AutocompleteHandler(webapp.RequestHandler):
 
         result = {
             'session': str(session_key),
-            'completions': completions
+            'completions': list(sorted(set(completions)))
         }
 
         self.response.headers['Content-Type'] = 'application/json'
