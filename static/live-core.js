@@ -312,6 +312,25 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 cls: 'sympy-live-separator',
                 html: '|'
             }, {
+                tag: 'select',
+                id: 'autocomplete-behavior',
+                children: [{
+                    tag: 'option',
+                    value: 'tab',
+                    html: 'Tab'
+                }, {
+                    tag: 'option',
+                    value: 'ctrl-space',
+                    html: 'Ctrl-Space'
+                }]
+            }, {
+                tag: 'span',
+                html: 'autocompletes'
+            }, {
+                tag: 'span',
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
                 tag: 'span',
                 html: 'Ctrl-Up/Down for history'
             }, {
@@ -347,7 +366,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
-        this.recordEl = this.toolbarEl.down('select:nth(3)');
+        this.autocompleteEl = this.toolbarEl.down('select:nth(3)');
+        this.recordEl = this.toolbarEl.down('select:nth(4)');
 
         var index;
 
