@@ -90,6 +90,31 @@
     </div>
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
+    <div id="searches-container">
+      <div id="saved-searches-container" class="hidden" {% if not user %}style="display:none;"{% endif %}>
+        <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
+        <div id="saved-searches">
+          <p>Press to evaluate. <a href="javascript:void 0;"
+              id="saved-searches-clear"> Clear History</a></p>
+          <ul id="saved-searches-list">
+            {% for search in saved_searches %}
+            <li><button><pre>{{ search.query|escape }}</pre></button></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div id="recent-searches-container" class="hidden">
+        <h3>Recent Searches<img src="static/arrow.png" alt="Arrow" /></h3>
+        <div id="recent-searches">
+          <p>Press to evaluate.</p>
+          <ul id="recent-searches-list">
+            {% for search in searches %}
+            <li><button><pre>{{ search.query|escape }}</pre></button></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
     <div id="shell"></div>
     <div id="main-navigation">
         <ul>
