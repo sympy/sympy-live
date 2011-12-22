@@ -98,3 +98,27 @@ button {
     line-height: 50px;
 }
 
+.sympy-live-autocompletions {
+    overflow: hidden;
+    list-style-type: decimal;
+    font-family: monospace;
+    font-size: 10pt;
+    height: 1.2em;
+    width: 95%;
+    counter-reset: completion;
+}
+
+.sympy-live-autocompletions li {
+    display: inline;
+    margin-right: 0.25em;
+    
+}
+
+.sympy-live-autocompletions li:before {
+    counter-increment: completion;
+    content: counter(completion) ". ";
+}
+
+.sympy-live-autocompletions li:after {
+    content: " | ";
+}

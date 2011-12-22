@@ -199,7 +199,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, true);
 
         this.completionsEl = Ext.DomHelper.append(el, {
-            tag: 'ul',
+            tag: 'ol',
             cls: 'sympy-live-autocompletions'
         }, true);
 
