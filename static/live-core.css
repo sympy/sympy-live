@@ -76,7 +76,7 @@ button {
 }
 
 .sympy-live-processing {
-    background-image: url("/static/spinner.gif");
+    background-image: url("/static/images/spinner.gif");
 }
 
 .sympy-live-fullscreen-popup {

@@ -95,7 +95,7 @@ body {
     color: #FFF;
 }
 
-.sympy-live-processing { background-image: url("/static/spinner.gif"); }
+.sympy-live-processing { background-image: url("/static/images/spinner.gif"); }
 
 @media only screen and (max-width: 320px) {
     .sympy-live-output {
