@@ -258,6 +258,10 @@ class Live(object):
 
         completer = rlcompleter.Completer(statement_module.__dict__)
 
+        if '=' in statement:
+            statement = statement.split('=', 1)[1].strip()
+            print >> sys.stderr, statement
+
         # XXX need a better way to do this
         if '.' in statement:
             return completer.attr_matches(statement)
