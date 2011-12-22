@@ -98,6 +98,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     tabWidth: 4,
     basePath: null,
     defaultBasePath: 'http://live.sympy.org',
+    autocompleter: null,
 
     constructor: function(config) {
         config = Ext.apply({}, config);
@@ -202,6 +203,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             tag: 'ol',
             cls: 'sympy-live-autocompletions'
         }, true);
+
+        this.autocompleter = new SymPy.Autocompleter({
+            input: this.promptEl,
+            output: this.completionsEl
+        }, this);
+        this.autocompleter.setup();
 
         this.renderToolbar(el);
 
@@ -622,14 +629,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
 
             break;
+
         case SymPy.Keys.TAB:
             if (this.autocompleteEl.getValue() === "tab") {
-                this.complete();
+                this.autocompleter.complete(this.getStatement());
                 event.stopEvent();
             }
             break;
         }
-
         return false;
     },
 
@@ -735,7 +742,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 scope: this
             });
         }
->>>>>>> Added start of autocomplete to JS
     },
 
     evaluate: function() {
@@ -864,33 +870,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         return (result) ? result : default_value;
-    },
-
-    displayCompletions: function(responseJSON) {
-        var completions = responseJSON['completions'];
-        this.completionsEl.dom.innerHTML = '';
-        console.log(completions);
-        if (completions.length === 1){
-            this.setValue(completions[0]);
-        }
-        else if(completions.length > 0){
-            Ext.each(completions, function(c){
-                Ext.DomHelper.append(this.completionsEl, {
-                    tag: 'li',
-                    html: c
-                }, true);
-            }, this);
-        }
-        else {
-            Ext.DomHelper.append(this.completionsEl, {
-                tag: 'li',
-                cls: 'sympy-live-autocompletions-none',
-                html: '&lt;No completions&gt;'
-            }, true);
-        }
-    },
-
-    completionError: function(response) {
     },
 
     fullscreen: function() {

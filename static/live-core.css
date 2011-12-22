@@ -122,3 +122,7 @@ button {
 .sympy-live-autocompletions li:after {
     content: " | ";
 }
+
+.sympy-live-autocompletions li:last-child:after {
+    content: "";
+}
