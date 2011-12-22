@@ -477,7 +477,7 @@ class ForceDesktopCookieHandler(webapp.RequestHandler):
         expiration = datetime.datetime.now() + datetime.timedelta(days=1000)
         cookie = Cookie.SimpleCookie()
         cookie["desktop"] = "yes"
-        cookie["desktop"]["domain"] = "sympy-live-testing-madnutter56.appspot.com"
+        cookie["desktop"]["domain"] = "live.sympy.org"
         cookie["desktop"]["path"] = "/"
         cookie["desktop"]["expires"] = \
         expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
