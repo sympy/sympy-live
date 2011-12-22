@@ -47,6 +47,7 @@ import tokenize
 import types
 import simplejson
 import wsgiref.handlers
+import rlcompleter
 
 from StringIO import StringIO
 
@@ -230,6 +231,38 @@ class Live(object):
     def compile(self, source, mode):
         """Wrapper over Python's built-in function. """
         return compile(source, self._file, mode)
+
+    def complete(self, statement, session):
+        """Autocomplete the statement in the session's globals."""
+
+        statement_module = new.module('__main__')
+        import __builtin__
+        statement_module.__builtin__ = __builtin__
+
+        statement_module.__name__ = '__main__'
+
+        # re-evaluate the unpicklables
+        for code in session.unpicklables:
+            exec code in statement_module.__dict__
+
+        old_globals = dict(statement_module.__dict__)
+
+        # re-initialize the globals
+        session_globals_dict = session.globals_dict()
+
+        for name, val in session_globals_dict.items():
+            try:
+                statement_module.__dict__[name] = val
+            except:
+                session.remove_global(name)
+
+        completer = rlcompleter.Completer(statement_module.__dict__)
+
+        # XXX need a better way to do this
+        if '.' in statement:
+            return completer.attr_matches(statement)
+        else:
+            return completer.global_matches(statement)
 
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """
@@ -498,6 +531,43 @@ class FrontPageHandler(webapp.RequestHandler):
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
 
+class AutocompleteHandler(webapp.RequestHandler):
+    """Takes an incomplete statement and returns possible completions."""
+    def post(self):
+        try:
+            message = simplejson.loads(self.request.body)
+        except ValueError:
+            self.error(400)
+            return
+
+        session_key = message.get('session')
+        statement = message.get('statement').encode('utf-8')
+        live = Live()
+
+        if session_key is not None:
+            try:
+                session = Session.get(session_key)
+            except db.Error:
+                self.error(400)
+                return
+        else:
+            session = Session()
+            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
+            session_key = session.put()
+
+            live.evaluate(PREEXEC, session)
+            live.evaluate(PREEXEC_INTERNAL, session)
+
+        completions = live.complete(statement, session)
+
+        result = {
+            'session': str(session_key),
+            'completions': completions
+        }
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps(result))
+
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
 
@@ -702,6 +772,7 @@ def main():
       ('/shellmobile', ShellMobileFrontPageHandler),
       ('/shell.do', StatementHandler),
       ('/delete', DeleteHistory),
+      ('/autocomplete', AutocompleteHandler)
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)
