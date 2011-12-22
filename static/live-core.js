@@ -665,6 +665,38 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
       }
     },
 
+    getStatement: function() {
+        // gets and sanitizes the current statement
+        var statement = this.promptEl.getValue();
+        if (!statement.match(/^\s*$/)) {
+            return statement;
+        }
+        return null;
+    },
+
+    complete: function() {
+        var statement = this.getStatement();
+        if (statement !== null) {
+            var data = {
+                session: this.session || null,
+                statement: statement
+            };
+            Ext.Ajax.request({
+                method: 'POST',
+                url: (this.basePath || '') + '/autocomplete',
+                jsonData: Ext.encode(data),
+                success: function(response) {
+                    self.displayCompletions(Ext.decode(response.responseText));
+                },
+                failure: function(response) {
+                    self.completionError(response);
+                },
+                scope: this
+            });
+        }
+>>>>>>> Added start of autocomplete to JS
+    },
+
     evaluate: function() {
         var statement = this.promptEl.getValue();
         // make sure the statement is not only whitespace
@@ -790,6 +822,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         return (result) ? result : default_value;
+    },
+
+    displayCompletions: function(responseJSON) {
+    },
+
+    completionError: function(response) {
     },
 
     fullscreen: function() {
