@@ -38,6 +38,8 @@ body {
     resize: none;
     width: 50px;
     margin-left: 0px;
+    -webkit-appearance: none;
+    -webkit-border-radius:0px;
 }
 
 .sympy-live-prompt {
@@ -58,6 +60,9 @@ body {
     right: 40px;
     position: absolute;
     left: 59px;
+    margin-left:-15px;
+    -webkit-appearance: none;
+    -webkit-border-radius:0px;
 }
 
 .sympy-live-toolbar {
