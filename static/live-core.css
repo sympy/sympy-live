@@ -79,6 +79,11 @@ button {
     background-image: url("/static/spinner.gif");
 }
 
+.sympy-live-toolbar > button.sympy-live-evaluate-disabled {
+    background-color: #999;
+    color: #000
+}
+
 .sympy-live-fullscreen-popup {
     background: #000;
     left: 50%;
