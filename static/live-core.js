@@ -653,6 +653,16 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 event.stopEvent();
             }
             break;
+
+        case SymPy.Keys.SPACE:
+            if (event.ctrlKey &&
+                this.autocompleteEl.getValue() === "ctrl-space") {
+                this.autocompleter.complete(
+                    this.getStatement(),
+                    this.getSelection());
+                event.stopEvent();
+            }
+            break;
         }
         return false;
     },
