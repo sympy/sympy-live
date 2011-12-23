@@ -644,7 +644,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         case SymPy.Keys.TAB:
             if (this.autocompleteEl.getValue() === "tab") {
-                this.autocompleter.complete(this.getStatement());
+                this.autocompleter.complete(
+                    this.getStatement(),
+                    this.getSelection());
                 event.stopEvent();
             }
             break;

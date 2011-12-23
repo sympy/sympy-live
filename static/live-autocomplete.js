@@ -42,8 +42,27 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         }, true);
     },
 
-    complete: function(statement) {
+    complete: function(statement, selection) {
         if (statement !== null) {
+
+            // Get just the part to complete
+            var start = 0;
+            var end = selection.end;
+            // Ugly loop, but it's simple and it works
+            var regex = /:|"|'|\)|\(|\[|\]|\{|\}|\n|\s|\t/;
+            for(var i = end - 1; i >= 0 ; i--){
+                var c = statement[i];
+
+                if (c.match(regex) !== null) {
+                    start = i + 1;
+                    break;
+                }
+            }
+
+            this.replacePosition = [start, end];
+            this.replaceText = statement;
+            statement = statement.substring(start, end);
+
             var data = {
                 session: this.session || null,
                 statement: statement
@@ -64,23 +83,34 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     doComplete: function(completion) {
-        this.shell.setValue(completion);
+        var prefix = this.replaceText.substring(0, this.replacePosition[0]);
+        var suffix = this.replaceText.substring(
+            this.replacePosition[1],
+            this.replaceText.length);
+        this.shell.setValue(prefix + completion + suffix);
+        this.shell.setSelection(prefix.length + completion.length);
     },
 
     completionSuccess: function(responseJSON) {
         var completions = responseJSON['completions'];
         this.outputEl.dom.innerHTML = '';
-        console.log(completions);
         if (completions.length === 1){
             this.doComplete(completions[0]);
         }
         else if(completions.length > 0){
             for(var i = 0; i < completions.length; i++){
-                Ext.DomHelper.append(this.outputEl, {
+                var link = Ext.DomHelper.append(this.outputEl, {
                     tag: 'li',
-                    html: completions[i],
+                    children: [{
+                        tag: 'a',
+                        html: completions[i],
+                        href: 'javascript:void 0;'
+                    }],
                     id: this.getID(i)
-                });
+                }, true);
+                link.on("click", function(event){
+                    this.doComplete(event.target.innerText);
+                }, this);
             }
             this.currentCompletion = 0;
         }
@@ -92,6 +122,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
             }, true);
         }
         this.completions = completions;
+        this.allCompletions = completions;
     },
 
     completionError: function(response) {
