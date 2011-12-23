@@ -2,6 +2,22 @@ Ext.ns("SymPy");
 
 $.fn.reverse = [].reverse;
 
+SymPy.NumberKeyCodes = {
+    48: 0, 49: 1,
+    50: 2, 51: 3,
+    52: 4, 53: 5,
+    54: 6, 55: 7,
+    56: 8, 57: 9,
+};
+
+SymPy.NumberKeys = {
+    48: true, 49: true,
+    50: true, 51: true,
+    52: true, 53: true,
+    54: true, 55: true,
+    56: true, 57: true,
+};
+
 SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     inputEl: null,
     outputEl: null,
@@ -105,6 +121,13 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         if(typeof end === "undefined" || end === true) {
             this.finishComplete();
         }
+    },
+
+    doNumberComplete: function(keyCode){
+        if(!this.isNumberKey(keyCode)) {return;}
+        var number = SymPy.NumberKeyCodes[keyCode];
+        var index = this.currentCompletion + number - 1;
+        this.doComplete(this.completions[index]);
     },
 
     finishComplete: function(){
@@ -219,5 +242,9 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     isShowing: function(index) {
         var y = this.outputEl.first("li").getY();
         return (Ext.fly(this.getID(index)).getY() === y);
+    },
+
+    isNumberKey: function(keyCode) {
+        return SymPy.NumberKeys[keyCode] === true;
     }
 });

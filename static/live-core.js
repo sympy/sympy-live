@@ -528,6 +528,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     handleKey: function(event) {
+        if (event.ctrlKey && this.autocompleter.isNumberKey(event.getKey())) {
+            this.autocompleter.doNumberComplete(event.getKey());
+            event.stopEvent();
+            return;
+        }
         switch (event.getKey()) {
         case SymPy.Keys.UP:
             if ((event.ctrlKey && !event.altKey) || this.onFirstLine()) {
