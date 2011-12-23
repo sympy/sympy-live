@@ -111,6 +111,11 @@ button {
 
 .sympy-live-processing { background-image: url("/static/spinner.gif"); }
 
+.sympy-live-toolbar > button.sympy-live-evaluate-disabled {
+    background-color: #999;
+    color: #000
+}
+
 @media only screen and (max-width: 320px) {
     .sympy-live-output {
         height: 240px;
