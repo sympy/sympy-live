@@ -544,9 +544,21 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             break;
         case SymPy.Keys.LEFT:
-            return true;
+            if (event.ctrlKey) {
+                event.stopEvent();
+                this.autocompleter.showPrevGroup();
+            }
+            else {
+                return true;
+            }
         case SymPy.Keys.RIGHT:
-            return true;
+            if (event.ctrlKey) {
+                this.autocompleter.showNextGroup();
+                event.stopEvent();
+            }
+            else {
+                return true;
+            }
         case SymPy.Keys.BACKSPACE:
             if (this.supportsSelection) {
                 var cursor = this.getCursor();
