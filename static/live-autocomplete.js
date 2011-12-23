@@ -43,6 +43,10 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     complete: function(statement, selection) {
+        if (statement === this.replaceText) {
+            this.doComplete(this.completions[this.currentCompletion], true);
+            return;
+        }
         if (statement !== null) {
 
             // Get just the part to complete
