@@ -82,19 +82,31 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         }
     },
 
-    doComplete: function(completion) {
+    doComplete: function(completion, end) {
         var prefix = this.replaceText.substring(0, this.replacePosition[0]);
         var suffix = this.replaceText.substring(
             this.replacePosition[1],
             this.replaceText.length);
         this.shell.setValue(prefix + completion + suffix);
         this.shell.setSelection(prefix.length + completion.length);
+        if(typeof end === "undefined" || end === true) {
+            this.finishComplete();
+        }
+    },
+
+    finishComplete: function(){
+        this.replaceText = null;
+        this.replacePositon = null;
+        this.completions = [];
+        this.allCompletions = [];
+        this.currentCompletion = 0;
+        this.outputEl.dom.innerHTML = '';
     },
 
     completionSuccess: function(responseJSON) {
         var completions = responseJSON['completions'];
         this.outputEl.dom.innerHTML = '';
-        this.doComplete(responseJSON['prefix']);
+        this.doComplete(responseJSON['prefix'], false);
 
         if (completions.length === 1){
             this.doComplete(completions[0]);
