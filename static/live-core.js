@@ -135,7 +135,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
 
-        index = this.recordTypes.indexOf(config.record);
+        index = this.recordTypes.indexOf(config.autocomplete);
         this.autocomplete = (index == -1) ?
             this.getCookie('sympy-autocomplete', 'tab') : config.autocomplete;
 
@@ -401,6 +401,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(this.record);
         this.recordEl.dom.selectedIndex = index;
+
+        index = this.autocompleteTypes.indexOf(this.autocomplete);
+        this.autocompleteEl.dom.selectedIndex = index;
     },
 
     getKeyEvent: function() {
