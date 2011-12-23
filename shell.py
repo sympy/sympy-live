@@ -565,9 +565,14 @@ class AutocompleteHandler(webapp.RequestHandler):
             completions = [x for x in completions if
                            not x.split('.')[-1].startswith('_')]
 
+        # From http://stackoverflow.com/a/1916632
+        # Get longest common prefix to fill instantly
+        common = os.path.commonprefix(completions)
+
         result = {
             'session': str(session_key),
-            'completions': completions
+            'completions': completions,
+            'prefix': common
         }
 
         self.response.headers['Content-Type'] = 'application/json'

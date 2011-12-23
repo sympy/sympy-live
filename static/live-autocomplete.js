@@ -94,6 +94,8 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     completionSuccess: function(responseJSON) {
         var completions = responseJSON['completions'];
         this.outputEl.dom.innerHTML = '';
+        this.doComplete(responseJSON['prefix']);
+        console.log(responseJSON['prefix']);
         if (completions.length === 1){
             this.doComplete(completions[0]);
         }
