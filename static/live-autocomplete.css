@@ -2,17 +2,27 @@
     overflow: hidden;
     list-style-type: decimal;
     font-family: monospace;
-    font-size: 10pt;
+    font-size: 12pt;
     width: 89%;
-    height: 12pt;
+    height: 13.5pt;
     counter-reset: completion;
     display: inline-block;
-    padding: 0 0.25em;
+    padding: 0.25em 0.25em;
+    -moz-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+}
+
+.sympy-live-autocompletions.expanded {
+    height: 150px;
+    overflow: auto;
 }
 
 .sympy-live-autocompletions li {
     display: inline-block;
     margin-right: 0.25em;
+    height: 12pt;
 }
 
 .sympy-live-autocompletions li.counted:before {
@@ -31,11 +41,33 @@
 .sympy-live-autocompletions-toolbar {
     width: 10%;
     display: inline-block;
+    vertical-align: top;
 }
 
 .sympy-live-autocompletions-toolbar button {
     background-color: #3b5526;
     color: #FFF;
     border-radius: 0;
-    width: 49%;
+    width: 32%;
+}
+
+.sympy-live-autocompletions-toolbar button:first-child span {
+    display: block;
+    -moz-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+    -webkit-transform: rotate(0deg) translate(0px, 0px);
+    -moz-transform: rotate(0deg) translate(0px, 0px);
+    -o-transform: rotate(0deg) translate(0px, 0px);
+    -ms-transform: rotate(0deg) translate(0px, 0px);
+    -transform: rotate(0deg) translate(0px, 0px);
+}
+
+.sympy-live-autocompletions-toolbar button.hidden:first-child span {
+    -webkit-transform: rotate(-180deg) translate(0px, 0px);
+    -moz-transform: rotate(-180deg) translate(0px, 0px);
+    -o-transform: rotate(-180deg) translate(0px, 0px);
+    -ms-transform: rotate(-180deg) translate(0px, 0px);
+    -transform: rotate(-180deg) translate(0px, 0px);
 }

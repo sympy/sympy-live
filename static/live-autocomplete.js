@@ -21,14 +21,26 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
             cls: 'sympy-live-autocompletions-toolbar',
             children: [{
                 tag: 'button',
+                children: [{
+                    tag: 'span',  // For CSS animation purposes
+                    html: '&#x25BC;'
+                }],
+                title: 'Show/Hide All Completions'
+            },{
+                tag: 'button',
                 html: '&lt;'
             },{
                 tag: 'button',
                 html: '&gt;'
             }]
         }, true);
-        this.prevEl = this.toolbarEl.down("button:nth(1)");
-        this.nextEl = this.toolbarEl.down("button:nth(2)");
+        this.expandEl = this.toolbarEl.down("button:nth(1)");
+        this.prevEl = this.toolbarEl.down("button:nth(2)");
+        this.nextEl = this.toolbarEl.down("button:nth(3)");
+        this.expandEl.on("click", function(event){
+            $(".sympy-live-autocompletions").toggleClass("expanded");
+            $(".sympy-live-autocompletions-toolbar button:first").toggleClass("hidden");
+        }, this);
         this.nextEl.on("click", function(event){
             this.showNextGroup();
         }, this);
@@ -186,7 +198,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     showNumbers: function() {
-        $(this.outputEl.dom).children("li").slice(0, 10).addClass('counted');
+        $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');
     },
 
     hideNumbers: function() {

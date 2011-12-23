@@ -58,6 +58,13 @@ SymPy.MobileShell = Ext.extend(
                     'html': '|'
                 }
             );
+            this.completeEl = Ext.DomHelper.insertAfter(
+                this.evaluateEl,
+                {
+                    'tag': 'button',
+                    'html': 'Complete'
+                }
+            , true);
             this.toolbarEl.down('span')
                 .appendTo(shell)
                 .insertBefore(this.outputEl);
@@ -65,6 +72,8 @@ SymPy.MobileShell = Ext.extend(
                 .appendTo(shell)
                 .insertBefore(this.outputEl);
             this.toolbarEl.down('span').remove();
+            this.toolbarEl.down('span').remove();
+            this.autocompleteEl.remove();
             this.historyPrevEl.on("click", function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
@@ -72,6 +81,11 @@ SymPy.MobileShell = Ext.extend(
             this.historyNextEl.on("click", function(event){
                 this.promptEl.focus(1000);
                 this.nextInHistory();
+            }, this);
+            this.completeEl.on("click", function(event){
+                this.autocompleter.complete(
+                    this.getStatement(),
+                    this.getSelection());
             }, this);
             Ext.get("menu").on("click", function(event){
                 Ext.get("main-navigation").toggle(true);
