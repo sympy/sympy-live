@@ -103,7 +103,6 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     showNextGroup: function() {
-        var y = Ext.fly(this.getID(this.currentCompletion));
         var current = this.currentCompletion;
         for(var i = current + 1; ; i++) {
             if (i === this.completions.length) { i = 0;}
@@ -114,35 +113,26 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
                 break;
             }
         }
-        $('#' + this.getID(current)).prevAll().reverse().appendTo($(this.outputEl.dom));
-        if (this.currentCompletion === current) {
-            this.currentCompletion = 0;
-            Ext.get(this.getID(current)).appendTo(this.outputEl);
-            return;
-        }
+        $('#' + this.getID(current)).
+            prevAll().
+            reverse().
+            appendTo($(this.outputEl.dom));
         this.currentCompletion = current;
     },
 
     showPrevGroup: function() {
         var current = this.currentCompletion;
-        var last = current - 1;
-        if (last < 0) {last = this.completions.length - 1;}
-        console.log("");
-        console.log("last", last);
-        for(var i = last; ; i--) {
-            if (i < 0) {i = this.completions.length - 1;}
-            this.outputEl.insertFirst(Ext.get(this.getID(i)));
-            this.currentCompletion = i;
-            console.log(current, i);
-            if(!this.isShowing(current)){
-                console.log("stop", current, i);
-                Ext.get(this.getID(i)).appendTo(this.outputEl);
-                this.currentCompletion += 1;
-                break;
+        while(true) {
+            this.outputEl.insertFirst(this.outputEl.last("li"));
+            if(!this.isShowing(this.currentCompletion)){
+                this.outputEl.first("li").appendTo(this.outputEl);
+                this.currentCompletion = parseInt(
+                    this.outputEl.first("li").id.split('-')[1],
+                    10
+                );
+                console.log(this.currentCompletion);
+                return;
             }
-        }
-        if (this.currentCompletion === this.completions.length) {
-            this.currentCompletion = 0;
         }
     },
 
@@ -151,8 +141,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     isShowing: function(index) {
-        var y = Ext.fly(this.getID(this.currentCompletion)).getY();
-        console.log("showing", index, y, Ext.fly(this.getID(index)).getY());
+        var y = this.outputEl.first("li").getY();
         return (Ext.fly(this.getID(index)).getY() === y);
     }
 });
