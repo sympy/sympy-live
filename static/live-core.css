@@ -103,15 +103,16 @@ button {
     list-style-type: decimal;
     font-family: monospace;
     font-size: 10pt;
-    height: 1.2em;
-    width: 95%;
+    width: 89%;
+    height: 12pt;
     counter-reset: completion;
+    display: inline-block;
+    padding: 0 0.25em;
 }
 
 .sympy-live-autocompletions li {
-    display: inline;
+    display: inline-block;
     margin-right: 0.25em;
-    
 }
 
 .sympy-live-autocompletions li:before {
@@ -125,4 +126,16 @@ button {
 
 .sympy-live-autocompletions li:last-child:after {
     content: "";
+}
+
+.sympy-live-autocompletions-toolbar {
+    width: 10%;
+    display: inline-block;
+}
+
+.sympy-live-autocompletions-toolbar button {
+    background-color: #3b5526;
+    color: #FFF;
+    border-radius: 0;
+    width: 49%;
 }

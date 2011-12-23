@@ -200,13 +200,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, true);
 
         this.completionsEl = Ext.DomHelper.append(el, {
-            tag: 'ol',
-            cls: 'sympy-live-autocompletions'
+            tag: 'div',
+            cls: 'sympy-live-autocompletions-container'
         }, true);
 
         this.autocompleter = new SymPy.Autocompleter({
             input: this.promptEl,
-            output: this.completionsEl
+            container: this.completionsEl
         }, this);
         this.autocompleter.setup();
 
