@@ -37,10 +37,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         this.expandEl = this.toolbarEl.down("button:nth(1)");
         this.prevEl = this.toolbarEl.down("button:nth(2)");
         this.nextEl = this.toolbarEl.down("button:nth(3)");
-        this.expandEl.on("click", function(event){
-            $(".sympy-live-autocompletions").scrollTop(0).toggleClass("expanded");
-            $(".sympy-live-autocompletions-toolbar button:first").toggleClass("hidden");
-        }, this);
+        this.expandEl.on("click", this.toggleAllCompletions, this);
         this.nextEl.on("click", function(event){
             this.showNextGroup();
         }, this);
@@ -117,6 +114,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         this.allCompletions = [];
         this.currentCompletion = 0;
         this.outputEl.dom.innerHTML = '';
+        this.hideAllCompletions();
     },
 
     completionSuccess: function(responseJSON) {
@@ -194,6 +192,16 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
                 return;
             }
         }
+    },
+
+    toggleAllCompletions: function(event){
+        $(".sympy-live-autocompletions").scrollTop(0).toggleClass("expanded");
+        $(".sympy-live-autocompletions-toolbar button:first").toggleClass("hidden");
+    },
+
+    hideAllCompletions: function(event){
+        $(".sympy-live-autocompletions").scrollTop(0).removeClass("expanded");
+        $(".sympy-live-autocompletions-toolbar button:first").removeClass("hidden");
     },
 
     showNumbers: function() {
