@@ -3,7 +3,7 @@
     height: 2em;
     vertical-align: center;
     font-size: 12pt;
-    width: 77%;
+    width: 67%;
 }
 
 .sympy-live-autocompletions li {
@@ -24,13 +24,25 @@
 }
 
 .sympy-live-autocompletions.expanded li {
-    width: 80%;
+    width: 70%;
 }
 
 .sympy-live-autocompletions-toolbar {
-    width: 20%;
+    width: 30%;
 }
 
 .sympy-live-autocompletions-toolbar button {
     font-size: 8pt;
+}
+
+@media only screen and (min-width: 321px){
+    .sympy-live-autocompletions {
+        width: 77%;
+    }
+    .sympy-live-autocompletions-toolbar {
+        width: 20%;
+    }
+    .sympy-live-autocompletions.expanded li {
+        width: 40%;
+    }
 }

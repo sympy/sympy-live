@@ -18,6 +18,7 @@
     color: #FFF;
     border-radius: 0;
     height: 100%;
+    font-family: monospace;
 }
 
 .sympy-live-autocompletions.expanded {
@@ -36,7 +37,7 @@
     margin-bottom: 0.5em;
 }
 
-.sympy-live-autocompletions li.counted:before {
+.sympy-live-autocompletions li.counted button:before {
     counter-increment: completion;
     content: counter(completion) ". ";
 }
