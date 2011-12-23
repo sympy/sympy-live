@@ -560,11 +560,14 @@ class AutocompleteHandler(webapp.RequestHandler):
             live.evaluate(PREEXEC, session)
             live.evaluate(PREEXEC_INTERNAL, session)
 
-        completions = live.complete(statement, session)
+        completions = list(sorted(set(live.complete(statement, session))))
+        if not statement.split('.')[-1].startswith('_'):
+            completions = [x for x in completions if
+                           not x.split('.')[-1].startswith('_')]
 
         result = {
             'session': str(session_key),
-            'completions': list(sorted(set(completions)))
+            'completions': completions
         }
 
         self.response.headers['Content-Type'] = 'application/json'
