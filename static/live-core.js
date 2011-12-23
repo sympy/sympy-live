@@ -22,6 +22,7 @@ SymPy.Keys = {
     END:       35, HOME:      36,
     LEFT:      37, UP:        38,
     RIGHT:     39, DOWN:      40,
+    CTRL:      17,
     A: 65, B: 66, C: 67, D: 68,
     E: 69, F: 70, G: 71, H: 72,
     I: 73, J: 74, K: 75, L: 76,
@@ -223,6 +224,18 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             if (!this.handleKey(event)) {
                 this.postHandleKey(event);
+            }
+        }, this);
+
+        this.promptEl.on("keydown", function(event) {
+            if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
+                this.autocompleter.showNumbers();
+            }
+        }, this);
+
+        this.promptEl.on("keyup", function(event) {
+            if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
+                this.autocompleter.hideNumbers();
             }
         }, this);
 

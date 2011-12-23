@@ -185,6 +185,14 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         }
     },
 
+    showNumbers: function() {
+        $(this.outputEl.dom).children("li").slice(0, 10).addClass('counted');
+    },
+
+    hideNumbers: function() {
+        $(this.outputEl.dom).children("li").removeClass('counted');
+    },
+
     getID: function(index) {
         return "completion-" + index
     },

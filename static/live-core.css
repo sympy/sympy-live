@@ -115,7 +115,7 @@ button {
     margin-right: 0.25em;
 }
 
-.sympy-live-autocompletions li:before {
+.sympy-live-autocompletions li.counted:before {
     counter-increment: completion;
     content: counter(completion) ". ";
 }
