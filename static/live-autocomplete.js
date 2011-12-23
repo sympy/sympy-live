@@ -38,7 +38,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         this.prevEl = this.toolbarEl.down("button:nth(2)");
         this.nextEl = this.toolbarEl.down("button:nth(3)");
         this.expandEl.on("click", function(event){
-            $(".sympy-live-autocompletions").toggleClass("expanded");
+            $(".sympy-live-autocompletions").scrollTop(0).toggleClass("expanded");
             $(".sympy-live-autocompletions-toolbar button:first").toggleClass("hidden");
         }, this);
         this.nextEl.on("click", function(event){
@@ -132,9 +132,8 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
                 var link = Ext.DomHelper.append(this.outputEl, {
                     tag: 'li',
                     children: [{
-                        tag: 'a',
-                        html: completions[i],
-                        href: 'javascript:void 0;'
+                        tag: 'button',
+                        html: completions[i]
                     }],
                     id: this.getID(i)
                 }, true);

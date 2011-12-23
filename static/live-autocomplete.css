@@ -4,14 +4,20 @@
     font-family: monospace;
     font-size: 12pt;
     width: 89%;
-    height: 13.5pt;
+    height: 30px;
     counter-reset: completion;
     display: inline-block;
-    padding: 0.25em 0.25em;
     -moz-transition: all 1s ease-in;
     -webkit-transition: all 1s ease-in;
     -o-transition: all 1s ease-in;
     transition: all 1s ease-in;
+}
+
+.sympy-live-autocompletions button {
+    background-color: #3b5526;
+    color: #FFF;
+    border-radius: 0;
+    height: 100%;
 }
 
 .sympy-live-autocompletions.expanded {
@@ -19,19 +25,20 @@
     overflow: auto;
 }
 
+.sympy-live-autocompletions.expanded li {
+    width: 22.4%;
+}
+
 .sympy-live-autocompletions li {
     display: inline-block;
     margin-right: 0.25em;
-    height: 12pt;
+    height: 30px;
+    margin-bottom: 0.5em;
 }
 
 .sympy-live-autocompletions li.counted:before {
     counter-increment: completion;
     content: counter(completion) ". ";
-}
-
-.sympy-live-autocompletions li:after {
-    content: " | ";
 }
 
 .sympy-live-autocompletions li:last-child:after {
@@ -42,6 +49,7 @@
     width: 10%;
     display: inline-block;
     vertical-align: top;
+    height: 30px;
 }
 
 .sympy-live-autocompletions-toolbar button {
@@ -49,6 +57,7 @@
     color: #FFF;
     border-radius: 0;
     width: 32%;
+    height: 100%;
 }
 
 .sympy-live-autocompletions-toolbar button:first-child span {

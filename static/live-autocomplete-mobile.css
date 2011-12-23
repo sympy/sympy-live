@@ -1,5 +1,36 @@
 .sympy-live-autocompletions {
-    padding: 0.5em;
+    padding: 0em 0.25em;
     height: 2em;
     vertical-align: center;
+    font-size: 12pt;
+    width: 77%;
+}
+
+.sympy-live-autocompletions li {
+    height: 2em;
+    background-color: #3b5526;
+    padding: 0 0.5em;
+    color: #FFF;
+    margin-bottom: 0.5em;
+}
+
+.sympy-live-autocompletions button {
+    border: 0;
+    padding: 0 0.25em;
+}
+
+.sympy-live-autocompletions.expanded {
+    -webkit-overflow-scrolling: touch;
+}
+
+.sympy-live-autocompletions.expanded li {
+    width: 80%;
+}
+
+.sympy-live-autocompletions-toolbar {
+    width: 20%;
+}
+
+.sympy-live-autocompletions-toolbar button {
+    font-size: 8pt;
 }
