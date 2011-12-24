@@ -234,6 +234,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNumbers: function() {
+        console.log(this.currentCompletion)
         this.hideNumbers();
         this.showingNumbers = true;
         $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');

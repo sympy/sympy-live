@@ -229,13 +229,17 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl.on("keydown", function(event) {
             if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
-                this.completer.showNumbers();
+                if (this.completer.showingNumbers === false){
+                    this.completer.showNumbers();
+                }
             }
         }, this);
 
         this.promptEl.on("keyup", function(event) {
             if(event.ctrlKey && event.getKey() !== SymPy.Keys.CTRL) {
-                this.completer.showNumbers();
+                if (this.completer.showingNumbers === false){
+                    this.completer.showNumbers();
+                }
             }
             else {
                 this.completer.hideNumbers();
@@ -571,6 +575,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.ctrlKey) {
                 this.completer.showPrevGroup();
                 event.stopEvent();
+                break;
             }
             else {
                 return true;
@@ -579,6 +584,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             if (event.ctrlKey) {
                 this.completer.showNextGroup();
                 event.stopEvent();
+                break;
             }
             else {
                 return true;
