@@ -23,6 +23,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     outputEl: null,
     completions: [],
     currentCompletion: 0,
+    completionRowSize: 3,
 
     constructor: function(config, shell) {
         config = Ext.apply({}, config);
@@ -182,7 +183,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             this.currentCompletion = 0;
             this.completions = completions;
             this.allCompletions = completions;
-            if (completions.length > 3) {
+            if (completions.length > this.completionRowSize) {
                 this.showAllCompletions();
                 this.enableButtons();
             }
@@ -208,13 +209,13 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNextGroup: function() {
-        if (this.completions.length <= 3) {return;}
-        var id = (this.currentCompletion + 3) % this.completions.length;
+        if (this.completions.length <= this.completionRowSize) {return;}
+        var id = (this.currentCompletion + this.completionRowSize) % this.completions.length;
         $('#' + this.getID(id)).
             prevAll().
             reverse().
             appendTo($(this.outputEl.dom));
-        this.currentCompletion += 3;
+        this.currentCompletion += this.completionRowSize;
         this.currentCompletion %= this.completions.length;
         if (this.showingNumbers === true) {
             this.showNumbers();
@@ -222,12 +223,12 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showPrevGroup: function() {
-        if (this.completions.length <= 3) {return;}
+        if (this.completions.length <= this.completionRowSize) {return;}
         $('#' + this.getID(this.currentCompletion)).
             nextAll().
-            slice(-3).
+            slice(-this.completionRowSize).
             prependTo($(this.outputEl.dom));
-        this.currentCompletion -= 3;
+        this.currentCompletion -= this.completionRowSize;
         if (this.currentCompletion < 0) {
             this.currentCompletion += this.completions.length;
         }
@@ -246,7 +247,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showAllCompletions: function(event){
-        height = Math.ceil(this.completions.length / 3) * 40;
+        height = Math.ceil(this.completions.length / this.completionRowSize) * 40;
         if(height > 160) {height = 160;}
         $(".sympy-live-completions").
             scrollTop(0).

@@ -12,6 +12,7 @@
     padding: 0 0.5em;
     color: #FFF;
     margin-bottom: 0.5em;
+    width: 70%;
 }
 
 .sympy-live-completions button {
@@ -21,10 +22,6 @@
 
 .sympy-live-completions.expanded {
     -webkit-overflow-scrolling: touch;
-}
-
-.sympy-live-completions.expanded li {
-    width: 70%;
 }
 
 .sympy-live-completions-toolbar {
@@ -42,7 +39,7 @@
     .sympy-live-completions-toolbar {
         width: 20%;
     }
-    .sympy-live-completions.expanded li {
+    .sympy-live-completions li, .sympy-live-completions.expanded li {
         width: 40%;
     }
 }

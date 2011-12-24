@@ -58,7 +58,7 @@ SymPy.MobileShell = Ext.extend(
                     'html': '|'
                 }
             );
-            this.completeEl = Ext.DomHelper.insertAfter(
+            this.completeButtonEl = Ext.DomHelper.insertAfter(
                 this.evaluateEl,
                 {
                     'tag': 'button',
@@ -82,11 +82,13 @@ SymPy.MobileShell = Ext.extend(
                 this.promptEl.focus(1000);
                 this.nextInHistory();
             }, this);
-            this.completeEl.on("click", function(event){
-                this.autocompleter.complete(
+            this.completeButtonEl.on("click", function(event){
+                this.completer.complete(
                     this.getStatement(),
                     this.getSelection());
             }, this);
+            Ext.getBody().on("orientationchange", this.orientationUpdate, this);
+            this.orientationUpdate();
             Ext.get("menu").on("click", function(event){
                 Ext.get("main-navigation").toggle(true);
                 Ext.get("main-navigation").down("ul").toggle(true);
@@ -184,5 +186,15 @@ SymPy.MobileShell = Ext.extend(
                     })
                 }
             });
+        },
+
+        orientationUpdate: function(){
+            console.log(window.orientation);
+            if (window.orientation === 0 || window.orientation === 180){
+                this.completer.completionRowSize = 1;
+            }
+            else {
+                this.completer.completionRowSize = 2;
+            }
         }
     });
