@@ -159,7 +159,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     completionSuccess: function(responseJSON) {
         var completions = responseJSON['completions'];
         this.outputEl.dom.innerHTML = '';
-        this.doComplete(responseJSON['prefix'], false);
+        if (responseJSON['prefix']){
+            this.doComplete(responseJSON['prefix'], false);
+        }
 
         if (completions.length === 1){
             this.doComplete(completions[0]);
@@ -195,7 +197,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             }
         }
         else {
-            this.finishCompletion();
+            this.finishComplete();
             Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
                 cls: 'sympy-live-completions-none',
