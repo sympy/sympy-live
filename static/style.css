@@ -36,9 +36,10 @@ height:165px;
 
 #mainpage {
 	min-width:960px;
-	min-height:560px;
+	height:auto;
 	padding:0 20px;
 	margin-top:20px;
+	overflow:hidden;
 }
 #other_shells_arrow_clicked, #recent_searches_arrow_clicked, #example_arrow_clicked, #about_arrow_clicked, #user_searches_arrow_clicked  {
 	float:right;
@@ -64,11 +65,14 @@ float:left;
 #left {
 	width:55%;
 	float:left;
+	height:auto;
+	margin: 4px 0px 15px 4px;
 }
 #right {
-	overflow:hidden;
 	width:38%;
 	float:right;
+	height:auto;
+	margin: 4px 0px 4px 4px;
 }
 #left, #right {
 	border-color:#81B953;
@@ -76,7 +80,6 @@ float:left;
 	border-style:solid;
 	padding:10px 10px 10px 10px;
 	background-color:white;
-	margin: 4px 0px 4px 4px;
 	-moz-box-shadow: 10px 10px 5px #888;
 	-webkit-box-shadow: 10px 10px 5px #888;
 	box-shadow: 10px 10px 5px #888;
