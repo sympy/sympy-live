@@ -260,12 +260,19 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             addClass("expanded").
             height(height);
         $(".sympy-live-completions-toolbar button:first").addClass("hidden");
+        if (this.shell.completeButtonEl) {
+            $(this.shell.completeButtonEl.dom).appendTo($(this.toolbarEl.dom));
+        }
     },
 
     hideAllCompletions: function(event){
         $(".sympy-live-completions-toolbar button:first").removeClass("hidden");
         $(".sympy-live-completions").scrollTop(0).
             removeClass("expanded").height(30);
+        if (this.shell.completeButtonEl) {
+            $(this.shell.completeButtonEl.dom).
+                insertAfter($(this.shell.evaluateEl.dom));
+        }
     },
 
     showNumbers: function() {

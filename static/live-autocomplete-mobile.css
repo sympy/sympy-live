@@ -26,10 +26,17 @@
 
 .sympy-live-completions-toolbar {
     width: 30%;
+    height: 60px;
 }
 
 .sympy-live-completions-toolbar button {
     font-size: 8pt;
+    height: 30px;
+}
+
+.sympy-live-completions-toolbar button:nth-child(4) {
+    width: 95.9%;
+    font-size: 12pt;
 }
 
 @media only screen and (min-width: 321px){
