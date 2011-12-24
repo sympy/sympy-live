@@ -123,6 +123,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 },
                 scope: this
             });
+            Ext.Ajax.on("requestexception", this.completionError, this);
         }
     },
 
@@ -201,17 +202,18 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
                 cls: 'sympy-live-completions-none',
-                html: '&lt;No completions&gt;'
+                html: '<em>&lt;No completions&gt;</em>'
             }, true);
         }
     },
 
     completionError: function(response) {
+        this.outputEl.dom.innerHTML = '';
         Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
                 cls: 'sympy-live-completions-none',
                 html: '&lt;Error getting completions&gt;'
-            }, true);
+        }, true);
     },
 
     showNextGroup: function() {
