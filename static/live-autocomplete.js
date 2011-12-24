@@ -214,8 +214,12 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     toggleAllCompletions: function(event){
-        $(".sympy-live-completions").scrollTop(0).toggleClass("expanded");
-        $(".sympy-live-completions-toolbar button:first").toggleClass("hidden");
+        if ($(".sympy-live-completions").hasClass("expanded")){
+            this.hideAllCompletions();
+        }
+        else {
+            this.showAllCompletions();
+        }
     },
 
     showAllCompletions: function(event){
@@ -229,9 +233,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     hideAllCompletions: function(event){
+        $(".sympy-live-completions-toolbar button:first").removeClass("hidden");
         $(".sympy-live-completions").scrollTop(0).
             removeClass("expanded").height(30);
-        $(".sympy-live-completions-toolbar button:first").removeClass("hidden");
     },
 
     showNumbers: function() {
