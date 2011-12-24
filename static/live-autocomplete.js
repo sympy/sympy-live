@@ -161,6 +161,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             this.doComplete(completions[0]);
         }
         else if(completions.length > 0){
+            if ($.inArray(responseJSON['prefix'], completions) !== -1){
+                completions = $.grep(
+                    completions,
+                    function(val) { return val != responseJSON['prefix']; });
+            }
             for(var i = 0; i < completions.length; i++){
                 var link = Ext.DomHelper.append(this.outputEl, {
                     tag: 'li',
