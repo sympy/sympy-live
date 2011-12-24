@@ -214,7 +214,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.renderToolbar(el);
 
         this.caretEl.on("focus", function(event) {
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         var keyEvent = this.getKeyEvent();
@@ -248,7 +248,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.evaluateEl.on("click", function(event) {
             this.evaluate();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         this.fullscreenEl.on("click", function(event) {
@@ -257,30 +257,30 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearEl.on("click", function(event) {
             this.clear();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         this.printerEl.on("change", function(event) {
             this.updateSettings();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         this.submitEl.on("change", function(event) {
             this.updateSettings();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         this.autocompleteEl.on("change", function(event) {
             this.updateSettings();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
         this.recordEl.on("change", function(event) {
             this.updateSettings();
-            this.promptEl.focus();
+            this.focus();
         }, this);
 
-        this.promptEl.focus();
+        this.focus();
 
         var task = {
             run: this.updatePrompt,
@@ -437,7 +437,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     enablePrompt: function() {
         this.promptEl.dom.removeAttribute('readonly');
-        this.promptEl.focus();
+        this.focus();
     },
 
     setValue: function(value) {
@@ -524,14 +524,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (this.historyCursor > 0) {
             this.setValue(this.history[--this.historyCursor]);
         }
-        this.promptEl.focus();
+        this.focus();
     },
 
     nextInHistory: function() {
         if (this.historyCursor < this.history.length - 1) {
             this.setValue(this.history[++this.historyCursor]);
         }
-        this.promptEl.focus();
+        this.focus();
     },
 
     handleKey: function(event) {
@@ -760,6 +760,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
           this.promptEl.addClass('sympy-live-processing');
           this.evaluateEl.set({'disabled': 'disabled'});
           this.evaluateEl.addClass('sympy-live-evaluate-disabled');
+          this.completer.finishComplete();
       } else {
           this.evaluating = false;
           this.promptEl.removeClass('sympy-live-processing');
@@ -835,17 +836,17 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
-                    this.promptEl.focus();
+                    this.focus();
                 },
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
                     this.setEvaluating(false);
-                    this.promptEl.focus();
+                    this.focus();
                 },
                 scope: this
             });
-            this.promptEl.focus();
+            this.focus();
         }
     },
 
@@ -876,7 +877,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.setEvaluating(false);
-        this.promptEl.focus();
+        this.focus();
     },
 
     clear: function() {
@@ -895,6 +896,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearValue();
         this.historyCursor = this.history.length-1;
+
+        this.completer.finishComplete();
     },
 
     updateSettings: function() {
@@ -1039,5 +1042,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             });
         }
         this.fullscreenMode = false;
+    },
+
+    focus: function(){
+        this.promptEl.focus();
     }
 });

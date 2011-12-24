@@ -189,12 +189,15 @@ SymPy.MobileShell = Ext.extend(
         },
 
         orientationUpdate: function(){
-            console.log(window.orientation);
             if (window.orientation === 0 || window.orientation === 180){
                 this.completer.completionRowSize = 1;
             }
             else {
                 this.completer.completionRowSize = 2;
             }
+        },
+
+        focus: function() {
+            this.setSelection(this.getValue().length);
         }
     });

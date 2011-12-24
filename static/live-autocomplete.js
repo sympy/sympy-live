@@ -60,16 +60,19 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             if (this.buttonsEnabled === true) {
                 this.toggleAllCompletions();
             }
+            this.shell.focus();
         }, this);
         this.nextEl.on("click", function(event){
             if (this.buttonsEnabled === true) {
                 this.showNextGroup();
             }
+            this.shell.focus();
         }, this);
         this.prevEl.on("click", function(event){
             if (this.buttonsEnabled === true) {
                 this.showPrevGroup();
             }
+            this.shell.focus();
         }, this);
         this.disableButtons();
         this.outputEl = Ext.DomHelper.append(this.containerEl, {
