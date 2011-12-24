@@ -3,7 +3,7 @@ Ext.ns("SymPy");
 $.fn.reverse = [].reverse;
 
 SymPy.NumberKeyCodes = {
-    48: 0, 49: 1,
+    49: 1,
     50: 2, 51: 3,
     52: 4, 53: 5,
     54: 6, 55: 7,
@@ -11,7 +11,7 @@ SymPy.NumberKeyCodes = {
 };
 
 SymPy.NumberKeys = {
-    48: true, 49: true,
+    49: true,
     50: true, 51: true,
     52: true, 53: true,
     54: true, 55: true,
@@ -195,6 +195,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             }
         }
         else {
+            this.finishCompletion();
             Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
                 cls: 'sympy-live-completions-none',
