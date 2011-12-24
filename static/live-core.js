@@ -234,7 +234,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, this);
 
         this.promptEl.on("keyup", function(event) {
-            if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
+            if(event.ctrlKey) {
+                this.completer.showNumbers();
+            }
+            else {
                 this.completer.hideNumbers();
             }
         }, this);

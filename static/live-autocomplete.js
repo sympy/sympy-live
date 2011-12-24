@@ -185,6 +185,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNextGroup: function() {
+        if (this.completions.length <= 3) {return;}
         var current = this.currentCompletion;
         for(var i = current + 1; ; i++) {
             if (i === this.completions.length) { i = 0;}
@@ -200,9 +201,13 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             reverse().
             appendTo($(this.outputEl.dom));
         this.currentCompletion = current;
+        if (this.showingNumbers === true) {
+            this.showNumbers();
+        }
     },
 
     showPrevGroup: function() {
+        if (this.completions.length <= 3) {return;}
         var current = this.currentCompletion;
         while(true) {
             this.outputEl.insertFirst(this.outputEl.last("li"));
@@ -216,6 +221,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 return;
             }
         }
+        if (this.showingNumbers === true) {
+            this.showNumbers();
+        }
     },
 
     toggleAllCompletions: function(event){
@@ -225,7 +233,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
 
     showAllCompletions: function(event){
         height = Math.ceil(this.completions.length / 3) * 40;
-        if(height > 300) {height = 300;}
+        if(height > 160) {height = 160;}
         $(".sympy-live-completions").
             scrollTop(0).
             addClass("expanded").
@@ -239,11 +247,14 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNumbers: function() {
+        this.hideNumbers();
+        this.showingNumbers = true;
         $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');
     },
 
     hideNumbers: function() {
         $(this.outputEl.dom).children("li").removeClass('counted');
+        this.showingNumbers = false;
     },
 
     getID: function(index) {
