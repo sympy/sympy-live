@@ -20,7 +20,6 @@
 
 .sympy-live-completions.expanded {
     max-height: 160px;
-    min-height: 70px;
     overflow: auto;
 }
 
@@ -54,6 +53,11 @@
     border-radius: 0;
     width: 32%;
     height: 100%;
+}
+
+.sympy-live-completions-toolbar button.disabled {
+    background-color: #999;
+    color: #000;
 }
 
 .sympy-live-completions-toolbar button:first-child span {

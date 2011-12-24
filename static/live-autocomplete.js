@@ -44,22 +44,33 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 title: 'Show/Hide All Completions'
             },{
                 tag: 'button',
+                cls: 'disabled',
                 html: '&lt;'
             },{
                 tag: 'button',
+                cls: 'disabled',
                 html: '&gt;'
             }]
         }, true);
         this.expandEl = this.toolbarEl.down("button:nth(1)");
         this.prevEl = this.toolbarEl.down("button:nth(2)");
         this.nextEl = this.toolbarEl.down("button:nth(3)");
-        this.expandEl.on("click", this.toggleAllCompletions, this);
+        this.expandEl.on("click", function(event) {
+            if (this.buttonsEnabled === true) {
+                this.toggleAllCompletions();
+            }
+        }, this);
         this.nextEl.on("click", function(event){
-            this.showNextGroup();
+            if (this.buttonsEnabled === true) {
+                this.showNextGroup();
+            }
         }, this);
         this.prevEl.on("click", function(event){
-            this.showPrevGroup();
+            if (this.buttonsEnabled === true) {
+                this.showPrevGroup();
+            }
         }, this);
+        this.disableButtons();
         this.outputEl = Ext.DomHelper.append(this.containerEl, {
             tag: 'ol',
             cls: 'sympy-live-completions',
@@ -138,6 +149,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.currentCompletion = 0;
         this.outputEl.dom.innerHTML = '';
         this.hideAllCompletions();
+        this.disableButtons();
     },
 
     completionSuccess: function(responseJSON) {
@@ -165,7 +177,13 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             this.currentCompletion = 0;
             this.completions = completions;
             this.allCompletions = completions;
-            if (completions.length > 3) {this.showAllCompletions();}
+            if (completions.length > 3) {
+                this.showAllCompletions();
+                this.enableButtons();
+            }
+            else {
+                this.disableButtons();
+            }
         }
         else {
             Ext.DomHelper.append(this.outputEl, {
@@ -247,6 +265,16 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     hideNumbers: function() {
         $(this.outputEl.dom).children("li").removeClass('counted');
         this.showingNumbers = false;
+    },
+
+    enableButtons: function() {
+        this.buttonsEnabled = true;
+        $('.sympy-live-completions-toolbar button').removeClass('disabled');
+    },
+
+    disableButtons: function() {
+        this.buttonsEnabled = false;
+        $('.sympy-live-completions-toolbar button').addClass('disabled');
     },
 
     getID: function(index) {
