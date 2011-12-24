@@ -186,21 +186,12 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
 
     showNextGroup: function() {
         if (this.completions.length <= 3) {return;}
-        var current = this.currentCompletion;
-        for(var i = current + 1; ; i++) {
-            if (i === this.completions.length) { i = 0;}
-            if(this.isShowing(i)){
-                current = i;
-            }
-            else {
-                break;
-            }
-        }
-        $('#' + this.getID(current)).
+        $('#' + this.getID(this.currentCompletion)).
             prevAll().
             reverse().
             appendTo($(this.outputEl.dom));
-        this.currentCompletion = current;
+        this.currentCompletion += 3;
+        this.currentCompletion %= this.completions.length;
         if (this.showingNumbers === true) {
             this.showNumbers();
         }
@@ -208,17 +199,13 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
 
     showPrevGroup: function() {
         if (this.completions.length <= 3) {return;}
-        var current = this.currentCompletion;
-        while(true) {
-            this.outputEl.insertFirst(this.outputEl.last("li"));
-            if(!this.isShowing(this.currentCompletion)){
-                this.outputEl.first("li").appendTo(this.outputEl);
-                this.currentCompletion = parseInt(
-                    this.outputEl.first("li").id.split('-')[1],
-                    10
-                );
-                return;
-            }
+        $('#' + this.getID(this.currentCompletion)).
+            nextAll().
+            slice(-3).
+            prependTo($(this.outputEl.dom));
+        this.currentCompletion -= 3;
+        if (this.currentCompletion < 0) {
+            this.currentCompletion += this.completions.length;
         }
         if (this.showingNumbers === true) {
             this.showNumbers();

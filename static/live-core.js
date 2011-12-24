@@ -569,8 +569,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         case SymPy.Keys.LEFT:
             if (event.ctrlKey) {
-                event.stopEvent();
                 this.completer.showPrevGroup();
+                event.stopEvent();
             }
             else {
                 return true;
