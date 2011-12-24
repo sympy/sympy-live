@@ -92,7 +92,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
     recordTypes: ['on', 'off'],
-	forcedesktopTypes: ['yes', 'no'],
     printer: null,
     submit: null,
     tabWidth: 4,
@@ -133,9 +132,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
-		
-		index = this.forcedesktopTypes.indexOf(config.forcedesktop);
-        this.forcedesktop = (index == -1) ? this.getCookie('desktop', 'no') : config.forcedesktop;
 
         delete config.printer;
         delete config.submit;
@@ -196,10 +192,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             rows: '4',
             spellcheck: 'false'
         }, true);
-	
-		this.renderButtons(el);
-		var settings = Ext.get('settings');
-        this.renderToolbar(settings);
+
+        this.renderToolbar(el);
 
         this.caretEl.on("focus", function(event) {
             this.promptEl.focus();
@@ -243,11 +237,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.updateSettings();
             this.promptEl.focus();
         }, this);
-		
-		this.forcedesktopEl.on("change", function(event) {
-            this.updateSettings();
-            this.promptEl.focus();
-        }, this);
 
         this.promptEl.focus();
 
@@ -261,15 +250,21 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         runner.start(task);
     },
 
-    renderToolbar: function(settings) {
-
-        this.toolbarEl = Ext.DomHelper.append(settings, {
+    renderToolbar: function(el) {
+        this.toolbarEl = Ext.DomHelper.append(el, {
             tag: 'p',
             cls: 'sympy-live-toolbar',
             children: [{
+                tag: 'button',
+                html: 'Evaluate'
+            }, {
+                tag: 'button',
+                html: 'Clear'
+            }, {
                 tag: 'span',
-                html: 'Output Format: '
-            },{
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
                 tag: 'select',
                 id: 'output-format',
                 children: [{
@@ -294,10 +289,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'LaTeX'
                 }]
             }, {
-                tag: 'br',
-            },{
                 tag: 'span',
-                html: 'Submit with : '
+                cls: 'sympy-live-separator',
+                html: '|'
             }, {
                 tag: 'select',
                 id: 'submit-behavior',
@@ -311,10 +305,22 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'Shift-Enter'
                 }]
             }, {
-                tag: 'br',
+                tag: 'span',
+                html: 'submits'
             }, {
                 tag: 'span',
-                html: 'Privacy: '
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
+                tag: 'span',
+                html: 'Ctrl-Up/Down for history'
+            }, {
+                tag: 'span',
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
+                tag: 'span',
+                html: 'Privacy'
             }, {
                 tag: 'select',
                 id: 'privacy',
@@ -328,36 +334,20 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'Off'
                 }]
             }, {
-                tag: 'br',
-            }, {
-                tag: 'span',
-                html: 'Force Desktop Version: '
-            }, {
-                tag: 'select',
-                id: 'desktop',
-                children: [{
-                    tag: 'option',
-                    value: 'yes',
-                    html: 'Yes'
-                    }, {
-                    tag: 'option',
-                    value: 'no',
-                    html: 'No'
-                }]
-            }, {
-                tag: 'br',
-            }, {
-                tag: 'span',
-                html: 'Ctrl-Up/Down for history'
+                tag: 'button',
+                html: 'Fullscreen'
             }]
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
 
-        this.printerEl = this.toolbarEl.down('select:nth(1)'); 
-        this.submitEl = this.toolbarEl.down('select:nth(2)'); 
-        this.recordEl = this.toolbarEl.down('select:nth(3)'); 
-		this.forcedesktopEl = this.toolbarEl.down('select:nth(4)'); 
+        this.evaluateEl = this.toolbarEl.down('button:nth(1)');
+        this.clearEl = this.toolbarEl.down('button:nth(2)');
+        this.fullscreenEl = this.toolbarEl.down('button:nth(3)');
+
+        this.printerEl = this.toolbarEl.down('select:nth(1)');
+        this.submitEl = this.toolbarEl.down('select:nth(2)');
+        this.recordEl = this.toolbarEl.down('select:nth(3)');
 
         var index;
 
@@ -369,30 +359,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(this.record);
         this.recordEl.dom.selectedIndex = index;
-		
-		index = this.forcedesktopTypes.indexOf(this.forcedesktop);
-        this.forcedesktopEl.dom.selectedIndex = index;
     },
-	renderButtons: function(el) {
-        this.ButtonsEl = Ext.DomHelper.append(el, {
-            tag: 'p',
-            cls: 'sympy-live-toolbar',
-            children: [{
-                tag: 'button',
-                html: 'Evaluate'
-            }, {
-                tag: 'button',
-                html: 'Clear'
-            },{
-                tag: 'button',
-                html: 'Fullscreen'
-            } ]
-        }, true);
 
-        this.evaluateEl = this.ButtonsEl.down('button:nth(1)');
-        this.clearEl = this.ButtonsEl.down('button:nth(2)');
-		this.fullscreenEl = this.ButtonsEl.down('button:nth(3)');
-    },
     getKeyEvent: function() {
         return Ext.isOpera ? "keypress" : "keydown";
     },
@@ -683,14 +651,26 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.outputEl.dom.scrollTop = this.outputEl.dom.scrollHeight;
     },
 
+    setEvaluating: function(state) {
+      if (state) {
+          this.evaluating = true;
+          this.promptEl.addClass('sympy-live-processing');
+          this.evaluateEl.set({'disabled': 'disabled'});
+          this.evaluateEl.addClass('sympy-live-evaluate-disabled');
+      } else {
+          this.evaluating = false;
+          this.promptEl.removeClass('sympy-live-processing');
+          this.evaluateEl.set({disabled: null}, false);
+          this.evaluateEl.removeClass('sympy-live-evaluate-disabled');
+      }
+    },
+
     evaluate: function() {
         var statement = this.promptEl.getValue();
         // make sure the statement is not only whitespace
         // use statement != "" if pure whitespace should be evaluated
         if (!this.evaluating && !statement.match(/^\s*$/)) {
-            this.evaluating = true;
-            this.promptEl.set({"disabled": "disabled"});
-            this.promptEl.addClass('sympy-live-processing');
+            this.setEvaluating(true);
 
             var data = {
                 print_statement: this.getValue().split('\n'),
@@ -726,10 +706,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
-                    this.promptEl.removeClass('sympy-live-processing');
-                    this.promptEl.set({disabled: null}, false);
+                    this.setEvaluating(false);
                     this.promptEl.focus();
-                    this.evaluating = false;
                 },
                 scope: this
             });
@@ -763,10 +741,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
         }
 
-        this.promptEl.removeClass('sympy-live-processing');
-        this.promptEl.set({disabled: null}, false);
+        this.setEvaluating(false);
         this.promptEl.focus();
-        this.evaluating = false;
     },
 
     clear: function() {
@@ -791,7 +767,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.setCookie('sympy-printer', this.printerEl.getValue());
         this.setCookie('sympy-submit', this.submitEl.getValue());
         this.setCookie('sympy-privacy', this.recordEl.getValue());
-		this.setCookie('desktop', this.forcedesktopEl.getValue());
     },
 
     setCookie: function(name, value) {
