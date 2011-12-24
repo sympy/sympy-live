@@ -163,6 +163,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 }, this);
             }
             this.currentCompletion = 0;
+            this.completions = completions;
+            this.allCompletions = completions;
+            if (completions.length > 3) {this.showAllCompletions();}
         }
         else {
             Ext.DomHelper.append(this.outputEl, {
@@ -171,8 +174,6 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 html: '&lt;No completions&gt;'
             }, true);
         }
-        this.completions = completions;
-        this.allCompletions = completions;
     },
 
     completionError: function(response) {
@@ -220,6 +221,16 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     toggleAllCompletions: function(event){
         $(".sympy-live-completions").scrollTop(0).toggleClass("expanded");
         $(".sympy-live-completions-toolbar button:first").toggleClass("hidden");
+    },
+
+    showAllCompletions: function(event){
+        height = Math.ceil(this.completions.length / 3) * 40;
+        if(height > 300) {height = 300;}
+        $(".sympy-live-completions").
+            scrollTop(0).
+            addClass("expanded").
+            height(height);
+        $(".sympy-live-completions-toolbar button:first").addClass("hidden");
     },
 
     hideAllCompletions: function(event){

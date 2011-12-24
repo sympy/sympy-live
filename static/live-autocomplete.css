@@ -19,9 +19,9 @@
 }
 
 .sympy-live-completions.expanded {
-    max-height: 300px;
+    max-height: 160px;
     min-height: 70px;
-    overflow: ;
+    overflow: auto;
 }
 
 .sympy-live-completions li {
