@@ -217,7 +217,6 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     this.outputEl.first("li").id.split('-')[1],
                     10
                 );
-                console.log(this.currentCompletion);
                 return;
             }
         }
