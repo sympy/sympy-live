@@ -241,7 +241,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     hideAllCompletions: function(event){
-        $(".sympy-live-completions").scrollTop(0).removeClass("expanded");
+        $(".sympy-live-completions").scrollTop(0).
+            removeClass("expanded").height(30);
         $(".sympy-live-completions-toolbar button:first").removeClass("hidden");
     },
 
