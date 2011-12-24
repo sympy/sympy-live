@@ -186,7 +186,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
 
     showNextGroup: function() {
         if (this.completions.length <= 3) {return;}
-        $('#' + this.getID(this.currentCompletion)).
+        var id = (this.currentCompletion + 3) % this.completions.length;
+        $('#' + this.getID(id)).
             prevAll().
             reverse().
             appendTo($(this.outputEl.dom));
@@ -234,7 +235,6 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNumbers: function() {
-        console.log(this.currentCompletion)
         this.hideNumbers();
         this.showingNumbers = true;
         $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');
