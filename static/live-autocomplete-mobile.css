@@ -1,4 +1,4 @@
-.sympy-live-autocompletions {
+.sympy-live-completions {
     padding: 0em 0.25em;
     height: 2em;
     vertical-align: center;
@@ -6,7 +6,7 @@
     width: 67%;
 }
 
-.sympy-live-autocompletions li {
+.sympy-live-completions li {
     height: 2em;
     background-color: #3b5526;
     padding: 0 0.5em;
@@ -14,35 +14,35 @@
     margin-bottom: 0.5em;
 }
 
-.sympy-live-autocompletions button {
+.sympy-live-completions button {
     border: 0;
     padding: 0 0.25em;
 }
 
-.sympy-live-autocompletions.expanded {
+.sympy-live-completions.expanded {
     -webkit-overflow-scrolling: touch;
 }
 
-.sympy-live-autocompletions.expanded li {
+.sympy-live-completions.expanded li {
     width: 70%;
 }
 
-.sympy-live-autocompletions-toolbar {
+.sympy-live-completions-toolbar {
     width: 30%;
 }
 
-.sympy-live-autocompletions-toolbar button {
+.sympy-live-completions-toolbar button {
     font-size: 8pt;
 }
 
 @media only screen and (min-width: 321px){
-    .sympy-live-autocompletions {
+    .sympy-live-completions {
         width: 77%;
     }
-    .sympy-live-autocompletions-toolbar {
+    .sympy-live-completions-toolbar {
         width: 20%;
     }
-    .sympy-live-autocompletions.expanded li {
+    .sympy-live-completions.expanded li {
         width: 40%;
     }
 }

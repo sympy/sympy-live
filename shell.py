@@ -533,7 +533,7 @@ class FrontPageHandler(webapp.RequestHandler):
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
 
-class AutocompleteHandler(webapp.RequestHandler):
+class CompletionHandler(webapp.RequestHandler):
     """Takes an incomplete statement and returns possible completions."""
     def post(self):
         try:
@@ -782,7 +782,7 @@ def main():
       ('/shellmobile', ShellMobileFrontPageHandler),
       ('/shell.do', StatementHandler),
       ('/delete', DeleteHistory),
-      ('/autocomplete', AutocompleteHandler)
+      ('/complete', CompletionHandler)
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)

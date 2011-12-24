@@ -18,7 +18,7 @@ SymPy.NumberKeys = {
     56: true, 57: true,
 };
 
-SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
+SymPy.Completer = Ext.extend(Ext.util.Observable, {
     inputEl: null,
     outputEl: null,
     completions: [],
@@ -34,7 +34,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     setup: function() {
         this.toolbarEl = Ext.DomHelper.append(this.containerEl, {
             tag: 'div',
-            cls: 'sympy-live-autocompletions-toolbar',
+            cls: 'sympy-live-completions-toolbar',
             children: [{
                 tag: 'button',
                 children: [{
@@ -62,8 +62,8 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         }, this);
         this.outputEl = Ext.DomHelper.append(this.containerEl, {
             tag: 'ol',
-            cls: 'sympy-live-autocompletions',
-            html: '<em>Autocompletions here</em>'
+            cls: 'sympy-live-completions',
+            html: '<em>Completions here</em>'
         }, true);
     },
 
@@ -98,7 +98,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
             };
             Ext.Ajax.request({
                 method: 'POST',
-                url: (this.basePath || '') + '/autocomplete',
+                url: (this.basePath || '') + '/complete',
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.completionSuccess(Ext.decode(response.responseText));
@@ -167,7 +167,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
         else {
             Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
-                cls: 'sympy-live-autocompletions-none',
+                cls: 'sympy-live-completions-none',
                 html: '&lt;No completions&gt;'
             }, true);
         }
@@ -178,7 +178,7 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     completionError: function(response) {
         Ext.DomHelper.append(this.outputEl, {
                 tag: 'li',
-                cls: 'sympy-live-autocompletions-none',
+                cls: 'sympy-live-completions-none',
                 html: '&lt;Error getting completions&gt;'
             }, true);
     },
@@ -218,13 +218,13 @@ SymPy.Autocompleter = Ext.extend(Ext.util.Observable, {
     },
 
     toggleAllCompletions: function(event){
-        $(".sympy-live-autocompletions").scrollTop(0).toggleClass("expanded");
-        $(".sympy-live-autocompletions-toolbar button:first").toggleClass("hidden");
+        $(".sympy-live-completions").scrollTop(0).toggleClass("expanded");
+        $(".sympy-live-completions-toolbar button:first").toggleClass("hidden");
     },
 
     hideAllCompletions: function(event){
-        $(".sympy-live-autocompletions").scrollTop(0).removeClass("expanded");
-        $(".sympy-live-autocompletions-toolbar button:first").removeClass("hidden");
+        $(".sympy-live-completions").scrollTop(0).removeClass("expanded");
+        $(".sympy-live-completions-toolbar button:first").removeClass("hidden");
     },
 
     showNumbers: function() {

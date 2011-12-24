@@ -205,11 +205,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             cls: 'sympy-live-autocompletions-container'
         }, true);
 
-        this.autocompleter = new SymPy.Autocompleter({
+        this.completer = new SymPy.Completer({
             input: this.promptEl,
             container: this.completionsEl
         }, this);
-        this.autocompleter.setup();
+        this.completer.setup();
 
         this.renderToolbar(el);
 
@@ -229,13 +229,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.promptEl.on("keydown", function(event) {
             if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
-                this.autocompleter.showNumbers();
+                this.completer.showNumbers();
             }
         }, this);
 
         this.promptEl.on("keyup", function(event) {
             if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
-                this.autocompleter.hideNumbers();
+                this.completer.hideNumbers();
             }
         }, this);
 
@@ -528,8 +528,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     handleKey: function(event) {
-        if (event.ctrlKey && this.autocompleter.isNumberKey(event.getKey())) {
-            this.autocompleter.doNumberComplete(event.getKey());
+        if (event.ctrlKey && this.completer.isNumberKey(event.getKey())) {
+            this.completer.doNumberComplete(event.getKey());
             event.stopEvent();
             return;
         }
@@ -567,14 +567,14 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         case SymPy.Keys.LEFT:
             if (event.ctrlKey) {
                 event.stopEvent();
-                this.autocompleter.showPrevGroup();
+                this.completer.showPrevGroup();
             }
             else {
                 return true;
             }
         case SymPy.Keys.RIGHT:
             if (event.ctrlKey) {
-                this.autocompleter.showNextGroup();
+                this.completer.showNextGroup();
                 event.stopEvent();
             }
             else {
@@ -665,7 +665,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         case SymPy.Keys.TAB:
             if (this.autocompleteEl.getValue() === "tab") {
-                this.autocompleter.complete(
+                this.completer.complete(
                     this.getStatement(),
                     this.getSelection());
                 event.stopEvent();
@@ -675,7 +675,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         case SymPy.Keys.SPACE:
             if (event.ctrlKey &&
                 this.autocompleteEl.getValue() === "ctrl-space") {
-                this.autocompleter.complete(
+                this.completer.complete(
                     this.getStatement(),
                     this.getSelection());
                 event.stopEvent();

@@ -1,59 +1,54 @@
-.sympy-live-autocompletions {
+.sympy-live-completions {
     overflow: hidden;
-    list-style-type: decimal;
+    list-style-type: none;
     font-family: monospace;
     font-size: 12pt;
     width: 89%;
     height: 30px;
     counter-reset: completion;
     display: inline-block;
-    -moz-transition: all 1s ease-in;
-    -webkit-transition: all 1s ease-in;
-    -o-transition: all 1s ease-in;
-    transition: all 1s ease-in;
 }
 
-.sympy-live-autocompletions button {
+.sympy-live-completions button {
     background-color: #3b5526;
     color: #FFF;
     border-radius: 0;
     height: 100%;
     font-family: monospace;
+    width: 100%;
 }
 
-.sympy-live-autocompletions.expanded {
-    height: 150px;
-    overflow: auto;
+.sympy-live-completions.expanded {
+    max-height: 300px;
+    min-height: 70px;
+    overflow: ;
 }
 
-.sympy-live-autocompletions.expanded li {
-    width: 22.4%;
-}
-
-.sympy-live-autocompletions li {
+.sympy-live-completions li {
     display: inline-block;
     margin-right: 0.25em;
     height: 30px;
-    margin-bottom: 0.5em;
+    margin-bottom: 10px;
+    width: 30%;
 }
 
-.sympy-live-autocompletions li.counted button:before {
+.sympy-live-completions li.counted button:before {
     counter-increment: completion;
     content: counter(completion) ". ";
 }
 
-.sympy-live-autocompletions li:last-child:after {
+.sympy-live-completions li:last-child:after {
     content: "";
 }
 
-.sympy-live-autocompletions-toolbar {
+.sympy-live-completions-toolbar {
     width: 10%;
     display: inline-block;
     vertical-align: top;
     height: 30px;
 }
 
-.sympy-live-autocompletions-toolbar button {
+.sympy-live-completions-toolbar button {
     background-color: #3b5526;
     color: #FFF;
     border-radius: 0;
@@ -61,7 +56,7 @@
     height: 100%;
 }
 
-.sympy-live-autocompletions-toolbar button:first-child span {
+.sympy-live-completions-toolbar button:first-child span {
     display: block;
     -moz-transition: all 1s ease-in;
     -webkit-transition: all 1s ease-in;
@@ -74,7 +69,7 @@
     -transform: rotate(0deg) translate(0px, 0px);
 }
 
-.sympy-live-autocompletions-toolbar button.hidden:first-child span {
+.sympy-live-completions-toolbar button.hidden:first-child span {
     -webkit-transform: rotate(-180deg) translate(0px, 0px);
     -moz-transform: rotate(-180deg) translate(0px, 0px);
     -o-transform: rotate(-180deg) translate(0px, 0px);
