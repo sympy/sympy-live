@@ -192,8 +192,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     this.doComplete(event.target.innerText);
                 }, this);
             }
+            console.log(completions.length)
             for (var j = 0;
-                 j <= (completions.length % this.completionRowSize);
+                 j < (completions.length % this.completionRowSize);
                  j++) {
                 Ext.DomHelper.append(this.outputEl, {
                     tag: 'li',
@@ -241,9 +242,12 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         }
         this.enableButton("prev");
         var id = (this.currentCompletion + this.completionRowSize);
-        if (id >= this.completions.length) {
+        if (id >= this.completions.length - this.completionRowSize) {
             this.disableButton("next");
-            id = this.completions.length - 1;
+            id = this.completions.length - this.completionRowSize;
+            if (this.completions.length % 2 !== 0) {
+                id += 1;
+            }
         }
         $('#' + this.getID(id)).
             prevAll().
