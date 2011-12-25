@@ -108,7 +108,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             statement = statement.substring(start, end);
 
             var data = {
-                session: this.session || null,
+                session: this.shell.session || null,
                 statement: statement
             };
             Ext.Ajax.request({
@@ -158,6 +158,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     completionSuccess: function(responseJSON) {
+        this.shell.session = responseJSON['session'];
         var completions = responseJSON['completions'];
         this.outputEl.dom.innerHTML = '';
         if (responseJSON['prefix']){

@@ -239,32 +239,46 @@ class Live(object):
         import __builtin__
         statement_module.__builtin__ = __builtin__
 
-        statement_module.__name__ = '__main__'
+        old_main = sys.modules.get('__main__')
 
-        # re-evaluate the unpicklables
-        for code in session.unpicklables:
-            exec code in statement_module.__dict__
+        try:
+            sys.modules['__main__'] = statement_module
 
-        old_globals = dict(statement_module.__dict__)
+            statement_module.__name__ = '__main__'
 
-        # re-initialize the globals
-        session_globals_dict = session.globals_dict()
+            # re-evaluate the unpicklables
+            for code in session.unpicklables:
+                exec code in statement_module.__dict__
 
-        for name, val in session_globals_dict.items():
+            old_globals = dict(statement_module.__dict__)
+
+            # re-initialize the globals
+            session_globals_dict = session.globals_dict()
+
+            for name, val in session_globals_dict.items():
+                try:
+                    statement_module.__dict__[name] = val
+                except:
+                    session.remove_global(name)
+
+            __builtin__._ = session_globals_dict.get('_')
+
+            completer = rlcompleter.Completer(statement_module.__dict__)
+
+            if '=' in statement:
+                statement = statement.split('=', 1)[1].strip()
+            # XXX need a better way to do this
+            if '.' in statement:
+                return completer.attr_matches(statement)
+            else:
+                return completer.global_matches(statement)
+
+        finally:
+            sys.modules['__main__'] = old_main
             try:
-                statement_module.__dict__[name] = val
-            except:
-                session.remove_global(name)
-
-        completer = rlcompleter.Completer(statement_module.__dict__)
-
-        if '=' in statement:
-            statement = statement.split('=', 1)[1].strip()
-        # XXX need a better way to do this
-        if '.' in statement:
-            return completer.attr_matches(statement)
-        else:
-            return completer.global_matches(statement)
+                del __builtin__._
+            except AttributeError:
+                pass
 
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """

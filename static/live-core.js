@@ -778,28 +778,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return null;
     },
 
-    complete: function() {
-        var statement = this.getStatement();
-        if (statement !== null) {
-            var data = {
-                session: this.session || null,
-                statement: statement
-            };
-            Ext.Ajax.request({
-                method: 'POST',
-                url: (this.basePath || '') + '/autocomplete',
-                jsonData: Ext.encode(data),
-                success: function(response) {
-                    this.displayCompletions(Ext.decode(response.responseText));
-                },
-                failure: function(response) {
-                    this.completionError(response);
-                },
-                scope: this
-            });
-        }
-    },
-
     evaluate: function() {
         var statement = this.promptEl.getValue();
         // make sure the statement is not only whitespace
