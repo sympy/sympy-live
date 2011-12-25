@@ -192,10 +192,10 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     this.doComplete(event.target.innerText);
                 }, this);
             }
-            console.log(completions.length)
-            for (var j = 0;
-                 j < (completions.length % this.completionRowSize);
-                 j++) {
+            var padding = this.completionRowSize;
+            padding -= (completions.length % this.completionRowSize);
+            padding %= this.completionRowSize;
+            for (var j = 0; j < padding; j++) {
                 Ext.DomHelper.append(this.outputEl, {
                     tag: 'li',
                     children: [{
@@ -244,10 +244,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         var id = (this.currentCompletion + this.completionRowSize);
         if (id >= this.completions.length - this.completionRowSize) {
             this.disableButton("next");
-            id = this.completions.length - this.completionRowSize;
-            if (this.completions.length % 2 !== 0) {
-                id += 1;
-            }
+            id = this.completions.length - this.completionRowSize + 1;
+            id += this.completions.length % this.completionRowSize;
         }
         $('#' + this.getID(id)).
             prevAll().
