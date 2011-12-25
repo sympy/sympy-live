@@ -15,7 +15,7 @@
 Ext.ns("SymPy");
 
 SymPy.Keys = {
-    BACKSPACE: 8,  DEL:       49,
+    BACKSPACE: 8,  DEL:       46,
     TAB:       9,  SPACE:     32,
     ENTER:     13, ESC:       27,
     PAGE_UP:   33, PAGE_DOWN: 34,
@@ -589,7 +589,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             else {
                 return true;
             }
+        case SymPy.Keys.DEL:
+            this.completer.finishComplete();
+            break;
         case SymPy.Keys.BACKSPACE:
+            this.completer.finishComplete();
             if (this.supportsSelection) {
                 var cursor = this.getCursor();
 
