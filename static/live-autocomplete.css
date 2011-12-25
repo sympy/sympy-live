@@ -31,13 +31,15 @@
     width: 30%;
 }
 
+.sympy-live-completions li button.padding {
+    background-color: transparent;
+    border: 0;
+    color: #000;
+}
+
 .sympy-live-completions li.counted button:before {
     counter-increment: completion;
     content: counter(completion) ". ";
-}
-
-.sympy-live-completions li:last-child:after {
-    content: "";
 }
 
 .sympy-live-completions-toolbar {

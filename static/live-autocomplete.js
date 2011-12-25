@@ -30,6 +30,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.inputEl = config.input;
         this.containerEl = config.container;
         this.shell = shell;
+        this.buttonState = {
+            prev: false,
+            next: false,
+            expand: false,
+        };
     },
 
     setup: function() {
@@ -57,29 +62,29 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.prevEl = this.toolbarEl.down("button:nth(2)");
         this.nextEl = this.toolbarEl.down("button:nth(3)");
         this.expandEl.on("click", function(event) {
-            if (this.buttonsEnabled === true) {
+            if (this.isButtonEnabled("expand")) {
                 this.toggleAllCompletions();
             }
             this.shell.focus();
         }, this);
         this.nextEl.on("click", function(event){
-            if (this.buttonsEnabled === true) {
+            if (this.isButtonEnabled("next")) {
                 this.showNextGroup();
             }
             this.shell.focus();
         }, this);
         this.prevEl.on("click", function(event){
-            if (this.buttonsEnabled === true) {
+            if (this.isButtonEnabled("prev")) {
                 this.showPrevGroup();
             }
             this.shell.focus();
         }, this);
-        this.disableButtons();
         this.outputEl = Ext.DomHelper.append(this.containerEl, {
             tag: 'ol',
             cls: 'sympy-live-completions',
             html: '<em>Completions here</em>'
         }, true);
+        this.disableButtons(["prev", "next", "expand"]);
     },
 
     complete: function(statement, selection) {
@@ -154,7 +159,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.currentCompletion = 0;
         this.outputEl.dom.innerHTML = '';
         this.hideAllCompletions();
-        this.disableButtons();
+        this.disableButtons(["prev", "next", "expand"]);
     },
 
     completionSuccess: function(responseJSON) {
@@ -187,15 +192,27 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     this.doComplete(event.target.innerText);
                 }, this);
             }
+            for (var j = 0;
+                 j <= (completions.length % this.completionRowSize);
+                 j++) {
+                Ext.DomHelper.append(this.outputEl, {
+                    tag: 'li',
+                    children: [{
+                        tag: 'button',
+                        cls: 'padding'
+                    }]
+                });
+            }
+            $("button.padding").last().html("<em>No more completions</em>");
             this.currentCompletion = 0;
             this.completions = completions;
             this.allCompletions = completions;
             if (completions.length > this.completionRowSize) {
                 this.showAllCompletions();
-                this.enableButtons();
+                this.enableButtons(["expand", "next"]);
             }
             else {
-                this.disableButtons();
+                this.disableButtons(["expand", "prev", "next"]);
             }
         }
         else {
@@ -218,28 +235,46 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showNextGroup: function() {
-        if (this.completions.length <= this.completionRowSize) {return;}
-        var id = (this.currentCompletion + this.completionRowSize) % this.completions.length;
+        if (this.completions.length <= this.completionRowSize) {
+            this.disableButton("next");
+            return;
+        }
+        this.enableButton("prev");
+        var id = (this.currentCompletion + this.completionRowSize);
+        if (id >= this.completions.length) {
+            this.disableButton("next");
+            id = this.completions.length - 1;
+        }
         $('#' + this.getID(id)).
             prevAll().
             reverse().
             appendTo($(this.outputEl.dom));
-        this.currentCompletion += this.completionRowSize;
-        this.currentCompletion %= this.completions.length;
+        this.currentCompletion = id;
+        if (this.currentCompletion >= this.completions.length - 1) {
+            this.currentCompletion = this.completions.length - 1;
+            this.disableButton("next");
+        }
         if (this.showingNumbers === true) {
             this.showNumbers();
         }
     },
 
     showPrevGroup: function() {
-        if (this.completions.length <= this.completionRowSize) {return;}
+        if (this.completions.length <= this.completionRowSize ||
+            this.currentCompletion == 0
+           ) {
+            this.disableButton("prev");
+            return;
+        }
+        this.enableButton("next");
         $('#' + this.getID(this.currentCompletion)).
             nextAll().
             slice(-this.completionRowSize).
             prependTo($(this.outputEl.dom));
         this.currentCompletion -= this.completionRowSize;
-        if (this.currentCompletion < 0) {
-            this.currentCompletion += this.completions.length;
+        if (this.currentCompletion <= 0) {
+            this.currentCompletion = 0;
+            this.disableButton("prev");
         }
         if (this.showingNumbers === true) {
             this.showNumbers();
@@ -289,23 +324,35 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.showingNumbers = false;
     },
 
-    enableButtons: function() {
-        this.buttonsEnabled = true;
-        $('.sympy-live-completions-toolbar button').removeClass('disabled');
+    isButtonEnabled: function(button) {
+        if (this.buttonState[button] === true) {
+            return true;
+        }
+        return false;
     },
 
-    disableButtons: function() {
-        this.buttonsEnabled = false;
-        $('.sympy-live-completions-toolbar button').addClass('disabled');
+    enableButton: function(button) {
+        this.buttonState[button] = true;
+        // Not very nice but simple
+        this[button + "El"].removeClass("disabled");
+    },
+
+    disableButton: function(button) {
+        this.buttonState[button] = false;
+        // Not very nice but simple
+        this[button + "El"].addClass("disabled");
+    },
+
+    enableButtons: function(buttons) {
+        Ext.each(buttons, this.enableButton, this);
+    },
+
+    disableButtons: function(buttons) {
+        Ext.each(buttons, this.disableButton, this);
     },
 
     getID: function(index) {
         return "completion-" + index
-    },
-
-    isShowing: function(index) {
-        var y = this.outputEl.first("li").getY();
-        return (Ext.fly(this.getID(index)).getY() === y);
     },
 
     isNumberKey: function(keyCode) {
