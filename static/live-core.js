@@ -216,7 +216,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.completer.setup();
 
 	this.renderButtons(el);
-	var settings = Ext.get('settings');
+	var settings = Ext.get('settings').down(".content");
         this.renderToolbar(settings);
 
         this.caretEl.on("focus", function(event) {
@@ -286,7 +286,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.focus();
         }, this);
 
-		this.forcedesktopEl.on("change", function(event) {
+	this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
             this.promptEl.focus();
         }, this);
