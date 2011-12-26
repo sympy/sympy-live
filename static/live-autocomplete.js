@@ -148,7 +148,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         if(!this.isNumberKey(keyCode)) {return;}
         var number = SymPy.NumberKeyCodes[keyCode];
         var index = this.currentCompletion + number - 1;
-        this.doComplete(this.completions[index]);
+        if (index < this.completions.length){
+            this.doComplete(this.completions[index]);
+        }
     },
 
     finishComplete: function(){
@@ -204,7 +206,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     }]
                 });
             }
-            $("button.padding").last().html("<em>No more completions</em>");
+            $("button.padding").html("&nbsp;");
             this.currentCompletion = 0;
             this.completions = completions;
             this.allCompletions = completions;
