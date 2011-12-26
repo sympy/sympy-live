@@ -51,10 +51,12 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             },{
                 tag: 'button',
                 cls: 'disabled',
+                id: 'sympy-live-completions-prev',
                 html: '&lt;'
             },{
                 tag: 'button',
                 cls: 'disabled',
+                id: 'sympy-live-completions-next',
                 html: '&gt;'
             }]
         }, true);

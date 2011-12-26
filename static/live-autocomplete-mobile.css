@@ -3,7 +3,7 @@
     height: 2em;
     vertical-align: center;
     font-size: 12pt;
-    width: 67%;
+    width: 82%;
 }
 
 .sympy-live-completions li {
@@ -25,18 +25,23 @@
 }
 
 .sympy-live-completions-toolbar {
-    width: 30%;
+    width: 15%;
     height: 30px;
 }
 
 .sympy-live-completions-toolbar button {
     font-size: 8pt;
     height: 30px;
+    width: 100%;
 }
 
 .sympy-live-completions-toolbar button:nth-child(4) {
-    width: 95.9%;
+    width: 100%;
     font-size: 12pt;
+}
+
+#sympy-live-completions-prev, #sympy-live-completions-next {
+    display: none;
 }
 
 @media only screen and (min-width: 321px){
