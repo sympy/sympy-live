@@ -50,23 +50,9 @@ SymPy.MobileShell = Ext.extend(
             $("#autocomplete").next().remove();
             $("#autocomplete").remove();
             $(".sympy-live-toolbar").children("span").last().remove();
-            // Ext.each(
-            //     this.toolbarEl.query('.sympy-live-separator'),
-            //     function(n){
-            //         Ext.get(n).remove();
-            //     }
-            // );
-            // Ext.get("output-format")
-            //     .appendTo(shell)
-            //     .insertBefore(this.outputEl);
-            // Ext.DomHelper.insertBefore(
-            //     this.outputEl,
-            //     {
-            //         'tag': 'span',
-            //         'cls': 'sympy-live-separator',
-            //         'html': '|'
-            //     }
-            // );
+            $("#sympy-live-toolbar-main").
+                appendTo(".sympy-live-completions-toolbar");
+            $("#fullscreen-button").remove();
             this.completeButtonEl = Ext.DomHelper.insertAfter(
                 this.evaluateEl,
                 {
@@ -74,15 +60,6 @@ SymPy.MobileShell = Ext.extend(
                     'html': 'Complete'
                 }
             , true);
-            // this.toolbarEl.down('span')
-            //     .appendTo(shell)
-            //     .insertBefore(this.outputEl);
-            // Ext.get("submit-behavior")
-            //     .appendTo(shell)
-            //     .insertBefore(this.outputEl);
-            // this.toolbarEl.down('span').remove();
-            // this.toolbarEl.down('span').remove();
-            // this.autocompleteEl.remove();
             this.historyPrevEl.on("click", function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();

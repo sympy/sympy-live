@@ -439,6 +439,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.ButtonsEl = Ext.DomHelper.append(el, {
             tag: 'p',
             cls: 'sympy-live-toolbar',
+            id: 'sympy-live-toolbar-main',
             children: [{
                 tag: 'button',
                 html: 'Evaluate'
@@ -447,6 +448,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: 'Clear'
             },{
                 tag: 'button',
+                id: 'fullscreen-button',
                 html: 'Fullscreen'
             } ]
         }, true);

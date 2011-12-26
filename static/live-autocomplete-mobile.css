@@ -35,7 +35,7 @@
     width: 100%;
 }
 
-.sympy-live-completions-toolbar button:nth-child(4) {
+.sympy-live-completions-toolbar .sympy-live-toolbar button {
     width: 100%;
     font-size: 12pt;
 }
