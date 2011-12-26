@@ -15,14 +15,13 @@
 Ext.ns("SymPy");
 
 SymPy.Keys = {
-    BACKSPACE: 8,  DEL:       46,
+    BACKSPACE: 8,  DEL:       49,
     TAB:       9,  SPACE:     32,
     ENTER:     13, ESC:       27,
     PAGE_UP:   33, PAGE_DOWN: 34,
     END:       35, HOME:      36,
     LEFT:      37, UP:        38,
     RIGHT:     39, DOWN:      40,
-    CTRL:      17,
     A: 65, B: 66, C: 67, D: 68,
     E: 69, F: 70, G: 71, H: 72,
     I: 73, J: 74, K: 75, L: 76,
@@ -93,17 +92,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
     recordTypes: ['on', 'off'],
-<<<<<<< HEAD
-    autocompleteTypes: ['tab', 'ctrl-space'],
-=======
-	forcedesktopTypes: ['yes', 'no'],
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
     printer: null,
     submit: null,
     tabWidth: 4,
     basePath: null,
     defaultBasePath: 'http://live.sympy.org',
-    autocompleter: null,
 
     constructor: function(config) {
         config = Ext.apply({}, config);
@@ -139,13 +132,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
-		
-		index = this.forcedesktopTypes.indexOf(config.forcedesktop);
-        this.forcedesktop = (index == -1) ? this.getCookie('desktop', 'no') : config.forcedesktop;
-
-        index = this.autocompleteTypes.indexOf(config.autocomplete);
-        this.autocomplete = (index == -1) ?
-            this.getCookie('sympy-autocomplete', 'tab') : config.autocomplete;
 
         delete config.printer;
         delete config.submit;
@@ -206,29 +192,11 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             rows: '4',
             spellcheck: 'false'
         }, true);
-<<<<<<< HEAD
-
-        this.completionsEl = Ext.DomHelper.append(el, {
-            tag: 'div',
-            cls: 'sympy-live-autocompletions-container'
-        }, true);
-
-        this.completer = new SymPy.Completer({
-            input: this.promptEl,
-            container: this.completionsEl
-        }, this);
-        this.completer.setup();
 
         this.renderToolbar(el);
-=======
-	
-		this.renderButtons(el);
-		var settings = Ext.get('settings');
-        this.renderToolbar(settings);
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
 
         this.caretEl.on("focus", function(event) {
-            this.focus();
+            this.promptEl.focus();
         }, this);
 
         var keyEvent = this.getKeyEvent();
@@ -241,28 +209,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
         }, this);
 
-        this.promptEl.on("keydown", function(event) {
-            if(event.ctrlKey || event.getKey() === SymPy.Keys.CTRL) {
-                if (this.completer.showingNumbers === false){
-                    this.completer.showNumbers();
-                }
-            }
-        }, this);
-
-        this.promptEl.on("keyup", function(event) {
-            if(event.ctrlKey && event.getKey() !== SymPy.Keys.CTRL) {
-                if (this.completer.showingNumbers === false){
-                    this.completer.showNumbers();
-                }
-            }
-            else {
-                this.completer.hideNumbers();
-            }
-        }, this);
-
         this.evaluateEl.on("click", function(event) {
             this.evaluate();
-            this.focus();
+            this.promptEl.focus();
         }, this);
 
         this.fullscreenEl.on("click", function(event) {
@@ -271,35 +220,25 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearEl.on("click", function(event) {
             this.clear();
-            this.focus();
+            this.promptEl.focus();
         }, this);
 
         this.printerEl.on("change", function(event) {
             this.updateSettings();
-            this.focus();
+            this.promptEl.focus();
         }, this);
 
         this.submitEl.on("change", function(event) {
             this.updateSettings();
-            this.focus();
-        }, this);
-
-        this.autocompleteEl.on("change", function(event) {
-            this.updateSettings();
-            this.focus();
+            this.promptEl.focus();
         }, this);
 
         this.recordEl.on("change", function(event) {
             this.updateSettings();
-            this.focus();
-        }, this);
-		
-		this.forcedesktopEl.on("change", function(event) {
-            this.updateSettings();
             this.promptEl.focus();
         }, this);
 
-        this.focus();
+        this.promptEl.focus();
 
         var task = {
             run: this.updatePrompt,
@@ -311,15 +250,21 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         runner.start(task);
     },
 
-    renderToolbar: function(settings) {
-
-        this.toolbarEl = Ext.DomHelper.append(settings, {
+    renderToolbar: function(el) {
+        this.toolbarEl = Ext.DomHelper.append(el, {
             tag: 'p',
             cls: 'sympy-live-toolbar',
             children: [{
+                tag: 'button',
+                html: 'Evaluate'
+            }, {
+                tag: 'button',
+                html: 'Clear'
+            }, {
                 tag: 'span',
-                html: 'Output Format: '
-            },{
+                cls: 'sympy-live-separator',
+                html: '|'
+            }, {
                 tag: 'select',
                 id: 'output-format',
                 children: [{
@@ -344,10 +289,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'LaTeX'
                 }]
             }, {
-                tag: 'br',
-            },{
                 tag: 'span',
-                html: 'Submit with : '
+                cls: 'sympy-live-separator',
+                html: '|'
             }, {
                 tag: 'select',
                 id: 'submit-behavior',
@@ -361,7 +305,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'Shift-Enter'
                 }]
             }, {
-<<<<<<< HEAD
                 tag: 'span',
                 html: 'submits'
             }, {
@@ -369,33 +312,15 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 cls: 'sympy-live-separator',
                 html: '|'
             }, {
-                tag: 'select',
-                id: 'autocomplete-behavior',
-                children: [{
-                    tag: 'option',
-                    value: 'tab',
-                    html: 'Tab'
-                }, {
-                    tag: 'option',
-                    value: 'ctrl-space',
-                    html: 'Ctrl-Space'
-                }]
-            }, {
                 tag: 'span',
-                html: 'autocompletes'
+                html: 'Ctrl-Up/Down for history'
             }, {
                 tag: 'span',
                 cls: 'sympy-live-separator',
                 html: '|'
             }, {
                 tag: 'span',
-                html: 'Ctrl-Up/Down for history'
-=======
-                tag: 'br',
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
-            }, {
-                tag: 'span',
-                html: 'Privacy: '
+                html: 'Privacy'
             }, {
                 tag: 'select',
                 id: 'privacy',
@@ -409,47 +334,20 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'Off'
                 }]
             }, {
-                tag: 'br',
-            }, {
-                tag: 'span',
-                html: 'Force Desktop Version: '
-            }, {
-                tag: 'select',
-                id: 'desktop',
-                children: [{
-                    tag: 'option',
-                    value: 'yes',
-                    html: 'Yes'
-                    }, {
-                    tag: 'option',
-                    value: 'no',
-                    html: 'No'
-                }]
-            }, {
-                tag: 'br',
-            }, {
-                tag: 'span',
-                html: 'Ctrl-Up/Down for history'
+                tag: 'button',
+                html: 'Fullscreen'
             }]
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
 
-<<<<<<< HEAD
         this.evaluateEl = this.toolbarEl.down('button:nth(1)');
         this.clearEl = this.toolbarEl.down('button:nth(2)');
         this.fullscreenEl = this.toolbarEl.down('button:nth(3)');
 
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
-        this.autocompleteEl = this.toolbarEl.down('select:nth(3)');
-        this.recordEl = this.toolbarEl.down('select:nth(4)');
-=======
-        this.printerEl = this.toolbarEl.down('select:nth(1)'); 
-        this.submitEl = this.toolbarEl.down('select:nth(2)'); 
-        this.recordEl = this.toolbarEl.down('select:nth(3)'); 
-		this.forcedesktopEl = this.toolbarEl.down('select:nth(4)'); 
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
+        this.recordEl = this.toolbarEl.down('select:nth(3)');
 
         var index;
 
@@ -461,36 +359,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(this.record);
         this.recordEl.dom.selectedIndex = index;
-<<<<<<< HEAD
-
-        index = this.autocompleteTypes.indexOf(this.autocomplete);
-        this.autocompleteEl.dom.selectedIndex = index;
-=======
-		
-		index = this.forcedesktopTypes.indexOf(this.forcedesktop);
-        this.forcedesktopEl.dom.selectedIndex = index;
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
     },
-	renderButtons: function(el) {
-        this.ButtonsEl = Ext.DomHelper.append(el, {
-            tag: 'p',
-            cls: 'sympy-live-toolbar',
-            children: [{
-                tag: 'button',
-                html: 'Evaluate'
-            }, {
-                tag: 'button',
-                html: 'Clear'
-            },{
-                tag: 'button',
-                html: 'Fullscreen'
-            } ]
-        }, true);
 
-        this.evaluateEl = this.ButtonsEl.down('button:nth(1)');
-        this.clearEl = this.ButtonsEl.down('button:nth(2)');
-		this.fullscreenEl = this.ButtonsEl.down('button:nth(3)');
-    },
     getKeyEvent: function() {
         return Ext.isOpera ? "keypress" : "keydown";
     },
@@ -502,7 +372,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     enablePrompt: function() {
         this.promptEl.dom.removeAttribute('readonly');
-        this.focus();
+        this.promptEl.focus();
     },
 
     setValue: function(value) {
@@ -589,22 +459,17 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         if (this.historyCursor > 0) {
             this.setValue(this.history[--this.historyCursor]);
         }
-        this.focus();
+        this.promptEl.focus();
     },
 
     nextInHistory: function() {
         if (this.historyCursor < this.history.length - 1) {
             this.setValue(this.history[++this.historyCursor]);
         }
-        this.focus();
+        this.promptEl.focus();
     },
 
     handleKey: function(event) {
-        if (event.ctrlKey && this.completer.isNumberKey(event.getKey())) {
-            this.completer.doNumberComplete(event.getKey());
-            event.stopEvent();
-            return;
-        }
         switch (event.getKey()) {
         case SymPy.Keys.UP:
             if ((event.ctrlKey && !event.altKey) || this.onFirstLine()) {
@@ -637,28 +502,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             break;
         case SymPy.Keys.LEFT:
-            if (event.ctrlKey) {
-                this.completer.showPrevGroup();
-                event.stopEvent();
-                break;
-            }
-            else {
-                return true;
-            }
+            return true;
         case SymPy.Keys.RIGHT:
-            if (event.ctrlKey) {
-                this.completer.showNextGroup();
-                event.stopEvent();
-                break;
-            }
-            else {
-                return true;
-            }
-        case SymPy.Keys.DEL:
-            this.completer.finishComplete();
-            break;
+            return true;
         case SymPy.Keys.BACKSPACE:
-            this.completer.finishComplete();
             if (this.supportsSelection) {
                 var cursor = this.getCursor();
 
@@ -697,7 +544,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
             break;
         case SymPy.Keys.ENTER:
-            this.completer.finishComplete();
             var shiftEnter = (this.submitEl.getValue() == "shift-enter");
             if (event.shiftKey == shiftEnter) {
                 event.stopEvent();
@@ -741,26 +587,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }
 
             break;
-
-        case SymPy.Keys.TAB:
-            if (this.autocompleteEl.getValue() === "tab") {
-                this.completer.complete(
-                    this.getStatement(),
-                    this.getSelection());
-                event.stopEvent();
-            }
-            break;
-
-        case SymPy.Keys.SPACE:
-            if (event.ctrlKey &&
-                this.autocompleteEl.getValue() === "ctrl-space") {
-                this.completer.complete(
-                    this.getStatement(),
-                    this.getSelection());
-                event.stopEvent();
-            }
-            break;
         }
+
         return false;
     },
 
@@ -829,22 +657,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
           this.promptEl.addClass('sympy-live-processing');
           this.evaluateEl.set({'disabled': 'disabled'});
           this.evaluateEl.addClass('sympy-live-evaluate-disabled');
-          this.completer.finishComplete();
       } else {
           this.evaluating = false;
           this.promptEl.removeClass('sympy-live-processing');
           this.evaluateEl.set({disabled: null}, false);
           this.evaluateEl.removeClass('sympy-live-evaluate-disabled');
       }
-    },
-
-    getStatement: function() {
-        // gets and sanitizes the current statement
-        var statement = this.promptEl.getValue();
-        if (!statement.match(/^\s*$/)) {
-            return statement;
-        }
-        return null;
     },
 
     evaluate: function() {
@@ -883,17 +701,17 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
-                    this.focus();
+                    this.promptEl.focus();
                 },
                 failure: function(response) {
                     this.clearValue();
                     this.updatePrompt();
                     this.setEvaluating(false);
-                    this.focus();
+                    this.promptEl.focus();
                 },
                 scope: this
             });
-            this.focus();
+            this.promptEl.focus();
         }
     },
 
@@ -924,7 +742,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }
 
         this.setEvaluating(false);
-        this.focus();
+        this.promptEl.focus();
     },
 
     clear: function() {
@@ -943,19 +761,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.clearValue();
         this.historyCursor = this.history.length-1;
-
-        this.completer.finishComplete();
     },
 
     updateSettings: function() {
         this.setCookie('sympy-printer', this.printerEl.getValue());
         this.setCookie('sympy-submit', this.submitEl.getValue());
         this.setCookie('sympy-privacy', this.recordEl.getValue());
-<<<<<<< HEAD
-        this.setCookie('sympy-autocomplete', this.autocompleteEl.getValue());
-=======
-		this.setCookie('desktop', this.forcedesktopEl.getValue());
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
     },
 
     setCookie: function(name, value) {
@@ -1093,9 +904,5 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             });
         }
         this.fullscreenMode = false;
-    },
-
-    focus: function(){
-        this.promptEl.focus();
     }
 });

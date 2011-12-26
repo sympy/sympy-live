@@ -59,6 +59,7 @@ from google.appengine.ext.webapp import template
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
+   
 import detectmobile
 
 PRINTERS = {
@@ -516,18 +517,52 @@ class Session(db.Model):
     if name in self.unpicklable_names:
       self.unpicklable_names.remove(name)
 
+class ForceDesktopCookieHandler(webapp.RequestHandler):
+    def get(self):
+        #Cookie stuff
+        import Cookie
+        import datetime
+
+        expiration = datetime.datetime.now() + datetime.timedelta(days=1000)
+        cookie = Cookie.SimpleCookie()
+        cookie["desktop"] = "yes"
+        #cookie["desktop"]["domain"] = "live.sympy.org"
+        cookie["desktop"]["path"] = "/"
+        cookie["desktop"]["expires"] = \
+        expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
+        print cookie.output()
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'redirect.html')
+        vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+                 'python_version': sys.version,
+                 'user': users.get_current_user(),
+                 }
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
+
 class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
+        
+        
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
 
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+        #cookie stuff
+        import Cookie
+        import os
+        try:
+            cookie = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
+            forcedesktop = cookie['desktop'].value
+        except (Cookie.CookieError, KeyError):
+            forcedesktop = 'no'
 
-        if detectmobile.isMobile(self.request.headers):
-            self.redirect('/shellmobile')
+        if forcedesktop == 'no':
+            if detectmobile.isMobile(self.request.headers):          
+                self.redirect('/shellmobile')
+                
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -795,6 +830,7 @@ def main():
       ('/helpdsi', HelpDsiFrontPageHandler),
       ('/shellmobile', ShellMobileFrontPageHandler),
       ('/shell.do', StatementHandler),
+      ('/forcedesktop', ForceDesktopCookieHandler),
       ('/delete', DeleteHistory),
       ('/complete', CompletionHandler)
   ], debug=_DEBUG)
