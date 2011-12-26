@@ -65,3 +65,13 @@ function clear_searches(){
         });
     }
 }
+
+function expand_settings(){
+    if (document.getElementById('settings').style.height == "200px") {
+	document.getElementById('settings').style.height = "35px";
+	document.getElementById('settings_arrow_clicked').id='settings_arrow';
+    } else {
+	document.getElementById('settings').style.height = "200px";
+	document.getElementById('settings_arrow').id='settings_arrow_clicked';
+    }
+}

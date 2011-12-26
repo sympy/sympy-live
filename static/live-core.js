@@ -372,6 +372,23 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             }, {
                 tag: 'br',
             }, {
+                tag: 'select',
+                id: 'autocomplete',
+                children: [{
+                    tag: 'option',
+                    value: 'tab',
+                    html: 'Tab'
+                    }, {
+                    tag: 'option',
+                    value: 'ctrl-space',
+                    html: 'Ctrl-Space'
+                }]
+            }, {
+                tag: 'span',
+                html: 'completes'
+            }, {
+                tag: 'br',
+            }, {
                 tag: 'span',
                 html: 'Force Desktop Version: '
             }, {
@@ -398,7 +415,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
         this.recordEl = this.toolbarEl.down('select:nth(3)');
-	this.forcedesktopEl = this.toolbarEl.down('select:nth(4)');
+        this.autocompleteEl = this.toolbarEl.down('select:nth(4)');
+	this.forcedesktopEl = this.toolbarEl.down('select:nth(5)');
 
         var index;
 
@@ -417,7 +435,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 	index = this.forcedesktopTypes.indexOf(this.forcedesktop);
         this.forcedesktopEl.dom.selectedIndex = index;
     },
-	renderButtons: function(el) {
+    renderButtons: function(el) {
         this.ButtonsEl = Ext.DomHelper.append(el, {
             tag: 'p',
             cls: 'sympy-live-toolbar',
@@ -435,7 +453,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         this.evaluateEl = this.ButtonsEl.down('button:nth(1)');
         this.clearEl = this.ButtonsEl.down('button:nth(2)');
-		this.fullscreenEl = this.ButtonsEl.down('button:nth(3)');
+	this.fullscreenEl = this.ButtonsEl.down('button:nth(3)');
     },
     getKeyEvent: function() {
         return Ext.isOpera ? "keypress" : "keydown";
