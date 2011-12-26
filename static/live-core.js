@@ -93,11 +93,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
     recordTypes: ['on', 'off'],
-<<<<<<< HEAD
     autocompleteTypes: ['tab', 'ctrl-space'],
-=======
-	forcedesktopTypes: ['yes', 'no'],
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
+    forcedesktopTypes: ['yes', 'no'],
     printer: null,
     submit: null,
     tabWidth: 4,
@@ -139,7 +136,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
-		
+
 		index = this.forcedesktopTypes.indexOf(config.forcedesktop);
         this.forcedesktop = (index == -1) ? this.getCookie('desktop', 'no') : config.forcedesktop;
 
@@ -206,7 +203,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             rows: '4',
             spellcheck: 'false'
         }, true);
-<<<<<<< HEAD
 
         this.completionsEl = Ext.DomHelper.append(el, {
             tag: 'div',
@@ -219,13 +215,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, this);
         this.completer.setup();
 
-        this.renderToolbar(el);
-=======
-	
-		this.renderButtons(el);
-		var settings = Ext.get('settings');
+	this.renderButtons(el);
+	var settings = Ext.get('settings');
         this.renderToolbar(settings);
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
 
         this.caretEl.on("focus", function(event) {
             this.focus();
@@ -293,7 +285,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.updateSettings();
             this.focus();
         }, this);
-		
+
 		this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
             this.promptEl.focus();
@@ -361,38 +353,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     html: 'Shift-Enter'
                 }]
             }, {
-<<<<<<< HEAD
-                tag: 'span',
-                html: 'submits'
-            }, {
-                tag: 'span',
-                cls: 'sympy-live-separator',
-                html: '|'
-            }, {
-                tag: 'select',
-                id: 'autocomplete-behavior',
-                children: [{
-                    tag: 'option',
-                    value: 'tab',
-                    html: 'Tab'
-                }, {
-                    tag: 'option',
-                    value: 'ctrl-space',
-                    html: 'Ctrl-Space'
-                }]
-            }, {
-                tag: 'span',
-                html: 'autocompletes'
-            }, {
-                tag: 'span',
-                cls: 'sympy-live-separator',
-                html: '|'
-            }, {
-                tag: 'span',
-                html: 'Ctrl-Up/Down for history'
-=======
                 tag: 'br',
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
             }, {
                 tag: 'span',
                 html: 'Privacy: '
@@ -434,22 +395,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         }, true);
 
         this.supportsSelection = ('selectionStart' in this.promptEl.dom);
-
-<<<<<<< HEAD
-        this.evaluateEl = this.toolbarEl.down('button:nth(1)');
-        this.clearEl = this.toolbarEl.down('button:nth(2)');
-        this.fullscreenEl = this.toolbarEl.down('button:nth(3)');
-
         this.printerEl = this.toolbarEl.down('select:nth(1)');
         this.submitEl = this.toolbarEl.down('select:nth(2)');
-        this.autocompleteEl = this.toolbarEl.down('select:nth(3)');
-        this.recordEl = this.toolbarEl.down('select:nth(4)');
-=======
-        this.printerEl = this.toolbarEl.down('select:nth(1)'); 
-        this.submitEl = this.toolbarEl.down('select:nth(2)'); 
-        this.recordEl = this.toolbarEl.down('select:nth(3)'); 
-		this.forcedesktopEl = this.toolbarEl.down('select:nth(4)'); 
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
+        this.recordEl = this.toolbarEl.down('select:nth(3)');
+	this.forcedesktopEl = this.toolbarEl.down('select:nth(4)');
 
         var index;
 
@@ -461,15 +410,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
         index = this.recordTypes.indexOf(this.record);
         this.recordEl.dom.selectedIndex = index;
-<<<<<<< HEAD
 
         index = this.autocompleteTypes.indexOf(this.autocomplete);
         this.autocompleteEl.dom.selectedIndex = index;
-=======
-		
-		index = this.forcedesktopTypes.indexOf(this.forcedesktop);
+
+	index = this.forcedesktopTypes.indexOf(this.forcedesktop);
         this.forcedesktopEl.dom.selectedIndex = index;
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
     },
 	renderButtons: function(el) {
         this.ButtonsEl = Ext.DomHelper.append(el, {
@@ -951,11 +897,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.setCookie('sympy-printer', this.printerEl.getValue());
         this.setCookie('sympy-submit', this.submitEl.getValue());
         this.setCookie('sympy-privacy', this.recordEl.getValue());
-<<<<<<< HEAD
         this.setCookie('sympy-autocomplete', this.autocompleteEl.getValue());
-=======
-		this.setCookie('desktop', this.forcedesktopEl.getValue());
->>>>>>> 86fc19ef7a55bd57a27e70b2901b969b74cac579
+	this.setCookie('desktop', this.forcedesktopEl.getValue());
     },
 
     setCookie: function(name, value) {
