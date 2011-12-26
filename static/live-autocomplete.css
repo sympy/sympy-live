@@ -66,6 +66,13 @@
     color: #000;
 }
 
+.sympy-live-completions-toolbar .sympy-live-toolbar button {
+    display: block;
+    width: 96%;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+
 .sympy-live-completions-toolbar button:first-child span {
     display: block;
     -moz-transition: all 1s ease-in;

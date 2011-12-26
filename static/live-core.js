@@ -953,6 +953,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             'position' : 'absolute'
         });
 
+        $("#sympy-live-toolbar-main").
+            appendTo(".sympy-live-completions-toolbar");
+
         var shell = $('#shell'),
             leftdiv = $('#left'),
             ld = {
@@ -1056,6 +1059,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 'width' : '95%',
                 'height' : '20em'
             });
+            $("#sympy-live-toolbar-main").
+                appendTo("#shell");
         }
         this.fullscreenMode = false;
     },
