@@ -991,7 +991,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 }, 100);
                 $('.sympy-live-output').css({
                     'width' : bwidth-32,
-                    'height' : bheight-250
+                    'height' : bheight-250-160
                 });
             }
 
@@ -1049,7 +1049,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 height : this.leftHeight,
                 borderWidth : ld.border,
                 padding: 10
-            }, 100);
+            }, 100, function(){
+                leftdiv.css({height: 'auto'});
+            });
             $('.sympy-live-output').css({
                 'width' : '95%',
                 'height' : '20em'
