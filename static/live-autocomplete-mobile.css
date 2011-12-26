@@ -38,10 +38,30 @@
 .sympy-live-completions-toolbar .sympy-live-toolbar button {
     width: 100%;
     font-size: 12pt;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid #000;
+}
+
+.sympy-live-completions-toolbar .sympy-live-toolbar button:last-child {
+    border: 0;
 }
 
 #sympy-live-completions-prev, #sympy-live-completions-next {
     display: none;
+}
+
+@media only screen and (max-width: 320px){
+    .sympy-live-completions {
+        width: 67%;
+    }
+    .sympy-live-completions-toolbar {
+        width: 30%;
+    }
+    .sympy-live-completions li, .sympy-live-completions.expanded li {
+        width: 70%;
+    }
 }
 
 @media only screen and (min-width: 321px){
