@@ -41,23 +41,32 @@ SymPy.MobileShell = Ext.extend(
             this.renderSearches();
             this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
             var shell = Ext.get("shell");
-            Ext.each(
-                this.toolbarEl.query('.sympy-live-separator'),
-                function(n){
-                    Ext.get(n).remove();
-                }
-            );
-            Ext.get("output-format")
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            Ext.DomHelper.insertBefore(
-                this.outputEl,
-                {
-                    'tag': 'span',
-                    'cls': 'sympy-live-separator',
-                    'html': '|'
-                }
-            );
+            $("#settings .content .sympy-live-toolbar").
+                insertBefore($(shell.dom)).
+                children("br").
+                remove();
+            $("#output-format").next().remove();
+            $("#settings").remove();
+            $("#autocomplete").next().remove();
+            $("#autocomplete").remove();
+            $(".sympy-live-toolbar").children("span").last().remove();
+            // Ext.each(
+            //     this.toolbarEl.query('.sympy-live-separator'),
+            //     function(n){
+            //         Ext.get(n).remove();
+            //     }
+            // );
+            // Ext.get("output-format")
+            //     .appendTo(shell)
+            //     .insertBefore(this.outputEl);
+            // Ext.DomHelper.insertBefore(
+            //     this.outputEl,
+            //     {
+            //         'tag': 'span',
+            //         'cls': 'sympy-live-separator',
+            //         'html': '|'
+            //     }
+            // );
             this.completeButtonEl = Ext.DomHelper.insertAfter(
                 this.evaluateEl,
                 {
@@ -65,15 +74,15 @@ SymPy.MobileShell = Ext.extend(
                     'html': 'Complete'
                 }
             , true);
-            this.toolbarEl.down('span')
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            Ext.get("submit-behavior")
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            this.toolbarEl.down('span').remove();
-            this.toolbarEl.down('span').remove();
-            this.autocompleteEl.remove();
+            // this.toolbarEl.down('span')
+            //     .appendTo(shell)
+            //     .insertBefore(this.outputEl);
+            // Ext.get("submit-behavior")
+            //     .appendTo(shell)
+            //     .insertBefore(this.outputEl);
+            // this.toolbarEl.down('span').remove();
+            // this.toolbarEl.down('span').remove();
+            // this.autocompleteEl.remove();
             this.historyPrevEl.on("click", function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
