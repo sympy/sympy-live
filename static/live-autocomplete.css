@@ -9,6 +9,10 @@
     display: inline-block;
 }
 
+.sympy-live-completions li {
+    background-color: transparent !important;
+}
+
 .sympy-live-completions button {
     background-color: #3b5526;
     color: #FFF;
