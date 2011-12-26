@@ -37,7 +37,7 @@
     color: #000;
 }
 
-.sympy-live-completions li.counted button:before {
+.sympy-live-completions li.counted button:not(.padding):before {
     counter-increment: completion;
     content: counter(completion) ". ";
 }
