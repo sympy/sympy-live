@@ -2,7 +2,7 @@ body {
     font-family: monospace;
     font-size: 10pt;
 }
-#left, #right, #footer2, #user , #example, #about, #other_shells, #recent_searches, #user_searches {
+#left, #right, #footer2, #user , #example, #about, #other_shells, #recent_searches, #user_searches, #settings {
 	-webkit-border-radius: 4px 4px 4px 4px;
 	-moz-border-radius: 4px 4px 4px 4px;
 	-o-border-radius: 4px 4px 4px 4px;
@@ -41,7 +41,7 @@ height:165px;
 	margin-top:20px;
 	overflow:hidden;
 }
-#other_shells_arrow_clicked, #recent_searches_arrow_clicked, #example_arrow_clicked, #about_arrow_clicked, #user_searches_arrow_clicked  {
+#other_shells_arrow_clicked, #recent_searches_arrow_clicked, #example_arrow_clicked, #about_arrow_clicked, #user_searches_arrow_clicked, #settings_arrow_clicked  {
 	float:right;
 	text-align:center;
 	margin-right:10px;
@@ -84,7 +84,7 @@ float:left;
 	-webkit-box-shadow: 10px 10px 5px #888;
 	box-shadow: 10px 10px 5px #888;
 	}
-#user , #example, #about, #other_shells, #recent_searches, #user_searches{
+#user , #example, #about, #other_shells, #recent_searches, #user_searches, #settings{
 	padding: 0px 5px 5px 5px;
 	height:35px;
 	overflow:hidden;
@@ -120,7 +120,7 @@ float:right;
 	margin-right:10px;
 	margin-top:12.5px;
 }
-#other_shells_arrow, #recent_searches_arrow, #example_arrow, #about_arrow, #user_searches_arrow {
+#other_shells_arrow, #recent_searches_arrow, #example_arrow, #about_arrow, #user_searches_arrow, #settings_arrow {
 	float:right;
 	text-align:center;
 	margin-right:10px;
@@ -148,4 +148,16 @@ text-align:center;
 	position:fixed;
 	bottom:5px;
 	right:5px;
+}
+
+/* Styling for settings dropdowns */
+select {
+    -webkit-border-radius:2px;
+    -moz-border-radius:2px;
+	-o-border-radius:2px;
+	-ms-border-radius:2px;
+    border-radius:2px;
+}
+option {
+margin-right:10px;
 }

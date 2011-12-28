@@ -31,7 +31,7 @@ SymPy.MobileShell = Ext.extend(
             this.submitEl.next().remove();
             Ext.DomHelper.insertBefore(this.submitEl,{
                  tag: 'span',
-                 html: 'Enter'
+                 html: 'Enter '
             });
             this.historyPrevEl = Ext.get("button-history-prev");
             this.historyNextEl = Ext.get("button-history-next");
@@ -41,30 +41,25 @@ SymPy.MobileShell = Ext.extend(
             this.renderSearches();
             this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
             var shell = Ext.get("shell");
-            Ext.each(
-                this.toolbarEl.query('.sympy-live-separator'),
-                function(n){
-                    Ext.get(n).remove();
-                }
-            );
-            Ext.get("output-format")
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            Ext.DomHelper.insertBefore(
-                this.outputEl,
+            $("#settings .content .sympy-live-toolbar").
+                insertBefore($(shell.dom)).
+                children("br").
+                remove();
+            $("#output-format").next().remove();
+            $("#settings").remove();
+            $("#autocomplete").next().remove();
+            $("#autocomplete").remove();
+            $(".sympy-live-toolbar").children("span").last().remove();
+            $("#sympy-live-toolbar-main").
+                appendTo(".sympy-live-completions-toolbar");
+            $("#fullscreen-button").remove();
+            this.completeButtonEl = Ext.DomHelper.insertAfter(
+                this.evaluateEl,
                 {
-                    'tag': 'span',
-                    'cls': 'sympy-live-separator',
-                    'html': '|'
+                    'tag': 'button',
+                    'html': 'Complete'
                 }
-            );
-            this.toolbarEl.down('span')
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            Ext.get("submit-behavior")
-                .appendTo(shell)
-                .insertBefore(this.outputEl);
-            this.toolbarEl.down('span').remove();
+            , true);
             this.historyPrevEl.on("click", function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
@@ -73,6 +68,13 @@ SymPy.MobileShell = Ext.extend(
                 this.promptEl.focus(1000);
                 this.nextInHistory();
             }, this);
+            this.completeButtonEl.on("click", function(event){
+                this.completer.complete(
+                    this.getStatement(),
+                    this.getSelection());
+            }, this);
+            Ext.getBody().on("orientationchange", this.orientationUpdate, this);
+            this.orientationUpdate();
             Ext.get("menu").on("click", function(event){
                 Ext.get("main-navigation").toggle(true);
                 Ext.get("main-navigation").down("ul").toggle(true);
@@ -170,5 +172,18 @@ SymPy.MobileShell = Ext.extend(
                     })
                 }
             });
+        },
+
+        orientationUpdate: function(){
+            if (window.orientation === 0 || window.orientation === 180){
+                this.completer.completionRowSize = 1;
+            }
+            else {
+                this.completer.completionRowSize = 2;
+            }
+        },
+
+        focus: function() {
+            this.setSelection(this.getValue().length);
         }
     });
