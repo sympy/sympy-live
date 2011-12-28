@@ -43,6 +43,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             cls: 'sympy-live-completions-toolbar',
             children: [{
                 tag: 'button',
+                id: 'sympy-live-completions-toggle',
                 children: [{
                     tag: 'span',  // For CSS animation purposes
                     html: '&#x25BC;'

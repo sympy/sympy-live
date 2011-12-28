@@ -48,7 +48,7 @@
     border: 0;
 }
 
-#sympy-live-completions-prev, #sympy-live-completions-next {
+#sympy-live-completions-prev, #sympy-live-completions-next, #sympy-live-completions-toggle {
     display: none;
 }
 
