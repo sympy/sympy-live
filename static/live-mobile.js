@@ -31,7 +31,7 @@ SymPy.MobileShell = Ext.extend(
             this.submitEl.next().remove();
             Ext.DomHelper.insertBefore(this.submitEl,{
                  tag: 'span',
-                 html: 'Enter'
+                 html: 'Enter '
             });
             this.historyPrevEl = Ext.get("button-history-prev");
             this.historyNextEl = Ext.get("button-history-next");

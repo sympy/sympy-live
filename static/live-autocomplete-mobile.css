@@ -24,6 +24,10 @@
     -webkit-overflow-scrolling: touch;
 }
 
+p.sympy-live-toolbar select {
+    margin-right: 10px;
+}
+
 .sympy-live-completions-toolbar {
     width: 15%;
     height: 30px;
