@@ -65,8 +65,8 @@ import detectmobile
 PRINTERS = {
     'repr': srepr,
     'str': sstr,
-    'ascii': lambda arg: pretty(arg, use_unicode=False),
-    'unicode': lambda arg: pretty(arg, use_unicode=True),
+    'ascii': lambda arg: pretty(arg, use_unicode=False, wrap_line=False),
+    'unicode': lambda arg: pretty(arg, use_unicode=True, wrap_line=False),
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
 
