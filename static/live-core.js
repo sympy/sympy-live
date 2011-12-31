@@ -129,15 +129,15 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         var index;
 
         index = this.printerTypes.indexOf(config.printer);
-        this.printer = (index == -1) ? this.getCookie('sympy-printer', 'ascii') : config.printer;
+        this.printer = (index == -1) ? this.getCookie('sympy-printer', 'latex') : config.printer;
 
         index = this.submitTypes.indexOf(config.submit);
-        this.submit = (index == -1) ? this.getCookie('sympy-submit', 'shift-enter') : config.submit;
+        this.submit = (index == -1) ? this.getCookie('sympy-submit', 'enter') : config.submit;
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
 
-		index = this.forcedesktopTypes.indexOf(config.forcedesktop);
+        index = this.forcedesktopTypes.indexOf(config.forcedesktop);
         this.forcedesktop = (index == -1) ? this.getCookie('desktop', 'no') : config.forcedesktop;
 
         index = this.autocompleteTypes.indexOf(config.autocomplete);
