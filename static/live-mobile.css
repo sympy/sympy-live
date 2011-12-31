@@ -27,7 +27,6 @@ button {
 
 .sympy-live-output > div {
     white-space: pre;
-    word-wrap: break-word;
 }
 
 .sympy-live-output > div.sympy-live-hidden {
