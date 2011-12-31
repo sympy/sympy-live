@@ -129,15 +129,15 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         var index;
 
         index = this.printerTypes.indexOf(config.printer);
-        this.printer = (index == -1) ? this.getCookie('sympy-printer', 'ascii') : config.printer;
+        this.printer = (index == -1) ? this.getCookie('sympy-printer', 'latex') : config.printer;
 
         index = this.submitTypes.indexOf(config.submit);
-        this.submit = (index == -1) ? this.getCookie('sympy-submit', 'shift-enter') : config.submit;
+        this.submit = (index == -1) ? this.getCookie('sympy-submit', 'enter') : config.submit;
 
         index = this.recordTypes.indexOf(config.record);
         this.record = (index == -1) ? this.getCookie('sympy-privacy', 'on') : config.record;
 
-		index = this.forcedesktopTypes.indexOf(config.forcedesktop);
+        index = this.forcedesktopTypes.indexOf(config.forcedesktop);
         this.forcedesktop = (index == -1) ? this.getCookie('desktop', 'no') : config.forcedesktop;
 
         index = this.autocompleteTypes.indexOf(config.autocomplete);
@@ -789,6 +789,15 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.outputEl.dom.scrollTop = this.outputEl.dom.scrollHeight;
     },
 
+    scrollToLeft: function() {
+        this.outputEl.dom.scrollLeft = 0;
+    },
+
+    scrollToDefault: function() {
+        this.scrollToBottom();
+        this.scrollToLeft();
+    },
+
     setEvaluating: function(state) {
       if (state) {
           this.evaluating = true;
@@ -841,7 +850,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: SymPy.escapeHTML(value)
             });
 
-            this.scrollToBottom();
+            this.scrollToDefault();
 
             Ext.Ajax.request({
                 method: 'POST',
@@ -876,12 +885,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 html: SymPy.escapeHTML(result)
             }, false);
 
-            this.scrollToBottom();
+            this.scrollToDefault();
 
             if (this.printerEl.getValue() == 'latex') {
                 function postprocessLaTeX() {
                     Ext.get(element).removeClass('sympy-live-hidden');
-                    this.scrollToBottom();
+                    this.scrollToDefault();
                 }
 
                 MathJax.Hub.Queue(['Typeset', MathJax.Hub, element],
