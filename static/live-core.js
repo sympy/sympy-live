@@ -1003,7 +1003,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                 }, 100);
                 $('.sympy-live-output').css({
                     'width' : bwidth-32,
-                    'height' : bheight-250-160
+                    'height' : bheight-250-160+100
                 });
             }
 
