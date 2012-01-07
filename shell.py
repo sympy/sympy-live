@@ -464,7 +464,9 @@ class Session(db.Model):
       name: the name of the global to remove
       value: any picklable value
     """
-    blob = db.Blob(pickle.dumps(value))
+    # We need to disable the pickling optimization here in order to get the
+    # correct values out.
+    blob = db.Blob(self.fast_dumps(value))
 
     if name in self.global_names:
       index = self.global_names.index(name)
@@ -516,6 +518,22 @@ class Session(db.Model):
     """
     if name in self.unpicklable_names:
       self.unpicklable_names.remove(name)
+
+  def fast_dumps(self, obj, protocol=None):
+    """Performs the same function as pickle.dumps but with optimizations off.
+
+    Args:
+      obj: object, object to be pickled
+      protocol: int, optional protocol option to emulate pickle.dumps
+
+    Note: It is necessary to pickle SymPy values with the fast option in order
+          to get the correct assumptions when unpickling. See Issue 2587.
+    """
+    file = StringIO()
+    p = pickle.Pickler(file)
+    p.fast = 1
+    p.dump(obj)
+    return file.getvalue()
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
