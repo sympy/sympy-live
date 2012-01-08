@@ -73,7 +73,9 @@ button {
     background-color: #3b5526;
     color: #FFF;
 }
-
+,sympy-live-toolbar > button:hover {
+    cursor: pointer;
+}
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
 }
