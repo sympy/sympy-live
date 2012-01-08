@@ -76,6 +76,7 @@ button {
 .sympy-live-toolbar > button:hover {
     cursor: pointer;
 }
+
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
 }
