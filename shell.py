@@ -47,6 +47,7 @@ import tokenize
 import types
 import simplejson
 import wsgiref.handlers
+import rlcompleter
 
 from StringIO import StringIO
 
@@ -58,13 +59,14 @@ from google.appengine.ext.webapp import template
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
+   
 import detectmobile
 
 PRINTERS = {
     'repr': srepr,
     'str': sstr,
-    'ascii': lambda arg: pretty(arg, use_unicode=False),
-    'unicode': lambda arg: pretty(arg, use_unicode=True),
+    'ascii': lambda arg: pretty(arg, use_unicode=False, wrap_line=False),
+    'unicode': lambda arg: pretty(arg, use_unicode=True, wrap_line=False),
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
 
@@ -122,8 +124,10 @@ Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy
 
 # The blueprint used to store user queries
 class Searches(db.Model):
-  query = db.StringProperty()
-  timestamp = db.DateTimeProperty(auto_now_add=True)
+    user_id = db.UserProperty()
+    query = db.StringProperty(multiline=True)
+    timestamp = db.DateTimeProperty(auto_now_add=True)
+    private = db.BooleanProperty()
 
 
 def banner(quiet=False):
@@ -228,6 +232,54 @@ class Live(object):
     def compile(self, source, mode):
         """Wrapper over Python's built-in function. """
         return compile(source, self._file, mode)
+
+    def complete(self, statement, session):
+        """Autocomplete the statement in the session's globals."""
+
+        statement_module = new.module('__main__')
+        import __builtin__
+        statement_module.__builtin__ = __builtin__
+
+        old_main = sys.modules.get('__main__')
+
+        try:
+            sys.modules['__main__'] = statement_module
+
+            statement_module.__name__ = '__main__'
+
+            # re-evaluate the unpicklables
+            for code in session.unpicklables:
+                exec code in statement_module.__dict__
+
+            old_globals = dict(statement_module.__dict__)
+
+            # re-initialize the globals
+            session_globals_dict = session.globals_dict()
+
+            for name, val in session_globals_dict.items():
+                try:
+                    statement_module.__dict__[name] = val
+                except:
+                    session.remove_global(name)
+
+            __builtin__._ = session_globals_dict.get('_')
+
+            completer = rlcompleter.Completer(statement_module.__dict__)
+
+            if '=' in statement:
+                statement = statement.split('=', 1)[1].strip()
+            # XXX need a better way to do this
+            if '.' in statement:
+                return completer.attr_matches(statement)
+            else:
+                return completer.global_matches(statement)
+
+        finally:
+            sys.modules['__main__'] = old_main
+            try:
+                del __builtin__._
+            except AttributeError:
+                pass
 
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """
@@ -465,16 +517,52 @@ class Session(db.Model):
     if name in self.unpicklable_names:
       self.unpicklable_names.remove(name)
 
+class ForceDesktopCookieHandler(webapp.RequestHandler):
+    def get(self):
+        #Cookie stuff
+        import Cookie
+        import datetime
+
+        expiration = datetime.datetime.now() + datetime.timedelta(days=1000)
+        cookie = Cookie.SimpleCookie()
+        cookie["desktop"] = "yes"
+        #cookie["desktop"]["domain"] = "live.sympy.org"
+        cookie["desktop"]["path"] = "/"
+        cookie["desktop"]["expires"] = \
+        expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
+        print cookie.output()
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'redirect.html')
+        vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+                 'python_version': sys.version,
+                 'user': users.get_current_user(),
+                 }
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
+
 class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
+        
+        
         #Get the 10 most recent queries
-        searches_query = Searches.all().order('-timestamp')
-        results = searches_query.fetch(10)
+        searches_query = Searches.all().filter('private', False).order('-timestamp')
+        search_results = searches_query.fetch(10)
 
-        if detectmobile.isMobile(self.request.headers):
-            self.redirect('/shellmobile')
+        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+        #cookie stuff
+        import Cookie
+        import os
+        try:
+            cookie = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
+            forcedesktop = cookie['desktop'].value
+        except (Cookie.CookieError, KeyError):
+            forcedesktop = 'no'
+
+        if forcedesktop == 'no':
+            if detectmobile.isMobile(self.request.headers):          
+                self.redirect('/shellmobile')
+                
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -487,11 +575,57 @@ class FrontPageHandler(webapp.RequestHandler):
             'printer': self.request.get('printer').lower() or '',
             'submit': self.request.get('submit').lower() or '',
             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
-            'searches': results,
+            'searches': search_results,
+            'saved_searches': saved_searches,
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
+
+class CompletionHandler(webapp.RequestHandler):
+    """Takes an incomplete statement and returns possible completions."""
+    def post(self):
+        try:
+            message = simplejson.loads(self.request.body)
+        except ValueError:
+            self.error(400)
+            return
+
+        session_key = message.get('session')
+        statement = message.get('statement').encode('utf-8')
+        live = Live()
+
+        if session_key is not None:
+            try:
+                session = Session.get(session_key)
+            except db.Error:
+                self.error(400)
+                return
+        else:
+            session = Session()
+            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
+            session_key = session.put()
+
+            live.evaluate(PREEXEC, session)
+            live.evaluate(PREEXEC_INTERNAL, session)
+
+        completions = list(sorted(set(live.complete(statement, session))))
+        if not statement.split('.')[-1].startswith('_'):
+            completions = [x for x in completions if
+                           not x.split('.')[-1].startswith('_')]
+
+        # From http://stackoverflow.com/a/1916632
+        # Get longest common prefix to fill instantly
+        common = os.path.commonprefix(completions)
+
+        result = {
+            'session': str(session_key),
+            'completions': completions,
+            'prefix': common
+        }
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps(result))
 
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
@@ -513,16 +647,19 @@ class EvaluateHandler(webapp.RequestHandler):
             return
 
         # Code modified to store each query in a database
+        print_statement = '\n'.join(message.get('print_statement'))
         statement = message.get('statement')
         privacy = message.get('privacy')
 
-        if privacy == 'off' and statement != '':
+        if statement != '':
             searches = Searches()
-            searches.query = statement
-            logging.debug(searches.query)
-            searches.put()
+            searches.user_id = users.get_current_user()
+            searches.query = print_statement
 
-        statement = message.get('statement')
+        if privacy == 'off': searches.private = False
+        if privacy == 'on': searches.private = True
+
+        searches.put()
 
         session_key = message.get('session')
         printer_key = message.get('printer')
@@ -629,7 +766,10 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
       session = Session()
       session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
       session_key = session.put()
-
+    #Get the 10 most recent queries
+    searches_query = Searches.all().filter('private', False).order('-timestamp')
+    search_results = searches_query.fetch(10)
+    saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
     template_file = os.path.join(os.path.dirname(__file__), 'templates',
                                  'shellmobile.html')
     session_url = '/shellmobile?session=%s' % session_key
@@ -639,7 +779,9 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
              'logout_url': users.create_logout_url(session_url),
-             'tabWidth': self.request.get('tabWidth').lower() or 'undefined'
+             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
+             'searches': searches_query,
+             'saved_searches': saved_searches
              }
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
@@ -668,6 +810,18 @@ class StatementHandler(webapp.RequestHandler):
     # evaluate the statement in session's globals
     evaluate(statement, session, printer, self.response.out)
 
+
+class DeleteHistory(webapp.RequestHandler):
+    """Deletes all of the user's history"""
+
+    def get(self):
+        results = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+
+        for result in results:
+            db.delete(result)
+
+        self.response.out.write("Your queries have been deleted.")
+
 def main():
   application = webapp.WSGIApplication([
       ('/', FrontPageHandler),
@@ -676,6 +830,9 @@ def main():
       ('/helpdsi', HelpDsiFrontPageHandler),
       ('/shellmobile', ShellMobileFrontPageHandler),
       ('/shell.do', StatementHandler),
+      ('/forcedesktop', ForceDesktopCookieHandler),
+      ('/delete', DeleteHistory),
+      ('/complete', CompletionHandler)
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)

@@ -1,3 +1,11 @@
+button {
+    background: #e4ebe4;
+    border: 1px solid #000;
+    padding: 0.5em;
+    border-radius: 4px;
+    color: #3b5526;
+}
+
 .sympy-live-output {
     font-family: monospace;
     font-size: 10pt;
@@ -12,7 +20,6 @@
 
 .sympy-live-output > div {
     white-space: pre;
-    word-wrap: break-word;
 }
 
 .sympy-live-output > div.sympy-live-hidden {
@@ -61,9 +68,19 @@
     margin-left: 0.5em;
     margin-bottom: 0.5em;
 }
+.sympy-live-toolbar > button {
+    margin-left: 0.5em;
+    background-color: #3b5526;
+    color: #FFF;
+}
 
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
+}
+
+.sympy-live-toolbar > button.sympy-live-evaluate-disabled {
+    background-color: #999;
+    color: #000
 }
 
 .sympy-live-fullscreen-popup {

@@ -3,14 +3,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+        <meta name="viewport"
+              content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>SymPy Live</title>
-
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/external/ext-core.js"></script>
+        <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
 	<link rel="stylesheet" href="static/style.css" type="text/css" />
 	<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
 	<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
     <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
+    <script type="text/javascript" src="static/live-autocomplete.js"></script>
     <script type="text/javascript" src="/static/live-core.js"></script>
     <script type="text/javascript" src="/static/live-mobile.js"></script>
     <style type="text/css">
@@ -80,7 +83,39 @@
     </div>
     <div id="banner">{{ banner }}</div>
     <p>Non-iOS 5 users: use two fingers to scroll.</p>
+    <div id="searches-container">
+      <div id="saved-searches-container" class="hidden" {% if not user %}style="display:none;"{% endif %}>
+        <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
+        <div id="saved-searches">
+          <p>Press to evaluate. <a href="javascript:void 0;"
+              id="saved-searches-clear"> Clear History</a></p>
+          <ul id="saved-searches-list">
+            {% for search in saved_searches %}
+            <li><button><pre>{{ search.query|escape }}</pre></button></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div id="recent-searches-container" class="hidden">
+        <h3>Recent Searches<img src="static/arrow.png" alt="Arrow" /></h3>
+        <div id="recent-searches">
+          <p>Press to evaluate.</p>
+          <ul id="recent-searches-list">
+            {% for search in searches %}
+            <li><button><pre>{{ search.query|escape }}</pre></button></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
     <div id="shell"></div>
+    <div id="settings">
+      <a href="#settings"><div class="clickable_top">
+	  <div class="title"><h3>Settings</h3></div>
+	  <div id="settings_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+      </div></a>
+      <div class="content"></div>
+    </div>
     <div id="main-navigation">
         <ul>
             <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>
@@ -89,7 +124,8 @@
             <li class="first"><a href="http://www.sympy.org/support.html">Support</a></li>
             <li class="first"><a href="http://www.sympy.org/screenshots.html">Screenshots</a></li>
             <li class="first"><a href="http://www.sympy.org/development.html">Development</a></li>
-			<li class="active first"><a href="">Online Shell</a></li>
+			<li class="first"><a href="/forcedesktop">Use Desktop Version</a></li>
+			<li class="active first"><a href="">SymPy Live</a></li>
         </ul>
     </div>
   </body>

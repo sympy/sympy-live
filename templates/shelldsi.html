@@ -11,18 +11,18 @@
 <style type="text/css">
 body, #form{
 	margin: 0;
-	padding: 0;	
+	padding: 0;
 	font-size: 10px;
 }
 
 #matharea, #controlarea{
-	height: 176px; 
-	width: 240px; 
+	height: 176px;
+	width: 240px;
 	overflow: auto;
 }
 
 #output{
-	width: 720px;	
+	width: 720px;
 	height: 170px;
 	border: 0 none;
 	font-size: 10px;
@@ -32,12 +32,12 @@ body, #form{
 #statement{
 	text-align: left;
 	width: 232px;
-	height: 30px; 
+	height: 30px;
 	font-size: 10px;
 }
 
 .processing {
-	color: #00ffff;	
+	color: #00ffff;
 	background-image: url("/static/loader4.gif");
 	background-position: center center;
 	background-repeat: no-repeat;
@@ -52,25 +52,25 @@ body, #form{
 }
 
 table td{
-	width: 40px; 
+	width: 40px;
 	*height:27;
-	background: #9fcfba;  
-	border: 1px solid #666; 
+	background: #9fcfba;
+	border: 1px solid #666;
 	padding: 1px;
-	margin: 1px;	
+	margin: 1px;
 }
 
 table td:hover{
-	width: 40px; 
+	width: 40px;
 	*height:27;
-	background: #00FFFF;  
-	border: 1px solid #666; 
+	background: #00FFFF;
+	border: 1px solid #666;
 	padding: 1px;
 	margin: 1px;
 }
 
 #userbar{
-	border: 1px solid #666; 
+	border: 1px solid #666;
 	background: #9fcfba;
 }
 </style>
@@ -101,33 +101,33 @@ table td:hover{
 		<tr><td>7<td>8<td>9<td>x<td>y<td>z</td>
 		<tr><td>4<td>5<td>6<td>*<td>/<td>!</td>
 		<tr><td>1<td>2<td>3<td >+<td>-<td>=</td>
-		<tr><td>0<td >.<td>e<td>pi<td>,<td id="exe"><div class="prompt" id="execute">exe</div></td> 
+		<tr><td>0<td >.<td>e<td>pi<td>,<td id="exe"><div class="prompt" id="execute">exe</div></td>
 	</table>
 </div>
 
 <script type="text/javascript">
 
 var isshift = false;
- 
+
 function del(str){
-   
+
     var len = String(str).length;
     return String(str).substring(0, len - 1);
- 
+
 };
 
 function shift(){
-	
+
 	var firstpad = ['shift','print','eval','symb','solve','<-','(',')','sin','cos','tan','sqrt',
 			'7','8','9','x','y','z','4','5','6','*','/','!','1','2','3','+','-',
 			'=','0','.','e','pi',','];
-	
+
 	var secondpad = ['shift','intg','diff','mtx','exp','<-','(',')','asin','acos','atan','log',
 			'7','8','9','a','b','c','4','5','6','*','/','a/b','1','2','3','+','-',
 			'=','0','.','[',']',','];
-	
-	keys = $("keypad").getElementsByTagName("td"); 
-	
+
+	keys = $("keypad").getElementsByTagName("td");
+
 	if(isshift){
 		pad = firstpad;
 		isshift = false;
@@ -136,28 +136,28 @@ function shift(){
 		pad = secondpad;
 		isshift = true;
 	}
-	
-	for(i=1; i<pad.length; i++){		
-		keys[i].innerHTML = pad[i];	
+
+	for(i=1; i<pad.length; i++){
+		keys[i].innerHTML = pad[i];
 	}
-		
+
 }
 
 window.onload = function(){
 
 	document.body.scrollTop = 176;
-	
-	keys = $("keypad").getElementsByTagName("td"); 
+
+	keys = $("keypad").getElementsByTagName("td");
 	stmt = $("statement");
-	
+
 	for(i=0; i<=keys.length; i++){
 		keys[i].onclick = function(){
 			if(this.id == "exe")
 				shell.runStatement();
 			else if(this.id == "back")
-				stmt.value = del(stmt.value);	
+				stmt.value = del(stmt.value);
 			else if(this.innerHTML == "shift")
-				shift();	
+				shift();
 			else if(this.innerHTML == "eval")
 				stmt.value = "(" + stmt.value + ").evalf()";
 			else if(this.innerHTML == "print")
@@ -165,36 +165,36 @@ window.onload = function(){
 			else if(this.innerHTML == "symb")
 				stmt.value =  stmt.value + " = Symbol('" + stmt.value + "')";
 			else if(this.getAttribute("class") == "func")
-				stmt.value += this.innerHTML + "(";	
+				stmt.value += this.innerHTML + "(";
 			else if(this.innerHTML == "intg")
 				stmt.value += "integrate(";
 			else if(this.innerHTML == "diff")
 				stmt.value += "diff(";
 			else if(this.innerHTML == "mtx")
-				stmt.value += "Matrix(";	
+				stmt.value += "Matrix(";
 			else if(this.innerHTML == "exp")
-				stmt.value += ".expand()";		
+				stmt.value += ".expand()";
 			else if(this.innerHTML == "!")
-				stmt.value += "factorial(";	
+				stmt.value += "factorial(";
 			else if(this.innerHTML == "e")
-				stmt.value += "exp(";		
+				stmt.value += "exp(";
 			else if(this.innerHTML == "solve")
-				stmt.value += "solve(";	
+				stmt.value += "solve(";
 			else if(this.innerHTML == "a/b")
-				stmt.value += "Rational(";			
-			else 	
-				stmt.value += this.innerHTML;	
+				stmt.value += "Rational(";
+			else
+				stmt.value += this.innerHTML;
 			return shell.onPromptKeyPress(0);
-		}; 
+		};
 	}
-	
+
 	stmt.focus();
 };
 
 window.onkeypress = function(event) {
 	return shell.onPromptKeyPress(event);
 };
-	
+
 
 </script>
 
