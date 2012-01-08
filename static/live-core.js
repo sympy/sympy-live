@@ -1002,7 +1002,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'padding' : 0
                 }, 100);
                 $('.sympy-live-output').css({
-                    'width' : bwidth-32,
+                    'width' : bwidth0
                     'height' : bheight-250-160+100
                 });
             }
