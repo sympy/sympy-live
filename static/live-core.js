@@ -288,7 +288,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
 	this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
-            window.location = 'http://live.sympy.org'
+            window.location = '../templates/shell.html'
             this.promptEl.focus();
         }, this);
 
