@@ -214,6 +214,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             container: this.completionsEl
         }, this);
         this.completer.setup();
+
 	this.renderButtons(el);
 	var settings = Ext.get('settings').down(".content");
         this.renderToolbar(settings);
@@ -1002,7 +1003,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'padding' : 0
                 }, 100);
                 $('.sympy-live-output').css({
-                    'width' : bwidth0
+                    'width' : bwidth-32,
                     'height' : bheight-250-160+100
                 });
             }
