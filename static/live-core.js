@@ -93,7 +93,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     printerTypes: ['repr', 'str', 'ascii', 'unicode', 'latex'],
     submitTypes: ['enter', 'shift-enter'],
     recordTypes: ['on', 'off'],
-    autocompleteTypes: ['tab', 'ctrl-space'],
+    autocompleteTypes: ['tab', 'ctrl-space', 'automatically'],
     forcedesktopTypes: ['yes', 'no'],
     printer: null,
     submit: null,
@@ -288,6 +288,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
 	this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
+            window.location = '..'
             this.promptEl.focus();
         }, this);
 
@@ -382,6 +383,10 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     tag: 'option',
                     value: 'ctrl-space',
                     html: 'Ctrl-Space'
+                    }, {
+                    tag: 'option',
+                    value: 'automatically',
+                    html: 'Automatically'
                 }]
             }, {
                 tag: 'span',
@@ -571,6 +576,12 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             event.stopEvent();
             return;
         }
+        if (this.autocompleteEl.getValue() === "automatically") {
+            this.completer.complete(
+                this.getStatement(),
+                this.getSelection());
+	}
+
         switch (event.getKey()) {
         case SymPy.Keys.UP:
             if ((event.ctrlKey && !event.altKey) || this.onFirstLine()) {
@@ -714,6 +725,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     this.getStatement(),
                     this.getSelection());
                 event.stopEvent();
+	    }
+	    else {	
+                event.stopEvent();
             }
             break;
 
@@ -728,7 +742,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             break;
         }
         return false;
-    },
+   },
 
     preHandleKey: function(event) {
         if (this.historyCursor == this.history.length-1) {
@@ -738,6 +752,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     postHandleKey: function(event) {
         this.updateHistory(this.getValue());
+
     },
 
     updateHistory: function(value) {
@@ -953,6 +968,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         return (result) ? result : default_value;
     },
 
+
     fullscreen: function() {
         var popup = $('<div class="sympy-live-fullscreen-popup">Escape to close fullscreen mode.</div>');
         popup.css({
@@ -1005,6 +1021,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'width' : bwidth-32,
                     'height' : bheight-250-160+100
                 });
+		$('.sympy-live-prompt').css({
+		    'width' : bwidth-65
+		});
             }
 
             // some styles to make it look better
