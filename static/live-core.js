@@ -287,6 +287,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
 	this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
+            window.location = '..'
             this.promptEl.focus();
         }, this);
 
