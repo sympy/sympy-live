@@ -202,6 +202,12 @@ button {
     padding: 6px;
     height: 20px;
     margin-left:16px;
+    background: #ebfadf;
+    background: -moz-linear-gradient(left, #ebfadf, #EEEEEE);
+
+    background: -webkit-gradient(linear,left top, right top, from(#ebfadf), to(#EEEEEE));
+
+    filter: progid:DXImageTransform.Microsoft.Gradient(StartColorStr='#ebfadf', EndColorStr='#EEEEEE', GradientType=0);
 }
 #user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
 #sometext {
