@@ -10,7 +10,12 @@ a { -moz-outline: none; }
 
 body {
     color: #222;
-    background: #e4ebe4;
+    background: #ebfadf;
+    background: -moz-linear-gradient(left, #ebfadf, #EEEEEE);
+
+    background: -webkit-gradient(linear,left top, right top, from(#ebfadf), to(#EEEEEE));
+
+    filter: progid:DXImageTransform.Microsoft.Gradient(StartColorStr='#ebfadf', EndColorStr='#EEEEEE', GradientType=0);
     font-family: helvetica, arial, sans-serif;
 }
 

@@ -288,6 +288,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
 	this.forcedesktopEl.on("change", function(event) {
             this.updateSettings();
+            window.location = '..'
             this.promptEl.focus();
         }, this);
 
@@ -1005,6 +1006,9 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'width' : bwidth-32,
                     'height' : bheight-250-160+100
                 });
+		$('.sympy-live-prompt').css({
+		    'width' : bwidth-65
+		});
             }
 
             // some styles to make it look better
