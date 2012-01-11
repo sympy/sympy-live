@@ -466,7 +466,7 @@ class Session(db.Model):
     """
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    blob = db.Blob(self.fast_dumps(value))
+    blob = db.Blob(self.fast_dumps(value, -1))
 
     if name in self.global_names:
       index = self.global_names.index(name)
@@ -530,7 +530,7 @@ class Session(db.Model):
           to get the correct assumptions when unpickling. See Issue 2587.
     """
     file = StringIO()
-    p = pickle.Pickler(file)
+    p = pickle.Pickler(file, protocol)
     p.fast = 1
     p.dump(obj)
     return file.getvalue()
