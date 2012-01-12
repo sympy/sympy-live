@@ -6,7 +6,7 @@
         <title>SymPy Live</title>
 
         <script type="text/javascript" src="static/external/ext-core.js"></script>
-	<script type="text/javascript" src="static/expand_right.js"></script>
+        <script type="text/javascript" src="static/expand_right.js"></script>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
         <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
         <link rel="stylesheet" type="text/css" href="static/live-core.css" />
@@ -120,11 +120,13 @@
 			<div class="title"><h3>About this page</h3></div>
 			<div id="about_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
-<div class="content">
+<div id="about_content" class="content">
         <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
         running on the
         <a href="http://code.google.com/appengine/">Google App Engine</a>.
 			<p></p>
+Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.
+<p></p>
 This is just a regular Python shell, with the following commands executed by default:
 <pre>
 &gt;&gt;&gt; from __future__ import division

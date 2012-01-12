@@ -16,9 +16,15 @@ body {
 .username {
     font-weight: bold;
 }
+#about_content {
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+    height:130px;
+}
 #saved_searches, #recent_searches_content {
-overflow:auto;
-height:165px;
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+    height:165px;
 }
 #footer2 {
 	padding-left:5px;
