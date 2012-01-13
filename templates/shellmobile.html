@@ -97,8 +97,6 @@
         <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
         running on the
         <a href="http://code.google.com/appengine/">Google App Engine</a>.
-			<p></p>
-Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.
 <p></p>
 This is just a regular Python shell, with the following commands executed by default:
 <pre>
@@ -107,7 +105,8 @@ This is just a regular Python shell, with the following commands executed by def
 &gt;&gt;&gt; x, y, z, t = symbols('x y z t')
 &gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)
 &gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
-</pre></div>
+</pre><p></p>
+Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.</div>
 			</div>
 			{% if user %}<br/>{% endif %}
 			<div id="user_searches" {% if not user %}style="display:none;"{% endif %}>
