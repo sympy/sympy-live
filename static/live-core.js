@@ -851,16 +851,28 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             });
 
             this.scrollToDefault();
-
+			
+			if (navigator.userAgent.match(/like Mac OS X/i)) { 
+                timeout = 58; // On an iOS Device
+			} else {
+				timeout = 61; // Not iOS based
+			}
             Ext.Ajax.request({
                 method: 'POST',
                 url: (this.basePath || '') + '/evaluate',
+				timeout: (timeout * 1000),
                 jsonData: Ext.encode(data),
                 success: function(response) {
                     this.done(response);
                     this.focus();
                 },
-                failure: function(response) {
+                failure: function() {
+					Ext.DomHelper.append(this.outputEl, {
+					tag: 'div',
+					html: 'Error: Time limit exceeded.'
+					}
+					);
+					this.scrollToDefault();
                     this.clearValue();
                     this.updatePrompt();
                     this.setEvaluating(false);

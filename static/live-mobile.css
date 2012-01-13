@@ -189,82 +189,23 @@ button {
     font-weight: bold;
     float: right;
     display: inline-block;
-    margin: 10px 0 110px 0;
+    margin: 10px 0 40px 0;
     padding: 0.35em;
 }
 
-
-#user {
-    border: none;
-    padding: 6px;
-    height: 20px;
-}
 #user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
-#searches-container {
-    padding: 0.5em;
-    margin: 0.5em;
-    border-radius: 4px;
-    border: 1px solid #000;
-    background-color: #FFF;
-}
-#searches-container h3 {
-    font-family: monospace;
-    font-size: 100%;
-    text-decoration: underline;
-}
-#searches-container h3 img {
-    float: right;
-}
-#searches-container ul {
-    list-style-type: none;
-    overflow: auto;
-    max-height: 150px;
-    -webkit-overflow-scrolling: touch;
-}
-#searches-container ul li button {
-    border: 1px solid #000;
-    border-bottom: none;
-    background-color: #3b5526;
-    color: #FFF;
-    border-radius: 4px;
-    padding: 0.25em 0.5em;
-    width: 100%;
-    text-align: left;
-}
 
-#searches-container ul li:last-child {
-    border-bottom: 1px solid #000;
-    border-radius: 4px;
-}
-
-#searches-container pre {
-    display: inline;
-}
-
-#searches-container div img {
-    width: 1em;
-    height: 1em;
-    -moz-transition: all 1s ease-in;
-    -webkit-transition: all 1s ease-in;
-    -o-transition: all 1s ease-in;
-    transition: all 1s ease-in;
-    -webkit-transform: rotate(-180deg) translate(0px, 0px);
-    -moz-transform: rotate(-180deg) translate(0px, 0px);
-    -o-transform: rotate(-180deg) translate(0px, 0px);
-    -ms-transform: rotate(-180deg) translate(0px, 0px);
-    -transform: rotate(-180deg) translate(0px, 0px);
-}
-#searches-container div.hidden img {
-    width: 1em;
-    height: 1em;
-    -webkit-transform: rotate(0deg) translate(0px, 0px);
-    -moz-transform: rotate(0deg) translate(0px, 0px);
-    -o-transform: rotate(0deg) translate(0px, 0px);
-    -ms-transform: rotate(0deg) translate(0px, 0px);
-    -transform: rotate(0deg) translate(0px, 0px);
-}
 #saved-searches-container {
     border-bottom: 1px solid #000;
+}
+#about, #user_searches, #recent_searches, #settings {
+color: #222222;
+font-family: helvetica,arial,sans-serif;
+font-size: 14px;
+background-color:white;
+width:95%;
+margin-left:auto;
+margin-right:auto;
 }
 #recent-searches-container, #saved-searches-container {
     height: 220px;
