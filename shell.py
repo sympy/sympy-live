@@ -466,7 +466,7 @@ class Session(db.Model):
     """
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    blob = db.Blob(self.fast_dumps(value, -1))
+    blob = db.Blob(self.fast_dumps(value, 1))
 
     if name in self.global_names:
       index = self.global_names.index(name)
