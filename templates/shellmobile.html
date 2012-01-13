@@ -8,10 +8,11 @@
     <title>SymPy Live</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/external/ext-core.js"></script>
-        <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
-	<link rel="stylesheet" href="static/style.css" type="text/css" />
-	<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
-	<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="static/expand_right.js"></script>
+    <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
+    <link rel="stylesheet" href="static/style.css" type="text/css" />
+    <link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
+    <link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
     <link rel="stylesheet" type="text/css" href="/static/live-mobile.css" />
     <script type="text/javascript" src="static/live-autocomplete.js"></script>
     <script type="text/javascript" src="/static/live-core.js"></script>
@@ -65,6 +66,7 @@
 
         var el = Ext.get('shell');
         shell.render(el);
+		
       });
     </script>
   </head>
@@ -73,32 +75,70 @@
       <h1><a href=""><img src="static/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
       <button id="menu">&#8942;</button>
     </div>
-    <div id="user">
       {% if user %}
-      <span class="username">{{ user.nickname }}</span>
+      <span class="mobile_username">{{ user.nickname }}</span>
       (<a href="{{ logout_url }}">log out</a>)
       {% else %}
       <a href="{{ login_url }}">log in</a>
       {% endif %}
-    </div>
-    <div id="banner">{{ banner }}</div>
-    <p>Non-iOS 5 users: use two fingers to scroll.</p>
-    <div id="searches-container">
-      <div id="saved-searches-container" class="hidden" {% if not user %}style="display:none;"{% endif %}>
-        <h3>My Searches<img src="static/arrow.png" alt="Arrow" /></h3>
-        <div id="saved-searches">
-          <p>Press to evaluate. <a href="javascript:void 0;"
-              id="saved-searches-clear"> Clear History</a></p>
+	  <br/>
+	<script type="text/javascript">
+	if (navigator.userAgent.match(/(iPad|iPhone|iPod);.*CPU.*OS 5_\d_\d/i))
+{  } else {
+	document.write('Non-iOS 5 users: use two fingers to scroll.');
+	}
+	</script>
+	<div id="about">
+			<div class="clickable_top" onclick="transition_about();">
+			<div class="title"><h3 style="display:block;">About this page</h3></div>
+			<div id="about_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			</div>
+<div id="about_content" class="content">
+        <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
+        running on the
+        <a href="http://code.google.com/appengine/">Google App Engine</a>.
+<p></p>
+This is just a regular Python shell, with the following commands executed by default:
+<pre>
+&gt;&gt;&gt; from __future__ import division
+&gt;&gt;&gt; from sympy import *
+&gt;&gt;&gt; x, y, z, t = symbols('x y z t')
+&gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)
+&gt;&gt;&gt; f, g, h = symbols('f g h', cls=Function)
+</pre><p></p>
+Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.</div>
+			</div>
+			{% if user %}<br/>{% endif %}
+			<div id="user_searches" {% if not user %}style="display:none;"{% endif %}>
+		        <div class="clickable_top" onclick="expand_userhistory();">
+				<div id="user_searches_arrow">
+                    <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+                </div>
+                <div class="title"><h3 style="display:block;">My Searches&nbsp;</h3></div>
+                </div>
+                <div id="saved_searches" class="content">
+				<div id="saved-searches">
+          Press to evaluate.
           <ul id="saved-searches-list">
             {% for search in saved_searches %}
             <li><button><pre>{{ search.query|escape }}</pre></button></li>
             {% endfor %}
           </ul>
         </div>
-      </div>
-      <div id="recent-searches-container" class="hidden">
-        <h3>Recent Searches<img src="static/arrow.png" alt="Arrow" /></h3>
-        <div id="recent-searches">
+                </div>
+				<div id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
+        </div><br/>
+		<div id="recent_searches">
+		    <div class="clickable_top" onclick="expand_history();"> 
+			<div class="title">
+            <h3>Recent Searches</h3>
+            </div>
+			<div id="recent_searches_arrow">
+                <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+            </div>
+			</div>
+            <div id="recent_searches_content" class="content">
+            <div id="recent-searches">
           <p>Press to evaluate.</p>
           <ul id="recent-searches-list">
             {% for search in searches %}
@@ -106,16 +146,18 @@
             {% endfor %}
           </ul>
         </div>
-      </div>
-    </div>
+            </div>
+        </div><br/>
+		<div id="settings">
+			<div class="clickable_top" onclick="expand_settings();">
+			<div class="title"><h3>Settings</h3></div>
+			<div id="settings_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			</div>
+			<div class="content"></div>
+			</div>
+		<!-- End of new dropdowns -->
+    
     <div id="shell"></div>
-    <div id="settings">
-      <a href="#settings"><div class="clickable_top">
-	  <div class="title"><h3>Settings</h3></div>
-	  <div id="settings_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
-      </div></a>
-      <div class="content"></div>
-    </div>
     <div id="main-navigation">
         <ul>
             <li class="first"><a href="http://www.sympy.org/index.html">Main Page</a></li>

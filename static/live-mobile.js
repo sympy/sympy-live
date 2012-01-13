@@ -28,7 +28,7 @@ SymPy.MobileShell = Ext.extend(
                 this.submitEl.query('option[value="shift-enter"]')[0]);
             insertEl.set({value: "enter-inserts-newline"}).update("inserts newline");
             submitEl.set({value: "enter-submits"}).update("submits");
-            this.submitEl.next().remove();
+            this.submitEl.next().remove();			
             Ext.DomHelper.insertBefore(this.submitEl,{
                  tag: 'span',
                  html: 'Enter '
@@ -41,12 +41,8 @@ SymPy.MobileShell = Ext.extend(
             this.renderSearches();
             this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
             var shell = Ext.get("shell");
-            $("#settings .content .sympy-live-toolbar").
-                insertBefore($(shell.dom)).
-                children("br").
-                remove();
             $("#output-format").next().remove();
-            $("#settings").remove();
+			$("#output-format").next().remove();
             $("#autocomplete").next().remove();
             $("#autocomplete").remove();
             $(".sympy-live-toolbar").children("span").last().remove();
@@ -147,15 +143,6 @@ SymPy.MobileShell = Ext.extend(
             });
             setupEval.call(this, this.recentSearches);
             setupEval.call(this, this.savedSearches);
-            var toggle = (function(event){
-                $(this.dom).parent().toggleClass('hidden');
-            });
-            Ext.get("recent-searches-container").
-                first("h3").
-                on("click", toggle, this.recentSearches);
-            Ext.get("saved-searches-container").
-                first("h3").
-                on("click", toggle, this.savedSearches);
             $("#saved-searches-clear").click(function(){
                 if(confirm("Delete history?") === true){
                     $.ajax({
