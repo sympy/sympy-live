@@ -425,7 +425,11 @@ class Live(object):
             except AttributeError:
                 pass
 
-        session.put()
+        try:
+            session.put()
+        except:
+            if stream.len == 0:
+                self.error(stream, ('ERROR: Unable to store value due to excessive size.',)) 
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
