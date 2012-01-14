@@ -55,6 +55,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.runtime.apiproxy_errors import RequestTooLargeError 
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
@@ -425,7 +426,11 @@ class Live(object):
             except AttributeError:
                 pass
 
-        session.put()
+        try:
+            session.put()
+        except RequestTooLargeError:
+            stream.truncate(0) # clear output
+            self.error(stream, ('Unable to process statement due to its excessive size.',))
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
@@ -464,7 +469,9 @@ class Session(db.Model):
       name: the name of the global to remove
       value: any picklable value
     """
-    blob = db.Blob(pickle.dumps(value))
+    # We need to disable the pickling optimization here in order to get the
+    # correct values out.
+    blob = db.Blob(self.fast_dumps(value, 1))
 
     if name in self.global_names:
       index = self.global_names.index(name)
@@ -516,6 +523,22 @@ class Session(db.Model):
     """
     if name in self.unpicklable_names:
       self.unpicklable_names.remove(name)
+
+  def fast_dumps(self, obj, protocol=None):
+    """Performs the same function as pickle.dumps but with optimizations off.
+
+    Args:
+      obj: object, object to be pickled
+      protocol: int, optional protocol option to emulate pickle.dumps
+
+    Note: It is necessary to pickle SymPy values with the fast option in order
+          to get the correct assumptions when unpickling. See Issue 2587.
+    """
+    file = StringIO()
+    p = pickle.Pickler(file, protocol)
+    p.fast = 1
+    p.dump(obj)
+    return file.getvalue()
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
