@@ -55,6 +55,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.runtime.apiproxy_errors import RequestTooLargeError 
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
@@ -427,9 +428,9 @@ class Live(object):
 
         try:
             session.put()
-        except:
-            if stream.len == 0:
-                self.error(stream, ('ERROR: Unable to store value due to excessive size.',)) 
+        except RequestTooLargeError:
+            stream.truncate(0) # clear output
+            self.error(stream, ('Unable to process statement due to its excessive size.',))
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
