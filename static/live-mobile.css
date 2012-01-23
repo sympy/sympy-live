@@ -192,10 +192,9 @@ button {
     font-weight: bold;
     float: right;
     display: inline-block;
-    margin: 10px 0 110px 0;
+    margin: 10px 0 40px 0;
     padding: 0.35em;
 }
-
 
 #user {
     border: none;
@@ -244,35 +243,17 @@ button {
     border-bottom: 1px solid #000;
     border-radius: 4px;
 }
-
-#searches-container pre {
-    display: inline;
-}
-
-#searches-container div img {
-    width: 1em;
-    height: 1em;
-    -moz-transition: all 1s ease-in;
-    -webkit-transition: all 1s ease-in;
-    -o-transition: all 1s ease-in;
-    transition: all 1s ease-in;
-    -webkit-transform: rotate(-180deg) translate(0px, 0px);
-    -moz-transform: rotate(-180deg) translate(0px, 0px);
-    -o-transform: rotate(-180deg) translate(0px, 0px);
-    -ms-transform: rotate(-180deg) translate(0px, 0px);
-    -transform: rotate(-180deg) translate(0px, 0px);
-}
-#searches-container div.hidden img {
-    width: 1em;
-    height: 1em;
-    -webkit-transform: rotate(0deg) translate(0px, 0px);
-    -moz-transform: rotate(0deg) translate(0px, 0px);
-    -o-transform: rotate(0deg) translate(0px, 0px);
-    -ms-transform: rotate(0deg) translate(0px, 0px);
-    -transform: rotate(0deg) translate(0px, 0px);
-}
 #saved-searches-container {
     border-bottom: 1px solid #000;
+}
+#about, #user_searches, #recent_searches, #settings {
+color: #222222;
+font-family: helvetica,arial,sans-serif;
+font-size: 14px;
+background-color:white;
+width:95%;
+margin-left:auto;
+margin-right:auto;
 }
 #recent-searches-container, #saved-searches-container {
     height: 220px;
