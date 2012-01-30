@@ -55,12 +55,12 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from google.appengine.runtime.apiproxy_errors import RequestTooLargeError 
+from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
-   
+
 import detectmobile
 
 PRINTERS = {
@@ -471,7 +471,10 @@ class Session(db.Model):
     """
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    blob = db.Blob(self.fast_dumps(value, 1))
+
+    # We use protocol 2 here.  This is necessary to make things like pickling
+    # of singletons work correctly
+    blob = db.Blob(self.fast_dumps(value, -1))
 
     if name in self.global_names:
       index = self.global_names.index(name)
@@ -566,8 +569,8 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-        
-        
+
+
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
@@ -583,9 +586,9 @@ class FrontPageHandler(webapp.RequestHandler):
             forcedesktop = 'no'
 
         if forcedesktop == 'no':
-            if detectmobile.isMobile(self.request.headers):          
+            if detectmobile.isMobile(self.request.headers):
                 self.redirect('/shellmobile')
-                
+
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
