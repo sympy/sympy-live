@@ -34,13 +34,5 @@ function clear_searches(){
               function(data) {
                   $('#saved_searches').html(data);
               });
-        // Ext.Ajax.request({
-        //     method: 'GET',
-        //     url: (this.basePath || '') + '/delete',
-        //     success: function(response) {
-        //         var response = response.responseText;
-        //         Ext.fly('saved_searches').update(response);
-        //     },
-        // });
     }
 }
