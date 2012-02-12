@@ -1,59 +1,33 @@
-function transition_about(){
-    if (document.getElementById('about').style.height == "175px") {
-	document.getElementById('about').style.height = "35px";
-	document.getElementById('about_arrow_clicked').id='about_arrow';			}
-    else {
-	document.getElementById('about').style.height = "175px";
-	document.getElementById('about_arrow').id='about_arrow_clicked';
-    }
-}
-function transition_example(){
-    if (document.getElementById('example').style.height == "175px") {
-	document.getElementById('example').style.height = "35px";
-	document.getElementById('example_arrow_clicked').id='example_arrow';			}
-    else {
-	document.getElementById('example').style.height = "175px";
-	document.getElementById('example_arrow').id='example_arrow_clicked';
-    }
-}
-function transition_other_shells(){
-    if (document.getElementById('other_shells').style.height == "95px") {
-	document.getElementById('other_shells').style.height = "35px";
-	document.getElementById('other_shells_arrow_clicked').id='other_shells_arrow';
-    }
-    else {
-	document.getElementById('other_shells').style.height = "95px";
-	document.getElementById('other_shells_arrow').id='other_shells_arrow_clicked';
-    }
+function makeTransition(elemId, arrowId, closedHeight, openHeight) {
+    return (function(){
+        var closedHeight = 35;
+        // relies on parseInt ignoring invalid trailing content
+        var margin = parseInt($('.content').css('margin-top'), 10);
+        var openHeight = $(elemId + ' .content').height() + margin;
+        var elem = $(elemId), arrow = $(arrowId);
+        if (elem.height() === closedHeight) {
+            elem.height(openHeight);
+            arrow.addClass('clicked');
+        }
+        else {
+            elem.height(closedHeight);
+            arrow.removeClass('clicked');
+        }
+    });
 }
 
-function expand_userhistory(){
-    if (document.getElementById('user_searches').style.height == "225px") {
-	    <!-- document.getElementById('user_searches').style.overflow = "hidden"; -->
-	    document.getElementById('user_searches').style.height = "35px";
-	document.getElementById('user_searches_arrow_clicked').id='user_searches_arrow';
-    } else {
-	    <!--document.getElementById('user_searches').style.overflow = "auto"; -->
-	    document.getElementById('user_searches').style.height = "225px";
-	document.getElementById('user_searches_arrow').id='user_searches_arrow_clicked';
-    }
-}
-
-function expand_history(){
-    if (document.getElementById('recent_searches').style.height == "225px") {
-	    <!-- document.getElementById('recent_searches').style.overflow = "hidden"; -->
-	    document.getElementById('recent_searches').style.height = "35px";
-	document.getElementById('recent_searches_arrow_clicked').id='recent_searches_arrow';
-    } else {
-	    <!-- document.getElementById('recent_searches').style.overflow = "auto";  -->
-	    document.getElementById('recent_searches').style.height = "225px";
-	document.getElementById('recent_searches_arrow').id='recent_searches_arrow_clicked';
-    }
-}
+$(document).ready(function(){
+    $('.clickable_top').each(function(i, elem){
+        var elem_id = $(elem).parent().parent().attr('id');
+        var arrow_id = elem_id + '_arrow';
+        $('#' + arrow_id).addClass('arrow');
+        $(elem).click(makeTransition('#' + elem_id, '#' + arrow_id));
+    });
+});
 
 function clear_searches(){
     var confirm_delete = confirm("Are you sure you want to clear your search history?");
-    if (confirm_delete==true)
+    if (confirm_delete===true)
     {
         Ext.Ajax.request({
             method: 'GET',
@@ -63,15 +37,5 @@ function clear_searches(){
                 Ext.fly('saved_searches').update(response);
             },
         });
-    }
-}
-
-function expand_settings(){
-    if (document.getElementById('settings').style.height == "200px") {
-	document.getElementById('settings').style.height = "35px";
-	document.getElementById('settings_arrow_clicked').id='settings_arrow';
-    } else {
-	document.getElementById('settings').style.height = "200px";
-	document.getElementById('settings_arrow').id='settings_arrow_clicked';
     }
 }

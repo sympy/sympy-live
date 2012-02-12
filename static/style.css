@@ -47,20 +47,20 @@ body {
 	margin-top:20px;
 	overflow:hidden;
 }
-#other_shells_arrow_clicked, #recent_searches_arrow_clicked, #example_arrow_clicked, #about_arrow_clicked, #user_searches_arrow_clicked, #settings_arrow_clicked  {
-	float:right;
-	text-align:center;
-	margin-right:10px;
-	margin-top:7.5px;
-    -moz-transition: all 1s ease-in;
-    -webkit-transition: all 1s ease-in;
-    -o-transition: all 1s ease-in;
-    transition: all 1s ease-in;
-	-webkit-transform: rotate(-180deg) translate(0px, 0px);
-	-moz-transform: rotate(-180deg) translate(0px, 0px);
-	-o-transform: rotate(-180deg) translate(0px, 0px);
-	-ms-transform: rotate(-180deg) translate(0px, 0px);
-	-transform: rotate(-180deg) translate(0px, 0px);
+.arrow.clicked  {
+  float:right;
+  text-align:center;
+  margin-right:10px;
+  margin-top:7.5px;
+  -moz-transition: all 1s ease-in;
+  -webkit-transition: all 1s ease-in;
+  -o-transition: all 1s ease-in;
+  transition: all 1s ease-in;
+  -webkit-transform: rotate(-180deg) translate(0px, 0px);
+  -moz-transform: rotate(-180deg) translate(0px, 0px);
+  -o-transform: rotate(-180deg) translate(0px, 0px);
+  -ms-transform: rotate(-180deg) translate(0px, 0px);
+  -transform: rotate(-180deg) translate(0px, 0px);
 	
 }
 .clickable_top {
@@ -126,20 +126,20 @@ float:right;
 	margin-right:10px;
 	margin-top:12.5px;
 }
-#other_shells_arrow, #recent_searches_arrow, #example_arrow, #about_arrow, #user_searches_arrow, #settings_arrow {
-	float:right;
-	text-align:center;
-	margin-right:10px;
-	margin-top:7.5px;
-	-moz-transition: all 1s ease-in;
-    -webkit-transition: all 1s ease-in;
-    -o-transition: all 1s ease-in;
-    transition: all 1s ease-in;
-	-webkit-transform: rotate(0deg) translate(0px, 0px);
-	-moz-transform: rotate(0deg) translate(0px, 0px);
-	-o-transform: rotate(0deg) translate(0px, 0px);
-	-ms-transform: rotate(0deg) translate(0px, 0px);
-	-transform: rotate(0deg) translate(0px, 0px);
+.arrow {
+  float:right;
+  text-align:center;
+  margin-right:10px;
+  margin-top:7.5px;
+  -moz-transition: all 1s ease-in;
+  -webkit-transition: all 1s ease-in;
+  -o-transition: all 1s ease-in;
+  transition: all 1s ease-in;
+  -webkit-transform: rotate(0deg) translate(0px, 0px);
+  -moz-transform: rotate(0deg) translate(0px, 0px);
+  -o-transform: rotate(0deg) translate(0px, 0px);
+  -ms-transform: rotate(0deg) translate(0px, 0px);
+  -transform: rotate(0deg) translate(0px, 0px);
 }
 
 #clear_searches {
