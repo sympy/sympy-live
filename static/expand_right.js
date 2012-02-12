@@ -6,11 +6,11 @@ function makeTransition(elemId, arrowId, closedHeight, openHeight) {
         var openHeight = $(elemId + ' .content').height() + margin;
         var elem = $(elemId), arrow = $(arrowId);
         if (elem.height() === closedHeight) {
-            elem.height(openHeight);
+            elem.addClass('clicked').height(openHeight);
             arrow.addClass('clicked');
         }
         else {
-            elem.height(closedHeight);
+            elem.removeClass('clicked').height(closedHeight);
             arrow.removeClass('clicked');
         }
     });
@@ -29,13 +29,18 @@ function clear_searches(){
     var confirm_delete = confirm("Are you sure you want to clear your search history?");
     if (confirm_delete===true)
     {
-        Ext.Ajax.request({
-            method: 'GET',
-            url: (this.basePath || '') + '/delete',
-            success: function(response) {
-                var response = response.responseText;
-                Ext.fly('saved_searches').update(response);
-            },
-        });
+        $.get((this.basePath || '') + '/delete',
+              null,
+              function(data) {
+                  $('#saved_searches').html(data);
+              });
+        // Ext.Ajax.request({
+        //     method: 'GET',
+        //     url: (this.basePath || '') + '/delete',
+        //     success: function(response) {
+        //         var response = response.responseText;
+        //         Ext.fly('saved_searches').update(response);
+        //     },
+        // });
     }
 }

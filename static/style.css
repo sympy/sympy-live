@@ -63,6 +63,9 @@ body {
   -transform: rotate(-180deg) translate(0px, 0px);
 	
 }
+#user_searches.clicked {
+  height: 240px!important;
+}
 .clickable_top {
 width:100%;
 height:35px;
