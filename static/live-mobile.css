@@ -81,14 +81,28 @@ button {
 .sympy-live-toolbar > * {
     margin-left: 0;
 }
-.sympy-live-toolbar > button {
-    margin-left: 0;
-    border-color: #f5f5f5;
-    border-size: 10px;
-    background-color: #3b5526;
-    color: #FFF;
+#sympy-live-toolbar-main > button {
+  margin-left: 0;
+  -moz-transition: all .5s ease-out;
+  -webkit-transition: all .5s ease-out;
+  -o-transition: all .5s ease-out;
+  transition: all .5s ease-out;
+  background-color: #3b5526;
+  color: #FFF;
+  font-weight: bold;
 }
-
+#sympy-live-toolbar-main > button:hover {
+  margin-left: 0;
+  color: #FFF;
+  background-color: #5B7745;
+  -moz-transition: all .2s ease-in;
+  -webkit-transition: all .2s ease-in;
+  -o-transition: all .2s ease-in;
+  transition: all .2s ease-in;
+}
+#sympy-live-toolbar-main > button:first-child {
+  background-color: #81B953;
+}
 
 
 #sympy-live-toolbar-history {
