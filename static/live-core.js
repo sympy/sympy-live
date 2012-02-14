@@ -824,6 +824,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
 
     evaluate: function() {
         var statement = this.promptEl.getValue();
+        this.updateHistory(statement);
         // make sure the statement is not only whitespace
         // use statement != "" if pure whitespace should be evaluated
         if (!this.evaluating && !statement.match(/^\s*$/)) {
@@ -851,8 +852,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             });
 
             this.scrollToDefault();
-			
-			if (navigator.userAgent.match(/like Mac OS X/i)) { 
+
+			if (navigator.userAgent.match(/like Mac OS X/i)) {
                 timeout = 58; // On an iOS Device
 			} else {
 				timeout = 61; // Not iOS based
