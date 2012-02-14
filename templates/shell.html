@@ -5,9 +5,9 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
 
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
         <script type="text/javascript" src="static/external/ext-core.js"></script>
         <script type="text/javascript" src="static/expand_right.js"></script>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
         <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
         <link rel="stylesheet" type="text/css" href="static/live-core.css" />
         <script type="text/javascript" src="static/live-autocomplete.js"></script>
@@ -28,7 +28,7 @@
                     extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
                 },
                 menuSettings: {
-                    context: "Browser",
+                    context: "MathJax",
                     zoom: "Hover",
                     ALT: true
                 },
@@ -100,7 +100,7 @@
 			{% if user %}
 			<br/>
 			<div id="user_searches">
-		        <a href="#user_searches"><div class="clickable_top" onclick="expand_userhistory();">
+		        <a href="#user_searches"><div class="clickable_top">
 				<div id="user_searches_arrow">
                     <img height="25" width="25" alt="Arrow" src="static/arrow.png">
                 </div>
@@ -116,7 +116,7 @@
 				<div id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
         </div>{% endif %}<br/>
             <div id="about">
-			<a href="#about"><div class="clickable_top" onclick="transition_about();">
+			<a href="#about"><div class="clickable_top">
 			<div class="title"><h3>About this page</h3></div>
 			<div id="about_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
@@ -136,14 +136,14 @@ This is just a regular Python shell, with the following commands executed by def
 Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.</div>
 			</div><br/>
 			<div id="settings">
-			<a href="#settings"><div class="clickable_top" onclick="expand_settings();">
+			<a href="#settings"><div class="clickable_top">
 			<div class="title"><h3>Settings</h3></div>
 			<div id="settings_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
 			<div class="content"></div>
 			</div><br/>
             <div id="example">
-			<a href="#example"><div class="clickable_top" onclick="transition_example();">
+			<a href="#example"><div class="clickable_top">
 			<div class="title"><h3>Example session</h3></div>
 			<div id="example_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
@@ -167,7 +167,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 			<br/>
 			<div id="other_shells">
 			
-				<a href="#other_shells"><div class="clickable_top" onclick="transition_other_shells();"> 
+				<a href="#other_shells"><div class="clickable_top"> 
 					<div class="title"><h3>Other Online Shells</h3></div>
 					<div id="other_shells_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
 				</div></a>
@@ -181,7 +181,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 		</div>
 		<br/>
 		<div id="recent_searches">
-		    <a href="#recent_searches"><div class="clickable_top" onclick="expand_history();"> 
+		    <a href="#recent_searches"><div class="clickable_top"> 
 			<div class="title">
             <h3>Recent Searches</h3>
             </div>
