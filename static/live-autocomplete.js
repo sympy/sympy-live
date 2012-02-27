@@ -178,13 +178,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             padding -= (completions.length % this.completionRowSize);
             padding %= this.completionRowSize;
             for (var j = 0; j < padding; j++) {
-                Ext.DomHelper.append(this.outputEl, {
-                    tag: 'li',
-                    children: [{
-                        tag: 'button',
-                        cls: 'padding'
-                    }]
-                });
+                this.outputEl.append($("<li><button class='padding'/></li>"));
             }
             $("button.padding").html("&nbsp;");
             this.currentCompletion = 0;
@@ -200,11 +194,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         }
         else {
             this.finishComplete();
-            Ext.DomHelper.append(this.outputEl, {
-                tag: 'li',
-                cls: 'sympy-live-completions-none',
-                html: '<em>&lt;No completions&gt;</em>'
-            }, true);
+            this.outputEl.append($("<li><em>&lt;No completions&gt;</em>",
+                                   {class: 'sympy-live-completions-none'}));
         }
     },
 
