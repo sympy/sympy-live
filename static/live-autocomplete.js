@@ -309,11 +309,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     enableButtons: function(buttons) {
-        Ext.each(buttons, this.enableButton, this);
+        $.map(buttons, $.proxy(this.enableButton, this));
     },
 
     disableButtons: function(buttons) {
-        Ext.each(buttons, this.disableButton, this);
+        $.map(buttons, $.proxy(this.disableButton, this));
     },
 
     getID: function(index) {
