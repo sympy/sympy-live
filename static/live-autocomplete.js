@@ -169,9 +169,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     function(val) { return val != responseJSON['prefix']; });
             }
             for(var i = 0; i < completions.length; i++){
-                var link = $("<li><button>" + completions[i] + "</button></li>",
-                             {id: this.getID(i)});
-                console.log(link);
+                var link = $("<li><button>" + completions[i] + "</button></li>");
+                link.attr({id: this.getID(i)});
                 link.appendTo(this.outputEl);
                 link.click($.proxy(function(event){
                     this.doComplete($(event.currentTarget).text());
@@ -235,7 +234,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         $('#' + this.getID(id)).
             prevAll().
             reverse().
-            appendTo($(this.outputEl.dom));
+            appendTo(this.outputEl);
         this.currentCompletion = id;
         if (this.currentCompletion >= this.completions.length - 1) {
             this.currentCompletion = this.completions.length - 1;
@@ -257,7 +256,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         $('#' + this.getID(this.currentCompletion)).
             nextAll().
             slice(-this.completionRowSize).
-            prependTo($(this.outputEl.dom));
+            prependTo(this.outputEl);
         this.currentCompletion -= this.completionRowSize;
         if (this.currentCompletion <= 0) {
             this.currentCompletion = 0;
