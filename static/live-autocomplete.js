@@ -28,7 +28,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     constructor: function(config, shell) {
         config = Ext.apply({}, config);
         this.inputEl = config.input;
-        this.containerEl = config.container;
+        this.containerEl = $(config.container.dom);
         this.shell = shell;
         this.buttonState = {
             prev: false,
@@ -38,55 +38,39 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     setup: function() {
-        this.toolbarEl = Ext.DomHelper.append(this.containerEl, {
-            tag: 'div',
-            cls: 'sympy-live-completions-toolbar',
-            children: [{
-                tag: 'button',
-                id: 'sympy-live-completions-toggle',
-                children: [{
-                    tag: 'span',  // For CSS animation purposes
-                    html: '&#x25BC;'
-                }],
-                title: 'Show/Hide All Completions'
-            },{
-                tag: 'button',
-                cls: 'disabled',
-                id: 'sympy-live-completions-prev',
-                html: '&lt;'
-            },{
-                tag: 'button',
-                cls: 'disabled',
-                id: 'sympy-live-completions-next',
-                html: '&gt;'
-            }]
-        }, true);
-        this.expandEl = this.toolbarEl.down("button:nth(1)");
-        this.prevEl = this.toolbarEl.down("button:nth(2)");
-        this.nextEl = this.toolbarEl.down("button:nth(3)");
-        this.expandEl.on("click", function(event) {
+        this.toolbarEl = this.containerEl.append(
+            $("<div />", {class: 'sympy-live-completions-toolbar'})
+            .append($("<button><span>&#x25BC;</span></button>",
+                      {id: 'sympy-live-completions-toggle'}))
+            .append($("<button>&lt;</button>",
+                      {class: 'disabled', id: 'sympy-live-completions-prev'}))
+            .append($("<button>&gt;</button>",
+                      {class: 'disabled', id: 'sympy-live-completions-next'}))
+        ).children('div');
+        this.expandEl = this.toolbarEl.children("button:nth(1)");
+        this.prevEl = this.toolbarEl.children("button:nth(2)");
+        this.nextEl = this.toolbarEl.children("button:nth(3)");
+        this.expandEl.click(function(event) {
             if (this.isButtonEnabled("expand")) {
                 this.toggleAllCompletions();
             }
             this.shell.focus();
-        }, this);
-        this.nextEl.on("click", function(event){
+        });
+        this.nextEl.click(function(event){
             if (this.isButtonEnabled("next")) {
                 this.showNextGroup();
             }
             this.shell.focus();
         }, this);
-        this.prevEl.on("click", function(event){
+        this.prevEl.click(function(event){
             if (this.isButtonEnabled("prev")) {
                 this.showPrevGroup();
             }
             this.shell.focus();
         }, this);
-        this.outputEl = Ext.DomHelper.append(this.containerEl, {
-            tag: 'ol',
-            cls: 'sympy-live-completions',
-            html: '<em>Completions here</em>'
-        }, true);
+        this.outputEl = $("<ol />", {class: 'sympy-live-completions'})
+            .append($("<em>Completions here</em>"));
+        this.containerEl.append(this.outputEl);
         this.disableButtons(["prev", "next", "expand"]);
     },
 
