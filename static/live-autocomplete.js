@@ -103,19 +103,17 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 session: this.shell.session || null,
                 statement: statement
             };
-            Ext.Ajax.request({
-                method: 'POST',
-                url: (this.basePath || '') + '/complete',
-                jsonData: Ext.encode(data),
-                success: function(response) {
-                    this.completionSuccess(Ext.decode(response.responseText));
-                },
-                failure: function(response) {
-                    this.completionError(response);
-                },
-                scope: this
+            $.ajax((this.basePath || '') + '/complete', {
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: $.proxy(function(data, textStatus, xhr) {
+                    this.completionSuccess(data);
+                }, this),
+                error: $.proxy(function(xhr, textStatus, error) {
+                    this.completionError();
+                }, this)
             });
-            Ext.Ajax.on("requestexception", this.completionError, this);
         }
     },
 
@@ -210,13 +208,10 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         }
     },
 
-    completionError: function(response) {
+    completionError: function() {
         this.outputEl.html('');
-        Ext.DomHelper.append(this.outputEl, {
-                tag: 'li',
-                cls: 'sympy-live-completions-none',
-                html: '&lt;Error getting completions&gt;'
-        }, true);
+        this.outputEl.append($("<li>&lt;Error getting completions&gt;</li>"),
+                             {class: 'sympy-live-completions-none'});
     },
 
     showNextGroup: function() {
