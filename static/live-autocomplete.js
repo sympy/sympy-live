@@ -281,11 +281,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     showNumbers: function() {
         this.hideNumbers();
         this.showingNumbers = true;
-        $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');
+        this.outputEl.children("li").slice(0, 9).addClass('counted');
     },
 
     hideNumbers: function() {
-        $(this.outputEl.dom).children("li").removeClass('counted');
+        this.outputEl.children("li").removeClass('counted');
         this.showingNumbers = false;
     },
 
