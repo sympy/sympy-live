@@ -39,13 +39,15 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
 
     setup: function() {
         this.toolbarEl = this.containerEl.append(
-            $("<div />", {class: 'sympy-live-completions-toolbar'})
-            .append($("<button><span>&#x25BC;</span></button>",
-                      {id: 'sympy-live-completions-toggle'}))
-            .append($("<button>&lt;</button>",
-                      {class: 'disabled', id: 'sympy-live-completions-prev'}))
-            .append($("<button>&gt;</button>",
-                      {class: 'disabled', id: 'sympy-live-completions-next'}))
+            $("<div />", {"class": 'sympy-live-completions-toolbar'})
+                .append($("<button><span>&#x25BC;</span></button>")
+                        .attr({"id": 'sympy-live-completions-toggle'}))
+                .append($("<button>&lt;</button>")
+                        .attr({"class": 'disabled',
+                               'id': 'sympy-live-completions-prev'}))
+                .append($("<button>&gt;</button>")
+                        .attr({"class": 'disabled',
+                               "id": 'sympy-live-completions-next'}))
         ).children('div');
         this.expandEl = this.toolbarEl.children("button:nth(0)");
         this.prevEl = this.toolbarEl.children("button:nth(1)");
