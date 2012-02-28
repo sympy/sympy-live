@@ -9,10 +9,6 @@
     display: inline-block;
 }
 
-.sympy-live-completions li {
-    background-color: transparent !important;
-}
-
 .sympy-live-completions button {
     background-color: #3b5526;
     color: #FFF;
@@ -33,6 +29,13 @@
     height: 30px;
     margin-bottom: 10px;
     width: 30%;
+    background-color: transparent !important;
+}
+
+.sympy-live-completions li button {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .sympy-live-completions li button.padding {
