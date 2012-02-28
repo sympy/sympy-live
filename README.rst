@@ -70,6 +70,12 @@ should see GUI of SymPy Online Shell.
 Uploading to GAE
 ----------------
 
+Before uploading, you need to update the version.  Edit app.yaml, and bump the
+version number up by one, and commit this change.  Then, go to
+https://appengine.google.com/deployment?app_id=sympy-live and delete the
+oldest version (we can only have ten versions at once, so if you don't do
+this, it will reject the upload).  Then, you can upload the new version.
+
 Assuming that sympy-live works properly (also across different mainstream
 web browsers), you can upload your changes to Google App Engine::
 
@@ -85,6 +91,20 @@ To achieve this, create an account on Google App Engine, start a new
 application and make appropriate changes to ``app.yaml`` (replace in the
 first line sympy-live with the name of your application). Then you can
 use ``appcfg.py`` as above, to upload to GAE.
+
+Go to http://<new-version-number>.sympy-live.appspot.com (for example, for
+version 21, go to http://21.sympy-live.appspot.com/) after uploading and make
+sure that everything works.  If it does, go to
+https://appengine.google.com/deployment?app_id=sympy-live and set the newest
+version to the default.
+
+Changing the version before each upload makes it easy to rollback accidental
+regressions.  Just go to the dashboard and revert to the latest version that
+doesn't have the problem.  This also lets you test the latest version after
+uploading before deploying it to the main site.
+
+Do not use versions to upload tests.  If you want to test something, create a
+separate test app on the App Engine and upload it there.
 
 Development notes
 -----------------
