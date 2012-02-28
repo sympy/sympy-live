@@ -265,7 +265,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showAllCompletions: function(event){
-        height = Math.ceil(this.completions.length / this.completionRowSize) * 40;
+        var height = Math.ceil(
+            this.completions.length / this.completionRowSize) * 40;
         if(height > 160) {height = 160;}
         $(".sympy-live-completions").
             scrollTop(0).
