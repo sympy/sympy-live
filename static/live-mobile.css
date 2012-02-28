@@ -1,7 +1,7 @@
 @import url("live-autocomplete-mobile.css");
 body {
     font-size: 10pt;
-    margin-left: 8px;
+    margin-left: -16px;
 }
 button {
     background: #e4ebe4;
@@ -23,6 +23,7 @@ button {
     margin: 6px 6px 10px 6px;
     height: 300px;
     min-width: 200px;
+    margin-left: 24px;
 }
 
 .sympy-live-output > div {
@@ -46,9 +47,10 @@ button {
     background-color: #f5f5f5;
     resize: none;
     width: 50px;
-    margin-left: 0px;
+    margin-left: 24px;
     -webkit-appearance: none;
     -webkit-border-radius:0px;
+
 }
 
 .sympy-live-prompt {
@@ -76,10 +78,11 @@ button {
 
 .sympy-live-toolbar {
     margin: 5px 0 0 0;
+    margin-left: 24px;
 }
 
 .sympy-live-toolbar > * {
-    margin-left: 0;
+    margin-left: 0px;
 }
 #sympy-live-toolbar-main > button {
   margin-left: 0;
@@ -207,8 +210,53 @@ button {
     padding: 0.35em;
 }
 
+#user {
+    border: none;
+    padding: 6px;
+    height: 20px;
+    margin-left:16px;
+}
 #user a:link, #user a:visited, #user a:hover, #user a:active { color: #3b5526; }
+#sometext {
+    margin-left:24px;
+}
+#searches-container {
+    padding: 0.5em;
+    margin: 0.5em;
+    border-radius: 4px;
+    border: 1px solid #000;
+    background-color: #FFF;
+    margin-left:24px;
+}
+#searches-container h3 {
+    font-family: monospace;
+    font-size: 100%;
+    text-decoration: underline;
+}
+#searches-container h3 img {
+    float: right;
+}
+#searches-container ul {
+    list-style-type: none;
+    overflow: auto;
+    max-height: 150px;
+    -webkit-overflow-scrolling: touch;
+}
+#searches-container ul li button {
+    border: 1px solid #000;
+    border-bottom: none;
+    background-color: #3b5526;
+    color: #FFF;
+    border-radius: 4px;
+    padding: 0.25em 0.5em;
+    width: 100%;
+    text-align: left;
+}
 
+#searches-container ul li:last-child {
+    border-bottom: 1px solid #000;
+    border-radius: 4px;
+}
 #saved-searches-container {
     border-bottom: 1px solid #000;
 }
@@ -227,7 +275,7 @@ margin-right:auto;
     -webkit-transition: all 0.5s ease-out;
     -moz-transition: all 0.5s ease-out;
     -o-transition: all 0.5s ease-out;
-    -ms-transition: all 0.5s ease-out;	
+    -ms-transition: all 0.5s ease-out;    
     transition: all 0.5s ease-out;
 }
 #recent-searches-container.hidden, #saved-searches-container.hidden {
