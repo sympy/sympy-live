@@ -24,6 +24,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     completions: [],
     currentCompletion: 0,
     completionRowSize: 3,
+    expandCompletions: true,
 
     constructor: function(config, shell) {
         config = Ext.apply({}, config);
@@ -35,6 +36,13 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             next: false,
             expand: false,
         };
+        var expand = this.shell.getCookie('sympy-completer-expand', true);
+        if (expand === 'true') {
+            this.expandCompletions = true;
+        }
+        else if (expand === 'false') {
+            this.expandCompletions = false;
+        }
     },
 
     setup: function() {
@@ -55,6 +63,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.expandEl.click($.proxy(function(e) {
             if (this.isButtonEnabled("expand")) {
                 this.toggleAllCompletions();
+                this.shell.setCookie('sympy-completer-expand',
+                                     (!this.expandCompletions).toString());
+                this.expandCompletions = !this.expandCompletions;
             }
             this.shell.focus();
         }, this));
@@ -187,7 +198,9 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             this.completions = completions;
             this.allCompletions = completions;
             if (completions.length > this.completionRowSize) {
-                this.showAllCompletions();
+                if (this.expandCompletions) {
+                    this.showAllCompletions();
+                }
                 this.enableButtons(["expand", "next"]);
             }
             else {
