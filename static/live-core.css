@@ -90,7 +90,6 @@ button {
 .sympy-live-toolbar > button:first-child {
   background-color: #81B953;
 }
-
 .sympy-live-processing {
     background-image: url("/static/spinner.gif");
 }
