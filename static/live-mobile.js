@@ -1,4 +1,7 @@
 Ext.ns("SymPy");
+SymPy.template = function (selector) {
+    return $(_.template($(selector).html(), {}));
+};
 SymPy.MobileShell = Ext.extend(
     SymPy.Shell, {
         constructor: function(config) {
@@ -7,40 +10,24 @@ SymPy.MobileShell = Ext.extend(
         },
         renderToolbar: function(el) {
             SymPy.MobileShell.superclass.renderToolbar.call(this, el);
-            Ext.DomHelper.insertAfter(
-                this.promptEl,
-                {
-                    tag: 'div',
-                    id: 'sympy-live-toolbar-history',
-                    children: [{
-                                   tag: 'button',
-                                   id: 'button-history-prev',
-                                   html: '\u2191'
-                               }, {
-                                   tag: 'button',
-                                   id: 'button-history-next',
-                                   html: '\u2193'
-                               }]
-                }, true);
-            var insertEl = Ext.get(
-                this.submitEl.query('option[value="enter"]')[0]);
-            var submitEl = Ext.get(
-                this.submitEl.query('option[value="shift-enter"]')[0]);
-            submitEl.set({value: "enter-inserts-newline"}).update("inserts newline");
-            insertEl.set({value: "enter-submits"}).update("submits");
-            this.submitEl.next().remove();
-            Ext.DomHelper.insertBefore(this.submitEl,{
-                 tag: 'span',
-                 html: 'Enter '
-            });
-            this.historyPrevEl = Ext.get("button-history-prev");
-            this.historyNextEl = Ext.get("button-history-next");
+            $(this.promptEl.dom).
+                after(SymPy.template('#tpl-toolbar-history'));
+            $(this.submitEl.dom).children('option[value="enter"]').
+                val("enter-inserts-newline").
+                html("inserts newline");
+            $(this.submitEl.dom).
+                before($('<label for="submit-behavior">Enter </span>'));
+            $(this.submitEl.dom).children('option[value="shift-enter"]').
+                val("enter-submits").
+                html("submits");
+            $(this.submitEl.dom).next().remove();
+            this.historyPrevEl = $("#button-history-prev");
+            this.historyNextEl = $("#button-history-next");
         },
         render: function(el) {
             SymPy.MobileShell.superclass.render.call(this, el);
             this.renderSearches();
             this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
-            var shell = Ext.get("shell");
             $("#output-format").next().remove();
 			$("#output-format").next().remove();
             $("#autocomplete").next().remove();
@@ -49,33 +36,29 @@ SymPy.MobileShell = Ext.extend(
             $("#sympy-live-toolbar-main").
                 appendTo(".sympy-live-completions-toolbar");
             $("#fullscreen-button").remove();
-            this.completeButtonEl = Ext.DomHelper.insertAfter(
-                this.evaluateEl,
-                {
-                    'tag': 'button',
-                    'html': 'Complete'
-                }
-                , true);
-            this.historyPrevEl.on("click", function(event){
+            this.completeButtonEl = $("<button>Complete</button>").
+                insertAfter($(this.evaluateEl.dom));
+            this.historyPrevEl.click($.proxy(function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
-            }, this);
-            this.historyNextEl.on("click", function(event){
+            }, this));
+            this.historyNextEl.click($.proxy(function(event){
                 this.promptEl.focus(1000);
                 this.nextInHistory();
-            }, this);
-            this.completeButtonEl.on("click", function(event){
+            }, this));
+            this.completeButtonEl.click($.proxy(function(event){
                 this.completer.complete(
                     this.getStatement(),
                     this.getSelection());
-            }, this);
-            Ext.getBody().on("orientationchange", this.orientationUpdate, this);
+            }, this));
+            $(window).bind("orientationchange",
+                           $.proxy(this.orientationUpdate, this));
             this.orientationUpdate();
-            Ext.get("menu").on("click", function(event){
-                Ext.get("main-navigation").toggle(true);
-                Ext.get("main-navigation").down("ul").toggle(true);
+            $("#menu").click(function(event){
+                $("#main-navigation").slideToggle();
+                $("#main-navigation").find("ul").slideToggle();
             });
-            Ext.get(document.body).scrollTo("top", this.outputEl.getTop());
+            $(document.body).scrollTop(this.outputEl.getTop());
             this.completer.expandCompletions = true;
         },
         handleKey: function(event) {
@@ -120,26 +103,26 @@ SymPy.MobileShell = Ext.extend(
             SymPy.MobileShell.superclass.handleKey.call(this, event);
         },
         renderSearches: function(){
-            this.savedSearches = Ext.get("saved-searches");
-            this.recentSearches = Ext.get("recent-searches");
+            this.savedSearches = $("#saved-searches");
+            this.recentSearches = $("#recent-searches");
             var setupEval = (function(el){
-                var nodes = el.query("button");
+                var nodes = el.find("button");
                 var shell = this;  // closure
-                Ext.each(nodes, function(node){
-                    node = Ext.get(node);
-                    node.on("click", function(event){
+                el.find("button").each(function(index, node){
+                    node = $(node);
+                    node.click(function(event){
                         // We don't want the query to show up twice
                         var origPrivacy = shell.recordEl.getValue();
                         shell.recordEl.dom.value =  "on";
                         // And we're going to scroll to the output
                         var scrollY = shell.outputEl.getTop();
 
-                        shell.setValue(this.first("pre").dom.innerHTML);
+                        shell.setValue(node.children("pre").html());
                         shell.evaluate();
 
-                        Ext.get(document.body).scrollTo("top", scrollY);
+                        $(document.body).scrollTop(scrollY);
                         shell.recordEl.dom.value = origPrivacy;
-                    }, node);
+                    });
                 });
             });
             setupEval.call(this, this.recentSearches);
