@@ -1,7 +1,8 @@
 Ext.ns("SymPy");
-SymPy.template = function (selector) {
-    return $(_.template($(selector).html(), {}));
-};
+SymPy.HISTORY_TEMPLATE = '<div id="sympy-live-toolbar-history">' +
+    '<button id="button-history-prev">↑</button>' +
+    '<button id="button-history-next">↓</button>' +
+    '</div>';
 SymPy.MobileShell = Ext.extend(
     SymPy.Shell, {
         constructor: function(config) {
@@ -11,7 +12,7 @@ SymPy.MobileShell = Ext.extend(
         renderToolbar: function(el) {
             SymPy.MobileShell.superclass.renderToolbar.call(this, el);
             $(this.promptEl.dom).
-                after(SymPy.template('#tpl-toolbar-history'));
+                after($(SymPy.HISTORY_TEMPLATE));
             $(this.submitEl.dom).children('option[value="enter"]').
                 val("enter-inserts-newline").
                 html("inserts newline");

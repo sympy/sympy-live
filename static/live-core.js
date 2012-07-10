@@ -175,6 +175,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     render: function(el) {
+        el = $(el) || $(document.body);
         el = Ext.get(el) || Ext.getBody();
 
         this.outputEl = Ext.DomHelper.append(el, {
@@ -940,7 +941,7 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
         this.setCookie('sympy-submit', this.submitEl.getValue());
         this.setCookie('sympy-privacy', this.recordEl.getValue());
         this.setCookie('sympy-autocomplete', this.autocompleteEl.getValue());
-	this.setCookie('desktop', this.forcedesktopEl.getValue());
+	    this.setCookie('desktop', this.forcedesktopEl.getValue());
     },
 
     setCookie: function(name, value) {
