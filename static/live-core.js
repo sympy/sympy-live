@@ -175,7 +175,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     },
 
     render: function(el) {
-        el = $(el) || $(document.body);
         el = Ext.get(el) || Ext.getBody();
 
         this.outputEl = Ext.DomHelper.append(el, {
