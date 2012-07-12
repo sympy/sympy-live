@@ -18,7 +18,7 @@ SymPy.NumberKeys = {
     56: true, 57: true,
 };
 
-SymPy.Completer = Ext.extend(Ext.util.Observable, {
+SymPy.Completer = Class.$extend({
     inputEl: null,
     outputEl: null,
     completions: [],
@@ -26,8 +26,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     completionRowSize: 3,
     expandCompletions: true,
 
-    constructor: function(config, shell) {
-        config = Ext.apply({}, config);
+    __init__: function(config, shell) {
+        config = $.extend({}, config);
         this.inputEl = config.input;
         this.containerEl = config.container;
         this.shell = shell;
