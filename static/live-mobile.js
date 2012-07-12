@@ -3,14 +3,13 @@ SymPy.HISTORY_TEMPLATE = '<div id="sympy-live-toolbar-history">' +
     '<button id="button-history-prev">↑</button>' +
     '<button id="button-history-next">↓</button>' +
     '</div>';
-SymPy.MobileShell = Ext.extend(
-    SymPy.Shell, {
-        constructor: function(config) {
-            config = Ext.apply({}, config);
-            SymPy.MobileShell.superclass.constructor.call(this, config);
+SymPy.MobileShell = SymPy.Shell.$extend({
+        __init__: function(config) {
+            config = $.extend({}, config);
+            this.$super(config);
         },
         renderToolbar: function(el) {
-            SymPy.MobileShell.superclass.renderToolbar.call(this, el);
+            this.$super(el);
             this.promptEl.after($(SymPy.HISTORY_TEMPLATE));
             this.submitEl.children('option[value="enter"]').
                 html("submits");
@@ -22,7 +21,7 @@ SymPy.MobileShell = Ext.extend(
             this.historyNextEl = $("#button-history-next");
         },
         render: function(el) {
-            SymPy.MobileShell.superclass.render.call(this, el);
+            this.$super(el);
             this.renderSearches();
             this.promptEl.attr({autocorrect: 'off', autocapitalize: 'off'});
             $("#output-format").next().remove();
@@ -99,7 +98,7 @@ SymPy.MobileShell = Ext.extend(
                     }
                 }
             }
-            SymPy.MobileShell.superclass.handleKey.call(this, event);
+            this.$super(event);
         },
         renderSearches: function(){
             this.savedSearches = $("#saved-searches");

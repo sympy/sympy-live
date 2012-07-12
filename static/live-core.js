@@ -77,10 +77,7 @@ SymPy.isTextNode = function(node) {
     return node.nodeType === 3;
 };
 
-Ext.USE_NATIVE_JSON = true;
-Ext.Ajax.timeout = 60000;
-
-SymPy.Shell = Ext.extend(Ext.util.Observable, {
+SymPy.Shell = Class.$extend({
     banner: null,
     history: [''],
     historyCursor: 0,
@@ -101,8 +98,8 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
     defaultBasePath: 'http://live.sympy.org',
     autocompleter: null,
 
-    constructor: function(config) {
-        config = Ext.apply({}, config);
+    __init__: function(config) {
+        config = $.extend({}, config);
 
         if (config.basePath) {
             this.basePath = config.basePath;
@@ -155,8 +152,6 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
             this.tabWidth = config.tabWidth;
             delete config.tabWidth;
         }
-
-        SymPy.Shell.superclass.constructor.call(this, config);
     },
 
     getBasePath: function(baseName) {
