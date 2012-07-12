@@ -11,24 +11,20 @@ SymPy.MobileShell = Ext.extend(
         },
         renderToolbar: function(el) {
             SymPy.MobileShell.superclass.renderToolbar.call(this, el);
-            $(this.promptEl.dom).
-                after($(SymPy.HISTORY_TEMPLATE));
-            $(this.submitEl.dom).children('option[value="enter"]').
-                val("enter-inserts-newline").
-                html("inserts newline");
-            $(this.submitEl.dom).
-                before($('<label for="submit-behavior">Enter </span>'));
-            $(this.submitEl.dom).children('option[value="shift-enter"]').
-                val("enter-submits").
+            this.promptEl.after($(SymPy.HISTORY_TEMPLATE));
+            this.submitEl.children('option[value="enter"]').
                 html("submits");
-            $(this.submitEl.dom).next().remove();
+            this.submitEl.children('option[value="shift-enter"]').
+                html("inserts newline");
+            this.submitEl.
+                before($('<label for="submit-behavior">Enter </span>'));
             this.historyPrevEl = $("#button-history-prev");
             this.historyNextEl = $("#button-history-next");
         },
         render: function(el) {
             SymPy.MobileShell.superclass.render.call(this, el);
             this.renderSearches();
-            this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
+            this.promptEl.attr({autocorrect: 'off', autocapitalize: 'off'});
             $("#output-format").next().remove();
 			$("#output-format").next().remove();
             $("#autocomplete").next().remove();
@@ -38,7 +34,7 @@ SymPy.MobileShell = Ext.extend(
                 appendTo(".sympy-live-completions-toolbar");
             $("#fullscreen-button").remove();
             this.completeButtonEl = $("<button>Complete</button>").
-                insertAfter($(this.evaluateEl.dom));
+                insertAfter(this.evaluateEl);
             this.historyPrevEl.click($.proxy(function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
@@ -59,15 +55,16 @@ SymPy.MobileShell = Ext.extend(
                 $("#main-navigation").slideToggle();
                 $("#main-navigation").find("ul").slideToggle();
             });
-            $(document.body).scrollTop(this.outputEl.getTop());
+            $(document.body).scrollTop(this.outputEl.offset().top);
             this.completer.expandCompletions = true;
         },
         handleKey: function(event) {
-            if (event.getKey() == SymPy.Keys.ENTER) {
-                var enterSubmits = (this.submitEl.getValue() ==
-                                    "enter-submits");
+            if (event.which == SymPy.Keys.ENTER) {
+                var enterSubmits = (this.submitEl.val() ==
+                                    "enter");
                 if (enterSubmits) {
-                    event.stopEvent();
+                    event.stopPropagation();
+                    event.preventDefault();
                     this.evaluate();
                     return true;
                 }
@@ -96,7 +93,8 @@ SymPy.MobileShell = Ext.extend(
                         this.setValue(start + '\n' + spaces + end);
                         this.setCursor(cursor + 1 + spaces.length);
 
-                        event.stopEvent();
+                        event.stopPropagation();
+                        event.preventDefault();
                         return true;
                     }
                 }
@@ -113,16 +111,16 @@ SymPy.MobileShell = Ext.extend(
                     node = $(node);
                     node.click(function(event){
                         // We don't want the query to show up twice
-                        var origPrivacy = shell.recordEl.getValue();
-                        shell.recordEl.dom.value =  "on";
+                        var origPrivacy = shell.recordEl.val();
+                        shell.recordEl.val("on");
                         // And we're going to scroll to the output
-                        var scrollY = shell.outputEl.getTop();
+                        var scrollY = shell.outputEl.offset().top;
 
                         shell.setValue(node.children("pre").html());
                         shell.evaluate();
 
                         $(document.body).scrollTop(scrollY);
-                        shell.recordEl.dom.value = origPrivacy;
+                        shell.recordEl.val(origPrivacy);
                     });
                 });
             });
