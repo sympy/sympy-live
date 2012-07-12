@@ -921,13 +921,21 @@ SymPy.Shell = Class.$extend({
                     'border-width' : 0,
                     'padding' : 0
                 }, 100);
-                var bodyHeight = $(document).height();
-                var shellHeight = $("#left").height();
-                var outputHeight = $(".sympy-live-output").height();
-                var buttonHeight = $(".sympy-live-toolbar").height();
+                var promptHeight = $('.sympy-live-prompt').outerHeight(true);
+                var completionHeight = $('.sympy-live-autocompletions-container')
+                    .outerHeight(true);
+                var toolbarHeight = $('.sympy-live-toolbar').outerHeight(true);
+                var titleHeight = $('.right_title').outerHeight(true);
+                var windowHeight = $(window).height();
+                var margins = $('.sympy-live-output').outerHeight(true) -
+                    $('.sympy-live-output').height();
+                var shellPadding = 20;
+                var height = windowHeight - (
+                    promptHeight + toolbarHeight + completionHeight +
+                        titleHeight + margins + shellPadding);
                 $('.sympy-live-output').css({
                     'width' : bwidth-32,
-                    'height' : bodyHeight - shellHeight + outputHeight - buttonHeight - 16
+                    'height' : height
                 });
             }
 
