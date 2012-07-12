@@ -1014,11 +1014,13 @@ SymPy.Shell = Ext.extend(Ext.util.Observable, {
                     'border-width' : 0,
                     'padding' : 0
                 }, 100);
-                var excess_height = $(document.body).height() - (
-                    $('#shell').height() + $('.right_title').height());
+                var bodyHeight = $(document).height();
+                var shellHeight = $("#left").height();
+                var outputHeight = $(".sympy-live-output").height();
+                var buttonHeight = $(".sympy-live-toolbar").height();
                 $('.sympy-live-output').css({
                     'width' : bwidth-32,
-                    'height' : bheight-250-160+(excess_height / 2)
+                    'height' : bodyHeight - shellHeight + outputHeight - buttonHeight - 16
                 });
             }
 
