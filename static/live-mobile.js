@@ -1,46 +1,29 @@
 Ext.ns("SymPy");
-SymPy.MobileShell = Ext.extend(
-    SymPy.Shell, {
-        constructor: function(config) {
-            config = Ext.apply({}, config);
-            SymPy.MobileShell.superclass.constructor.call(this, config);
+SymPy.HISTORY_TEMPLATE = '<div id="sympy-live-toolbar-history">' +
+    '<button id="button-history-prev">↑</button>' +
+    '<button id="button-history-next">↓</button>' +
+    '</div>';
+SymPy.MobileShell = SymPy.Shell.$extend({
+        __init__: function(config) {
+            config = $.extend({}, config);
+            this.$super(config);
         },
         renderToolbar: function(el) {
-            SymPy.MobileShell.superclass.renderToolbar.call(this, el);
-            Ext.DomHelper.insertAfter(
-                this.promptEl,
-                {
-                    tag: 'div',
-                    id: 'sympy-live-toolbar-history',
-                    children: [{
-                                   tag: 'button',
-                                   id: 'button-history-prev',
-                                   html: '\u2191'
-                               }, {
-                                   tag: 'button',
-                                   id: 'button-history-next',
-                                   html: '\u2193'
-                               }]
-                }, true);
-            var insertEl = Ext.get(
-                this.submitEl.query('option[value="enter"]')[0]);
-            var submitEl = Ext.get(
-                this.submitEl.query('option[value="shift-enter"]')[0]);
-            submitEl.set({value: "enter-inserts-newline"}).update("inserts newline");
-            insertEl.set({value: "enter-submits"}).update("submits");
-            this.submitEl.next().remove();
-            Ext.DomHelper.insertBefore(this.submitEl,{
-                 tag: 'span',
-                 html: 'Enter '
-            });
-            this.historyPrevEl = Ext.get("button-history-prev");
-            this.historyNextEl = Ext.get("button-history-next");
+            this.$super(el);
+            this.promptEl.after($(SymPy.HISTORY_TEMPLATE));
+            this.submitEl.children('option[value="enter"]').
+                html("submits");
+            this.submitEl.children('option[value="shift-enter"]').
+                html("inserts newline");
+            this.submitEl.
+                before($('<label for="submit-behavior">Enter </span>'));
+            this.historyPrevEl = $("#button-history-prev");
+            this.historyNextEl = $("#button-history-next");
         },
         render: function(el) {
-            SymPy.MobileShell.superclass.render.call(this, el);
+            this.$super(el);
             this.renderSearches();
-            this.promptEl.set({autocorrect: 'off', autocapitalize: 'off'});
-            var shell = Ext.get("shell");
+            this.promptEl.attr({autocorrect: 'off', autocapitalize: 'off'});
             $("#output-format").next().remove();
 			$("#output-format").next().remove();
             $("#autocomplete").next().remove();
@@ -49,40 +32,38 @@ SymPy.MobileShell = Ext.extend(
             $("#sympy-live-toolbar-main").
                 appendTo(".sympy-live-completions-toolbar");
             $("#fullscreen-button").remove();
-            this.completeButtonEl = Ext.DomHelper.insertAfter(
-                this.evaluateEl,
-                {
-                    'tag': 'button',
-                    'html': 'Complete'
-                }
-                , true);
-            this.historyPrevEl.on("click", function(event){
+            this.completeButtonEl = $("<button>Complete</button>").
+                insertAfter(this.evaluateEl);
+            this.historyPrevEl.click($.proxy(function(event){
                 this.promptEl.focus(1000);
                 this.prevInHistory();
-            }, this);
-            this.historyNextEl.on("click", function(event){
+            }, this));
+            this.historyNextEl.click($.proxy(function(event){
                 this.promptEl.focus(1000);
                 this.nextInHistory();
-            }, this);
-            this.completeButtonEl.on("click", function(event){
+            }, this));
+            this.completeButtonEl.click($.proxy(function(event){
                 this.completer.complete(
                     this.getStatement(),
                     this.getSelection());
-            }, this);
-            Ext.getBody().on("orientationchange", this.orientationUpdate, this);
+            }, this));
+            $(window).bind("orientationchange",
+                           $.proxy(this.orientationUpdate, this));
             this.orientationUpdate();
-            Ext.get("menu").on("click", function(event){
-                Ext.get("main-navigation").toggle(true);
-                Ext.get("main-navigation").down("ul").toggle(true);
+            $("#menu").click(function(event){
+                $("#main-navigation").slideToggle();
+                $("#main-navigation").find("ul").slideToggle();
             });
-            Ext.get(document.body).scrollTo("top", this.outputEl.getTop());
+            $(document.body).scrollTop(this.outputEl.offset().top);
+            this.completer.expandCompletions = true;
         },
         handleKey: function(event) {
-            if (event.getKey() == SymPy.Keys.ENTER) {
-                var enterSubmits = (this.submitEl.getValue() ==
-                                    "enter-submits");
+            if (event.which == SymPy.Keys.ENTER) {
+                var enterSubmits = (this.submitEl.val() ==
+                                    "enter");
                 if (enterSubmits) {
-                    event.stopEvent();
+                    event.stopPropagation();
+                    event.preventDefault();
                     this.evaluate();
                     return true;
                 }
@@ -111,34 +92,35 @@ SymPy.MobileShell = Ext.extend(
                         this.setValue(start + '\n' + spaces + end);
                         this.setCursor(cursor + 1 + spaces.length);
 
-                        event.stopEvent();
+                        event.stopPropagation();
+                        event.preventDefault();
                         return true;
                     }
                 }
             }
-            SymPy.MobileShell.superclass.handleKey.call(this, event);
+            this.$super(event);
         },
         renderSearches: function(){
-            this.savedSearches = Ext.get("saved-searches");
-            this.recentSearches = Ext.get("recent-searches");
+            this.savedSearches = $("#saved-searches");
+            this.recentSearches = $("#recent-searches");
             var setupEval = (function(el){
-                var nodes = el.query("button");
+                var nodes = el.find("button");
                 var shell = this;  // closure
-                Ext.each(nodes, function(node){
-                    node = Ext.get(node);
-                    node.on("click", function(event){
+                el.find("button").each(function(index, node){
+                    node = $(node);
+                    node.click(function(event){
                         // We don't want the query to show up twice
-                        var origPrivacy = shell.recordEl.getValue();
-                        shell.recordEl.dom.value =  "on";
+                        var origPrivacy = shell.recordEl.val();
+                        shell.recordEl.val("on");
                         // And we're going to scroll to the output
-                        var scrollY = shell.outputEl.getTop();
+                        var scrollY = shell.outputEl.offset().top;
 
-                        shell.setValue(this.first("pre").dom.innerHTML);
+                        shell.setValue(node.children("pre").html());
                         shell.evaluate();
 
-                        Ext.get(document.body).scrollTo("top", scrollY);
-                        shell.recordEl.dom.value = origPrivacy;
-                    }, node);
+                        $(document.body).scrollTop(scrollY);
+                        shell.recordEl.val(origPrivacy);
+                    });
                 });
             });
             setupEval.call(this, this.recentSearches);
