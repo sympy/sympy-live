@@ -29,7 +29,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     constructor: function(config, shell) {
         config = Ext.apply({}, config);
         this.inputEl = config.input;
-        this.containerEl = $(config.container.dom);
+        this.containerEl = config.container;
         this.shell = shell;
         this.buttonState = {
             prev: false,
