@@ -1,4 +1,4 @@
-Ext.ns("SymPy");
+utilities.namespace("SymPy");
 
 $.fn.reverse = [].reverse;
 

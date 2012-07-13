@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-Ext.ns("SymPy");
+utilities.namespace("SymPy");
 
 SymPy.Keys = {
     BACKSPACE: 8,  DEL:       46,
@@ -821,7 +821,7 @@ SymPy.Shell = Class.$extend({
                 }
 
                 MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.get(0)],
-                                  [postprocessLaTeX.createDelegate(this)]);
+                                  [$.proxy(postprocessLaTeX, this)]);
             }
         }
 
