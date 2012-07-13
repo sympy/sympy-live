@@ -1,4 +1,4 @@
-Ext.ns("SymPy");
+utilities.namespace("SymPy");
 SymPy.HISTORY_TEMPLATE = '<div id="sympy-live-toolbar-history">' +
     '<button id="button-history-prev">↑</button>' +
     '<button id="button-history-next">↓</button>' +
