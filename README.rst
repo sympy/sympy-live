@@ -70,21 +70,72 @@ should see GUI of SymPy Online Shell.
 Uploading to GAE
 ----------------
 
-Assuming that sympy-live works properly (also across different mainstream
-web browsers), you can upload your changes to Google App Engine::
+Before updating the the sympy-live app (the official one), you need to do two
+things.  First you need to bump the version in the ``app.yaml`` file.  Just
+change the second line ("version") to one more, and commit it (``git commit
+app.yaml -m "Bump version to NN"``, where ``NN`` is the new version) and push
+it.  Second, you need to go to the ``Versions`` section of the sympy-live
+dashboard at appspot.com and delete the oldest version, as we can only upload
+ten versions at a time.
+
+Assuming that sympy-live works properly (also across different mainstream web
+browsers), you can upload your changes to Google App Engine::
 
     $ ../appcfg.py update .
 
 Or, in Mac OS X, just open the GoogleAppEngineLauncher program, add the
-project if you haven't already, and click "Deploy" in the toolbar.  And
-then it should just work (follow the log that comes up to see.
+project if you haven't already, and click "Deploy" in the toolbar.  And then
+it should just work (follow the log that comes up to see.
 
-This requires admin privileges to http://sympy-live.appspot.com. If you
-don't have access to this App Engine application, you can make your own.
-To achieve this, create an account on Google App Engine, start a new
-application and make appropriate changes to ``app.yaml`` (replace in the
-first line sympy-live with the name of your application). Then you can
-use ``appcfg.py`` as above, to upload to GAE.
+This requires admin privileges to http://sympy-live.appspot.com. If you don't
+have access to this App Engine application, but want to test it, see the
+instructions in the `Testing on the App Engine`_ section below.
+
+Finally, go to http://NN.sympy-live.appspot.com, where ``NN`` is the version
+you just uploaded, and make sure that it works.  If it does, go to the
+``Versions`` section of the sympy-live dashboard, and set this as the new
+default version.  If there are any issues, you can roll back to the previous
+version from this same screen.
+
+Testing on the App Engine
+-------------------------
+
+It's usually a good idea to test big changes on the App Engine itself before
+deploying, as ``dev_appserver.py`` can only simulate the App Engine.  There is
+a semi-official testing server at sympy-live-tests.appspot.com.  If you want
+write access to it, just ask Aaron Meurer.  The convention there is to push
+to the version corresponding to the pull request (so if you have a branch that
+is pull request #55, you would push to version 55, and access it by
+55.sympy-live-tests.appspot.com).  Alternately, you can set up your own
+testing server (it's free, though it requires a cell phone to set up).
+
+Either way, to test, you will need to edit the ``app.yaml`` file.  You should
+edit the first line, ``application``, to the name of the testing application
+(like ``sympy-live-tests``), and the second line to the version number you
+want to use.
+
+You should not actually commit these changes to ``app.yaml``, as the official
+version should still use the ``sympy-live`` application.  Therefore, it is
+recommended that you run::
+
+    git update-index --assume-unchanged app.yaml
+
+This will make git ignore all changes to the ``app.yaml`` file, so that
+commands like ``git commit -a`` will not commit them.  This command works on
+the local level only, so you don't need to worry about it affecting other
+people who pull your branch.
+
+If you later want to commit an actual change to ``app.yaml`` (e.g., to modify
+some metadata, or to bump the version as described above), you need to run::
+
+    git update-index --no-assume-unchanged app.yaml
+
+This will undo the above command, so that git will recognize changes to the
+file again.
+
+If you have a test app online, remember to update it every time you update a
+pull request, so that others can easily review your work, without even having
+to use ``dev_appserver.py``.
 
 Development notes
 -----------------
