@@ -1,5 +1,5 @@
-application: sympy-live-tests
-version: 55
+application: sympy-live
+version: 24
 
 runtime: python
 api_version: 1
