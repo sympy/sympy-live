@@ -580,9 +580,9 @@ class FrontPageHandler(webapp.RequestHandler):
             cookie = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
             forcedesktop = cookie['desktop'].value
         except (Cookie.CookieError, KeyError):
-            forcedesktop = 'no'
+            forcedesktop = 'false'
 
-        if forcedesktop == 'no':
+        if forcedesktop in ('no', 'false'):
             if detectmobile.isMobile(self.request.headers):          
                 self.redirect('/shellmobile')
                 

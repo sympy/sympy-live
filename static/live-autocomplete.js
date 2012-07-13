@@ -18,15 +18,16 @@ SymPy.NumberKeys = {
     56: true, 57: true,
 };
 
-SymPy.Completer = Ext.extend(Ext.util.Observable, {
+SymPy.Completer = Class.$extend({
     inputEl: null,
     outputEl: null,
     completions: [],
     currentCompletion: 0,
     completionRowSize: 3,
+    expandCompletions: true,
 
-    constructor: function(config, shell) {
-        config = Ext.apply({}, config);
+    __init__: function(config, shell) {
+        config = $.extend({}, config);
         this.inputEl = config.input;
         this.containerEl = config.container;
         this.shell = shell;
@@ -35,58 +36,54 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
             next: false,
             expand: false,
         };
+        var expand = this.shell.getCookie('sympy-completer-expand', true);
+        if (expand === 'true') {
+            this.expandCompletions = true;
+        }
+        else if (expand === 'false') {
+            this.expandCompletions = false;
+        }
     },
 
     setup: function() {
-        this.toolbarEl = Ext.DomHelper.append(this.containerEl, {
-            tag: 'div',
-            cls: 'sympy-live-completions-toolbar',
-            children: [{
-                tag: 'button',
-                id: 'sympy-live-completions-toggle',
-                children: [{
-                    tag: 'span',  // For CSS animation purposes
-                    html: '&#x25BC;'
-                }],
-                title: 'Show/Hide All Completions'
-            },{
-                tag: 'button',
-                cls: 'disabled',
-                id: 'sympy-live-completions-prev',
-                html: '&lt;'
-            },{
-                tag: 'button',
-                cls: 'disabled',
-                id: 'sympy-live-completions-next',
-                html: '&gt;'
-            }]
-        }, true);
-        this.expandEl = this.toolbarEl.down("button:nth(1)");
-        this.prevEl = this.toolbarEl.down("button:nth(2)");
-        this.nextEl = this.toolbarEl.down("button:nth(3)");
-        this.expandEl.on("click", function(event) {
+        this.toolbarEl = this.containerEl.append(
+            $("<div />", {"class": 'sympy-live-completions-toolbar'})
+                .append($("<button><span>&#x25BC;</span></button>")
+                        .attr({"id": 'sympy-live-completions-toggle'}))
+                .append($("<button>&lt;</button>")
+                        .attr({"class": 'disabled',
+                               'id': 'sympy-live-completions-prev'}))
+                .append($("<button>&gt;</button>")
+                        .attr({"class": 'disabled',
+                               "id": 'sympy-live-completions-next'}))
+        ).children('div');
+        this.expandEl = this.toolbarEl.children("button:nth(0)");
+        this.prevEl = this.toolbarEl.children("button:nth(1)");
+        this.nextEl = this.toolbarEl.children("button:nth(2)");
+        this.expandEl.click($.proxy(function(e) {
             if (this.isButtonEnabled("expand")) {
                 this.toggleAllCompletions();
+                this.shell.setCookie('sympy-completer-expand',
+                                     (!this.expandCompletions).toString());
+                this.expandCompletions = !this.expandCompletions;
             }
             this.shell.focus();
-        }, this);
-        this.nextEl.on("click", function(event){
+        }, this));
+        this.nextEl.click($.proxy(function(event){
             if (this.isButtonEnabled("next")) {
                 this.showNextGroup();
             }
             this.shell.focus();
-        }, this);
-        this.prevEl.on("click", function(event){
+        }, this));
+        this.prevEl.click($.proxy(function(event){
             if (this.isButtonEnabled("prev")) {
                 this.showPrevGroup();
             }
             this.shell.focus();
-        }, this);
-        this.outputEl = Ext.DomHelper.append(this.containerEl, {
-            tag: 'ol',
-            cls: 'sympy-live-completions',
-            html: '<em>Completions here</em>'
-        }, true);
+        }, this));
+        this.outputEl = $("<ol />", {class: 'sympy-live-completions'})
+            .append($("<em>Completions here</em>"));
+        this.containerEl.append(this.outputEl);
         this.disableButtons(["prev", "next", "expand"]);
     },
 
@@ -119,19 +116,17 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                 session: this.shell.session || null,
                 statement: statement
             };
-            Ext.Ajax.request({
-                method: 'POST',
-                url: (this.basePath || '') + '/complete',
-                jsonData: Ext.encode(data),
-                success: function(response) {
-                    this.completionSuccess(Ext.decode(response.responseText));
-                },
-                failure: function(response) {
-                    this.completionError(response);
-                },
-                scope: this
+            $.ajax((this.basePath || '') + '/complete', {
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: $.proxy(function(data, textStatus, xhr) {
+                    this.completionSuccess(data);
+                }, this),
+                error: $.proxy(function(xhr, textStatus, error) {
+                    this.completionError();
+                }, this)
             });
-            Ext.Ajax.on("requestexception", this.completionError, this);
         }
     },
 
@@ -162,7 +157,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         this.completions = [];
         this.allCompletions = [];
         this.currentCompletion = 0;
-        this.outputEl.dom.innerHTML = '';
+        $(this.outputEl).html('');
         this.hideAllCompletions();
         this.disableButtons(["prev", "next", "expand"]);
     },
@@ -170,7 +165,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     completionSuccess: function(responseJSON) {
         this.shell.session = responseJSON['session'];
         var completions = responseJSON['completions'];
-        this.outputEl.dom.innerHTML = '';
+        this.outputEl.html('');
         if (responseJSON['prefix']){
             this.doComplete(responseJSON['prefix'], false);
         }
@@ -185,36 +180,27 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
                     function(val) { return val != responseJSON['prefix']; });
             }
             for(var i = 0; i < completions.length; i++){
-                var link = Ext.DomHelper.append(this.outputEl, {
-                    tag: 'li',
-                    children: [{
-                        tag: 'button',
-                        html: completions[i]
-                    }],
-                    id: this.getID(i)
-                }, true);
-                link.on("click", function(event){
-                    this.doComplete(event.target.innerText);
-                }, this);
+                var link = $("<li><button>" + completions[i] + "</button></li>");
+                link.attr({id: this.getID(i)});
+                link.appendTo(this.outputEl);
+                link.click($.proxy(function(event){
+                    this.doComplete($(event.currentTarget).text());
+                }, this));
             }
             var padding = this.completionRowSize;
             padding -= (completions.length % this.completionRowSize);
             padding %= this.completionRowSize;
             for (var j = 0; j < padding; j++) {
-                Ext.DomHelper.append(this.outputEl, {
-                    tag: 'li',
-                    children: [{
-                        tag: 'button',
-                        cls: 'padding'
-                    }]
-                });
+                this.outputEl.append($("<li><button class='padding'/></li>"));
             }
             $("button.padding").html("&nbsp;");
             this.currentCompletion = 0;
             this.completions = completions;
             this.allCompletions = completions;
             if (completions.length > this.completionRowSize) {
-                this.showAllCompletions();
+                if (this.expandCompletions) {
+                    this.showAllCompletions();
+                }
                 this.enableButtons(["expand", "next"]);
             }
             else {
@@ -223,21 +209,15 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         }
         else {
             this.finishComplete();
-            Ext.DomHelper.append(this.outputEl, {
-                tag: 'li',
-                cls: 'sympy-live-completions-none',
-                html: '<em>&lt;No completions&gt;</em>'
-            }, true);
+            this.outputEl.append($("<li><em>&lt;No completions&gt;</em>",
+                                   {class: 'sympy-live-completions-none'}));
         }
     },
 
-    completionError: function(response) {
-        this.outputEl.dom.innerHTML = '';
-        Ext.DomHelper.append(this.outputEl, {
-                tag: 'li',
-                cls: 'sympy-live-completions-none',
-                html: '&lt;Error getting completions&gt;'
-        }, true);
+    completionError: function() {
+        this.outputEl.html('');
+        this.outputEl.append($("<li>&lt;Error getting completions&gt;</li>"),
+                             {class: 'sympy-live-completions-none'});
     },
 
     showNextGroup: function() {
@@ -255,7 +235,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         $('#' + this.getID(id)).
             prevAll().
             reverse().
-            appendTo($(this.outputEl.dom));
+            appendTo(this.outputEl);
         this.currentCompletion = id;
         if (this.currentCompletion >= this.completions.length - 1) {
             this.currentCompletion = this.completions.length - 1;
@@ -277,7 +257,7 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
         $('#' + this.getID(this.currentCompletion)).
             nextAll().
             slice(-this.completionRowSize).
-            prependTo($(this.outputEl.dom));
+            prependTo(this.outputEl);
         this.currentCompletion -= this.completionRowSize;
         if (this.currentCompletion <= 0) {
             this.currentCompletion = 0;
@@ -298,7 +278,8 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     showAllCompletions: function(event){
-        height = Math.ceil(this.completions.length / this.completionRowSize) * 40;
+        var height = Math.ceil(
+            this.completions.length / this.completionRowSize) * 40;
         if(height > 160) {height = 160;}
         $(".sympy-live-completions").
             scrollTop(0).
@@ -316,11 +297,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     showNumbers: function() {
         this.hideNumbers();
         this.showingNumbers = true;
-        $(this.outputEl.dom).children("li").slice(0, 9).addClass('counted');
+        this.outputEl.children("li").slice(0, 9).addClass('counted');
     },
 
     hideNumbers: function() {
-        $(this.outputEl.dom).children("li").removeClass('counted');
+        this.outputEl.children("li").removeClass('counted');
         this.showingNumbers = false;
     },
 
@@ -344,11 +325,11 @@ SymPy.Completer = Ext.extend(Ext.util.Observable, {
     },
 
     enableButtons: function(buttons) {
-        Ext.each(buttons, this.enableButton, this);
+        $.map(buttons, $.proxy(this.enableButton, this));
     },
 
     disableButtons: function(buttons) {
-        Ext.each(buttons, this.disableButton, this);
+        $.map(buttons, $.proxy(this.disableButton, this));
     },
 
     getID: function(index) {
