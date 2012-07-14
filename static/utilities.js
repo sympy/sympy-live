@@ -16,3 +16,18 @@ if (!window.JSON) {
     }
   };
 }
+
+var utilities = {
+    namespace: function(_namespace) {
+        var namespaces = _namespace.split(/\./g);
+        var root = window;
+        for(var i = 0; i < namespaces.length; i++) {
+            if (typeof root[namespaces[i]] === "undefined" ||
+                root[namespaces[i]] === null) {
+                root[namespaces[i]] = {};
+            }
+            root = root[namespaces[i]];
+        }
+        return root;
+    }
+}

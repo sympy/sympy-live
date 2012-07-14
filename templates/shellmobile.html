@@ -9,7 +9,6 @@
     <script type="text/javascript" src="static/utilities.js"></script>
     <script type="text/javascript" src="static/external/classy.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/external/ext-core.js"></script>
     <script type="text/javascript" src="static/expand_right.js"></script>
     <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
     <link rel="stylesheet" href="static/style.css" type="text/css" />
@@ -59,7 +58,7 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
     <script type="text/javascript">
-      Ext.onReady(function() {
+      $(document).ready(function() {
         var shell = new SymPy.MobileShell({
           printer: "{{ printer }}",
           submit: "{{ submit }}",
