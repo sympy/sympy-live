@@ -163,7 +163,7 @@ button {
 }
 #header img {
     height: 40px;
-    width: 40px;
+    width: 57px;
 }
 #header h1 a:link {
     color: #FFF;
@@ -227,7 +227,7 @@ margin-right:auto;
     -webkit-transition: all 0.5s ease-out;
     -moz-transition: all 0.5s ease-out;
     -o-transition: all 0.5s ease-out;
-    -ms-transition: all 0.5s ease-out;	
+    -ms-transition: all 0.5s ease-out;
     transition: all 0.5s ease-out;
 }
 #recent-searches-container.hidden, #saved-searches-container.hidden {
@@ -239,7 +239,7 @@ margin-right:auto;
     -webkit-transition: all 0.5s ease-out;
     -moz-transition: all 0.5s ease-out;
     -o-transition: all 0.5s ease-out;
-    -ms-transition: all 0.5s ease-out;	
+    -ms-transition: all 0.5s ease-out;
     transition: all 0.5s ease-out;
 }
 #searches-container div.hidden ul {
