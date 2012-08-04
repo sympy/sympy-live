@@ -205,7 +205,8 @@ SymPy.Shell = Class.$extend({
 
         this.completer = new SymPy.Completer({
             input: this.promptEl,
-            container: this.completionsEl
+            container: this.completionsEl,
+            basePath: this.basePath
         }, this);
         this.completer.setup();
 

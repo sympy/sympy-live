@@ -42,9 +42,27 @@
   content: "↘ ";
 }
 
+/* Tab completion */
+
 .sympy-live-completions-toolbar #sympy-live-completions-toggle {
   display: none;
 }
+
+.sympy-live-completions-toolbar {
+  width: 7%;
+}
+
+.sympy-live-completions-toolbar button {
+  width: 50%;
+}
+
+.sympy-live-completions {
+  padding-left: 10px;
+  line-height: 30px;
+  margin: 0;
+}
+
+/* Settings */
 
 #settings {
   border-top: 1px solid #222;
@@ -63,6 +81,8 @@
 #settings h3.shown:before {
   content: "▴ ";
 }
+
+/* Code blocks on page */
 
 .sympy-live-eval-button {
   border: 0;

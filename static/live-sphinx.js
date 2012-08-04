@@ -37,7 +37,11 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         // Make enter the default submission button
         $("#submit-behavior").val("enter");
 
+        // Add a link to Python code that will evaluate it in SymPy Live
         this.processCodeBlocks();
+
+        // Don't expand the list of tab completions (saves space)
+        this.completer.expandCompletions = false;
     },
 
     processCodeBlocks: function() {

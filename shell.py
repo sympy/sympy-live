@@ -55,12 +55,12 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from google.appengine.runtime.apiproxy_errors import RequestTooLargeError 
+from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
-   
+
 import detectmobile
 
 PRINTERS = {
@@ -566,8 +566,8 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-        
-        
+
+
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
@@ -583,9 +583,9 @@ class FrontPageHandler(webapp.RequestHandler):
             forcedesktop = 'false'
 
         if forcedesktop in ('no', 'false'):
-            if detectmobile.isMobile(self.request.headers):          
+            if detectmobile.isMobile(self.request.headers):
                 self.redirect('/shellmobile')
-                
+
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -607,7 +607,16 @@ class FrontPageHandler(webapp.RequestHandler):
 
 class CompletionHandler(webapp.RequestHandler):
     """Takes an incomplete statement and returns possible completions."""
+
+    def _cross_site_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
+
+    def options(self):
+        self._cross_site_headers()
+
     def post(self):
+        self._cross_site_headers()
         try:
             message = simplejson.loads(self.request.body)
         except ValueError:
