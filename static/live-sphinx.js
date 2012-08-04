@@ -90,6 +90,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
     },
 
     show: function(duration) {
+        if (this.visible) return;
+
         if (typeof duration === "undefined") {
             duration = SymPy.DEFAULT_ANIMATION_DURATION;
         }
@@ -112,7 +114,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         }
         if (this.isVisible()) {
             this.hide(duration);
-        } else {
+        }
+        else {
             this.show(duration);
         }
     },
