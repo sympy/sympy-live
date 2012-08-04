@@ -50,11 +50,18 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
     processCodeBlocks: function() {
         $('.highlight-python').each($.proxy(function(index, el) {
             var el = $(el);
-            var button = $("<button>run code in SymPy Live</button>").
+            var container = $("<div/>").addClass('sympy-live-eval-toolbar');
+            var evaluate = $("<button>evaluate</button>").
                 addClass('sympy-live-eval-button').
-                appendTo(el.children());
-            el.children().prepend(button);
-            button.click($.proxy(function() {
+                appendTo(container);
+            $("<span> or </span>").appendTo(container);
+            var copy = $("<button>copy</button>").
+                addClass('sympy-live-eval-button').
+                appendTo(container);
+            $("<span> in SymPy Live</span>").appendTo(container);
+            el.children().prepend(container);
+
+            var fillShell = $.proxy(function() {
                 this.show();
                 var code = el.find('pre').text();
                 var lines = code.split(/\n/g);
@@ -66,6 +73,16 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                     }
                 }
                 this.setValue(codeLines.join('\n'));
+            }, this);
+
+            evaluate.click($.proxy(function() {
+                fillShell();
+                this.evaluate();
+            }, this));
+
+            copy.click($.proxy(function() {
+                fillShell();
+                this.focus();
             }, this));
         }, this));
     },

@@ -84,15 +84,20 @@
 
 /* Code blocks on page */
 
+.sympy-live-eval-toolbar {
+  display: none;
+  font-family: Arial;
+  font-size: 13px;
+}
+
 .sympy-live-eval-button {
   border: 0;
   background-color: transparent;
   margin: 0;
   padding: 0;
-  display: none;
 }
 
-.highlight-python:hover .sympy-live-eval-button {
+.highlight-python:hover .sympy-live-eval-toolbar {
   display: block;
   position: absolute;
   right: 25px;
