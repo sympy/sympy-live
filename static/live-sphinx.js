@@ -42,6 +42,9 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
         // Don't expand the list of tab completions (saves space)
         this.completer.expandCompletions = false;
+
+        // Change Fullscreen to go to main website
+        $("#fullscreen-button").html("Go to SymPy Live");
     },
 
     processCodeBlocks: function() {
@@ -140,6 +143,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
     },
 
     fullscreen: function() {
+        window.open("http://live.sympy.org");
     }
 });
 
