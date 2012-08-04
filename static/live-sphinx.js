@@ -1,339 +1,149 @@
-
-SymPy.SphinxShell = Ext.extend(SymPy.Shell, {
+utilities.namespace("SymPy");
+SymPy.DEFAULT_ANIMATION_DURATION = 800;
+SymPy.SphinxShell = SymPy.Shell.$extend({
+    __init__: function(config) {
+        this.$super(config);
+        this.visible = true;
+    },
 
     render: function(el) {
-        var el = el || Ext.getBody();
+        this.$super(el);
 
-        this.baseEl = Ext.DomHelper.append(el, {
-            tag: 'div',
-            cls: 'sympy-live-base'
-        }, true);
+        this.shellEl = $(el);
 
-        this.logoEl = Ext.DomHelper.append(el, {
-            tag: 'div',
-            cls: 'sympy-live-logo',
-            html: 'SymPy Live'
-        }, true);
+        this.shellEl.prepend($('<h2>SymPy Live Shell</h2>'));
 
-        this.logoEl.on('click', function() {
-            this.showShell();
-        }, this);
+        this.toggleShellEl = $('<button/>').
+            html("Hide SymPy Live Shell").
+            attr("id", "toggleShell").
+            addClass('shown');
 
-        var keyEvent = this.getKeyEvent();
+        this.toggleShellEl.appendTo(document.body);
+        this.toggleShellEl.click($.proxy(function() {
+            this.toggle();
+        }, this));
 
-        Ext.get(document).on(keyEvent, function(event) {
-            if (event.getKey() == SymPy.Keys.L && event.altKey && event.ctrlKey && event.shiftKey) {
-                event.stopEvent();
-                this.toggleShell();
-            }
-        }, this);
+        $('<h3 class="shown">Settings</h3>').
+            prependTo($("#settings")).
+            click($.proxy(this.toggleSettings, this));
 
-        this.headerEl = Ext.DomHelper.append(this.baseEl, {
-            tag: 'div',
-            cls: 'sympy-live-header',
-            children: [{
-                tag: 'a',
-                href: 'http://sympy.org/',
-                target: '_blank',
-                html: 'SymPy'
-            }, {
-                tag: 'a',
-                href: this.basePath || this.defaultBasePath,
-                target: '_blank',
-                html: 'Live'
-            }, {
-                tag: 'span',
-                html: 'running on the'
-            }, {
-                tag: 'a',
-                href: 'http://code.google.com/appengine/',
-                target: '_blank',
-                html: 'Google App Engine'
-            }]
-        }, true);
+        // We don't need the "force desktop version" option since there is
+        // no mobile version
+        var checkbox = $('#settings input[type="checkbox"]');
+        checkbox.prev().hide();
+        checkbox.next().hide();
+        checkbox.hide();
 
-        this.hideEl = Ext.DomHelper.append(this.headerEl, {
-            tag: 'a',
-            cls: 'sympy-live-hide',
-            html: 'hide'
-        }, true);
+        // Make enter the default submission button
+        $("#submit-behavior").val("enter");
 
-        this.hideEl.on('click', function(event) {
-            this.hideShell();
-        }, this);
-
-        SymPy.SphinxShell.superclass.render.call(this, this.baseEl);
-        this.hideShell();
+        this.processCodeBlocks();
     },
 
-    hideShell: function() {
+    processCodeBlocks: function() {
+        $('.highlight-python').each($.proxy(function(index, el) {
+            var el = $(el);
+            var button = $("<button>run code in SymPy Live</button>").
+                addClass('sympy-live-eval-button').
+                appendTo(el.children());
+            el.children().prepend(button);
+            button.click($.proxy(function() {
+                this.show();
+                var code = el.find('pre').text();
+                var lines = code.split(/\n/g);
+                var codeLines = [];
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].substring(0, 4) === ">>> ") {
+                        codeLines.push(
+                            lines[i].substring(4, lines[i].length));
+                    }
+                }
+                this.setValue(codeLines.join('\n'));
+            }, this));
+        }, this));
+    },
+
+    hide: function(duration) {
+        if (typeof duration === "undefined") {
+            duration = SymPy.DEFAULT_ANIMATION_DURATION;
+        }
         this.disablePrompt();
-        this.baseEl.hide();
-        this.logoEl.show();
+
+        this.shellDimensionsRestored = {
+            width: this.shellEl.width(),
+            height: this.shellEl.height(),
+            opacity: 1
+        };
+
+        this.shellEl.animate({
+            width: 0,
+            height: 0,
+            opacity: 0
+        }, duration);
+        this.visible = false;
+
+        this.toggleShellEl.html("Show SymPy Live Shell").removeClass('shown');
     },
 
-    showShell: function() {
-        this.logoEl.hide();
-        this.baseEl.show();
+    show: function(duration) {
+        if (typeof duration === "undefined") {
+            duration = SymPy.DEFAULT_ANIMATION_DURATION;
+        }
         this.enablePrompt();
+        $(this.shellEl).animate(
+            this.shellDimensionsRestored,
+            duration,
+            function() {
+                // Don't fix the height so that if the settings are
+                // expanded, the shell will expand with them
+                $(this).css('height', 'auto');
+            });
+        this.visible = true;
+        this.toggleShellEl.html("Hide SymPy Live Shell").addClass('shown');
     },
 
-    toggleShell: function() {
-        if (this.baseEl.isVisible()) {
-            this.hideShell();
+    toggle: function(duration) {
+        if (typeof duration === "undefined") {
+            duration = SymPy.DEFAULT_ANIMATION_DURATION;
+        }
+        if (this.isVisible()) {
+            this.hide(duration);
         } else {
-            this.showShell();
+            this.show(duration);
         }
     },
 
-    handleKey: function(event) {
-        var result = SymPy.SphinxShell.superclass.handleKey.call(this, event);
+    toggleSettings: function(duration) {
+        if (typeof duration === "undefined") {
+            duration = SymPy.DEFAULT_ANIMATION_DURATION;
+        }
 
-        if (result) {
-            return result;
-        } else {
-            switch (event.getKey()) {
-            case SymPy.Keys.ESC:
-                this.hideShell();
-                return true;
-            case SymPy.Keys.H:
-                if (event.altKey && !event.ctrlKey) {
-                    this.hideShell();
-                    return true;
-                }
-
-                break;
-            }
-
-            return false;
+        if ($("#settings .content").is(":visible")) {
+            $("#settings .content").slideUp(duration);
+            $("#settings h3").removeClass('shown');
+        }
+        else {
+            $("#settings .content").slideDown(duration);
+            $("#settings h3").addClass('shown');
         }
     },
 
-    processBlocks: function(node) {
-        var children = node.childNodes;
-
-        function isPrompt(obj) {
-            return SymPy.getDOMText(obj).indexOf('>>>') === 0;
-        }
-
-        function isContinuation(obj) {
-            return SymPy.getDOMText(obj).indexOf('...') === 0;
-        }
-
-        var blocks = [];
-
-        if ((children.length > 0) && isPrompt(children[0])) {
-            var lines = [];
-            var line = [];
-
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i];
-                line.push(child);
-
-                if (/\n+$/.test(SymPy.getDOMText(child))) {
-                    lines.push(line);
-                    line = [];
-                }
-            }
-
-            if (line.length) {
-                lines.push(line);
-            }
-
-            var elements = [];
-            var content = null;
-
-            function cloneNodes(line) {
-                for (var i = 0; i < line.length; i++) {
-                    content.appendChild(line[i].cloneNode(true));
-                }
-            }
-
-            function copyNodes(line) {
-                for (var i = 0; i < line.length; i++) {
-                    elements.push(line[i]);
-                }
-            }
-
-            function pushContent() {
-                var child = content.lastChild,
-                    postfix = null;
-
-                if (SymPy.isTextNode(child)) {
-                    var text = SymPy.getDOMText(child);
-
-                    if (/(\n+)$/.test(text)) {
-                        var newlines = RegExp.$1;
-
-                        if (newlines.length > 1) {
-                            content.removeChild(child);
-
-                            var i = text.length - newlines.length + 1;
-
-                            var textPrefix = text.substring(0, i);
-                            var textPostfix = text.substring(i);
-
-                            content.appendChild(document.createTextNode(textPrefix));
-                            postfix = document.createTextNode(textPostfix);
-                        }
-                    }
-                }
-
-                elements.push(content);
-
-                if (postfix) {
-                    elements.push(postfix);
-                }
-            }
-
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-
-                if (isPrompt(line[0])) {
-                    if (content) {
-                        pushContent();
-                        content = null;
-                    }
-
-                    content = document.createElement('div');
-                    blocks.push(content);
-                    cloneNodes(line);
-                } else if (isContinuation(line[0])) {
-                    if (content) {
-                        cloneNodes(line);
-                    } else {
-                        copyNodes(line);
-                    }
-                } else {
-                    if (content) {
-                        pushContent();
-                        content = null;
-                    }
-
-                    copyNodes(line);
-                }
-            }
-
-            if (content) {
-                elements.push(content);
-            }
-
-            while (node.childNodes.length >= 1) {
-                node.removeChild(node.firstChild);
-            }
-
-            for (var i = 0; i < elements.length; i++) {
-                node.appendChild(elements[i]);
-            }
-        } else {
-            var block = document.createElement('div');
-
-            while (node.childNodes.length >= 1) {
-                var child = node.firstChild;
-                block.appendChild(child.cloneNode(true));
-                node.removeChild(child);
-            }
-
-            node.appendChild(block);
-            blocks = [block]
-        }
-
-        Ext.each(blocks, function(block) {
-            Ext.get(block).addClass('sympy-live-block');
-        });
-
-        return blocks;
+    isVisible: function() {
+        return this.visible;
     },
 
-    processElements: function() {
-        var selector = 'div.highlight-python pre';
-        var nodes = Ext.DomQuery.select(selector);
-
-        Ext.each(nodes, function(node) {
-            var el = Ext.get(node);
-            var blocks;
-
-            if (el.hasClass('sympy-live-element')) {
-                blocks = Ext.DomQuery.select('div.sympy-live-block', node);
-            } else {
-                blocks = this.processBlocks(node);
-            }
-
-            Ext.each(blocks, function(block) {
-                var code = SymPy.getDOMText(block);
-                var prompt = null;
-
-                if (code.indexOf(">>> ") === 0) {
-                    var lines = code.split('\n');
-
-                    for (var j = 0; j < lines.length; j++) {
-                        lines[j] = lines[j].substr(4);
-                    }
-
-                    code = lines.join('\n');
-                    prompt = block.firstChild;
-                }
-
-                code = code.replace(/\n+$/, "");
-
-                if (prompt) {
-                    var el = Ext.get(prompt);
-
-                    el.addClass('sympy-live-python-prompt');
-                    el.on('click', function(event) {
-                        this.evaluateCode(code);
-                    }, this);
-                }
-
-                var toolbar = Ext.DomHelper.append(block, {
-                    tag: 'div',
-                    cls: 'sympy-live-block-toolbar'
-                }, true);
-
-                Ext.DomHelper.append(toolbar, {
-                    tag: 'span',
-                    html: 'Evaluate'
-                }, true).on('click', function(event) {
-                    this.evaluateCode(code);
-                }, this);
-
-                Ext.DomHelper.append(toolbar, {
-                    tag: 'span',
-                    html: 'Copy'
-                }, true).on('click', function(event) {
-                    this.copyCode(code);
-                }, this);
-
-                Ext.get(block).on('click', function(event) {
-                    if (!event.shiftKey && event.ctrlKey) {
-                        if (event.altKey) {
-                            event.stopEvent();
-                            this.evaluateCode(code);
-                        } else {
-                            event.stopEvent();
-                            this.copyCode(code);
-                        }
-                    }
-                }, this);
-            }, this);
-        }, this);
-    },
-
-    evaluateCode: function(code) {
-        this.copyCode(code);
-        this.evaluate();
-    },
-
-    copyCode: function(code) {
-        this.setValue(code);
-        this.updateHistory(code);
-        this.updatePrompt();
-        this.showShell();
+    fullscreen: function() {
     }
 });
 
-Ext.onReady(function() {
+$(document).ready(function() {
+    var shellEl = $('<div id="shell"/>').appendTo($(document.body));
+    var settingsEl = $('<div id="settings"><div class="content"></div></div>');
+    settingsEl.appendTo(shellEl);  // Needed to render the shell
+
     var shell = new SymPy.SphinxShell({baseName: 'live-sphinx.js'});
-    shell.render();
-    shell.processElements();
+    shell.render(shellEl);
+    settingsEl.appendTo(shellEl); // Put it under the shell
+    shell.toggleSettings();
+    shell.hide(0);
 });

@@ -1,78 +1,85 @@
+#shell {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 600px;
 
-.sympy-live-base {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    padding: 5px;
-    font-family: monospace;
-    font-size: 10pt;
-    background-color: white;
-    border: 1px solid silver;
+  border: 2px solid #81B953;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 10px 0 0 0;
+  padding: 10px 20px 20px 10px;
+  background: #FFF;
 }
 
-.sympy-live-logo {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    padding: 5px;
-    font-family: monospace;
-    font-size: 10pt;
-    background-color: #f5f5f5;
-    border: 1px solid silver;
-    cursor: pointer;
+#shell h2 {
+  font-weight: normal;
+  margin: 0;
+  text-align: center;
 }
 
-.sympy-live-header {
-    padding-bottom: 5px;
+.sympy-live-output {
+  width: 600px;
 }
 
-.sympy-live-header > * {
-    margin-right: 1ex;
+#toggleShell {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 5px 0 0 0;
+  color: #FFF;
+  background-color: #3B5526;
 }
 
-.sympy-live-hide {
-    cursor: pointer;
-    float: right;
-    margin: 0;
+#toggleShell:before {
+  content: "↖ ";
 }
 
-.sympy-live-block {
-    position: relative;
+#toggleShell.shown:before {
+  content: "↘ ";
 }
 
-.sympy-live-block-toolbar {
-    visibility: hidden;
-    position: absolute;
-    top: 0;
-    right: 0;
+.sympy-live-completions-toolbar #sympy-live-completions-toggle {
+  display: none;
 }
 
-.sympy-live-block-toolbar > span {
-    padding-right: 5px;
-    cursor: pointer;
-    color: gray;
+#settings {
+  border-top: 1px solid #222;
 }
 
-.sympy-live-block-toolbar > span:hover {
-    text-decoration: underline;
+#settings h3 {
+  font-weight: normal;
+  margin: 0;
+  cursor: pointer;
 }
 
-.sympy-live-block {
-    border: 1px solid transparent;
+#settings h3:before {
+  content: "▾ ";
 }
 
-.sympy-live-block:hover {
-    border: 1px solid silver;
+#settings h3.shown:before {
+  content: "▴ ";
 }
 
-.sympy-live-block:hover .sympy-live-block-toolbar {
-    visibility: visible;
+.sympy-live-eval-button {
+  border: 0;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+  display: none;
 }
 
-.sympy-live-python-prompt:hover {
-    cursor: pointer;
+.highlight-python:hover .sympy-live-eval-button {
+  display: block;
+  position: absolute;
+  right: 25px;
+  margin-top: 5px;
+}
+
+.sympy-live-eval-button:hover {
+  color: #81B953;
+  text-decoration: underline;
 }
