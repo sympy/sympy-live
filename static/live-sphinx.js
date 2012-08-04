@@ -1,9 +1,15 @@
 utilities.namespace("SymPy");
 SymPy.DEFAULT_ANIMATION_DURATION = 800;
 SymPy.SphinxShell = SymPy.Shell.$extend({
+    evalModeTypes: ['eval', 'copy'],
+    evalMode: 'eval',
+
     __init__: function(config) {
         this.$super(config);
         this.visible = true;
+
+        index = this.evalModeTypes.indexOf(config.record);
+        this.evalMode = (index == -1) ? this.getCookie('sympy-evalMode', 'eval') : config.evalMode;
     },
 
     render: function(el) {
@@ -27,6 +33,24 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             this.toggle();
         }, this));
 
+        // Add a link to Python code that will evaluate it in SymPy Live
+        this.processCodeBlocks();
+
+        // Don't expand the list of tab completions (saves space)
+        this.completer.expandCompletions = false;
+
+        // Change Fullscreen to go to main website
+        $("#fullscreen-button").html("Go to SymPy Live");
+
+	    this.evalModeEl.change($.proxy(function(event) {
+            this.updateSettings();
+            this.focus();
+        }, this));
+    },
+
+    renderToolbar: function(settings) {
+        this.$super(settings);
+
         $('<h3 class="shown">Settings</h3>').
             prependTo($("#settings")).
             click($.proxy(this.toggleSettings, this));
@@ -39,31 +63,33 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         checkbox.next().hide();
         checkbox.hide();
 
+        this.toolbarEl.append(
+            $('<br/>'),
+            $('<label for="evalMode">Evaluation Mode:</label>'),
+            $('<select id="evalMode"/>').append(
+                $('<option value="eval">Evaluate</option>'),
+                $('<option value="copy">Copy</option>')
+            ),
+            $('<br/>')
+        );
+        this.evalModeEl = $('#evalMode');
+
+        var index = this.evalModeTypes.indexOf(this.evalMode);
+        this.evalModeEl.children('option')[index].selected = true;
+
         // Make enter the default submission button
         $("#submit-behavior").val("enter");
-
-        // Add a link to Python code that will evaluate it in SymPy Live
-        this.processCodeBlocks();
-
-        // Don't expand the list of tab completions (saves space)
-        this.completer.expandCompletions = false;
-
-        // Change Fullscreen to go to main website
-        $("#fullscreen-button").html("Go to SymPy Live");
     },
 
     processCodeBlocks: function() {
         $('.highlight-python').each($.proxy(function(index, el) {
             var el = $(el);
+
+            // Add the toolbar
             var container = $("<div/>").addClass('sympy-live-eval-toolbar');
-            var evaluate = $("<button>evaluate</button>").
+            var evaluate = $("<button>Run in SymPy Live</button>").
                 addClass('sympy-live-eval-button').
                 appendTo(container);
-            $("<span> or </span>").appendTo(container);
-            var copy = $("<button>copy</button>").
-                addClass('sympy-live-eval-button').
-                appendTo(container);
-            $("<span> in SymPy Live</span>").appendTo(container);
             el.children('.highlight').prepend(container);
 
             var fillShell = $.proxy(function() {
@@ -84,13 +110,32 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
             evaluate.click($.proxy(function() {
                 fillShell();
-                this.evaluate();
+                if (this.evalModeEl.val() === "eval") {
+                    this.evaluate();
+                }
+                else {
+                    this.focus();
+                }
             }, this));
 
-            copy.click($.proxy(function() {
-                fillShell();
-                this.focus();
-            }, this));
+            // TODO Highlight each line on mouseover
+            // var codeEl = el.find('pre');
+            // var children = codeEl.children();
+            // var currentLine = [];
+
+            // children.each(function(index, node) {
+            //     var domNode = $(node).get(0);
+            //     currentLine.push($(node));
+            //     if (domNode.nextSibling.textContent === "\n") {
+            //         var line = $('<div/>');
+            //         for (var i = 0; i < currentLine.length; i++) {
+            //             line.append(currentLine[i]);
+            //         }
+            //         codeEl.append(line);
+            //         currentLine = [];
+            //     }
+            //     $(node).remove();
+            // });
         }, this));
     },
 
@@ -170,6 +215,11 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
     fullscreen: function() {
         window.open("http://live.sympy.org");
+    },
+
+    updateSettings: function() {
+        this.$super();
+        this.setCookie('sympy-evalMode', this.evalModeEl.val());
     }
 });
 
