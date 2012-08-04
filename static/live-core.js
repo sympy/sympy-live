@@ -374,7 +374,6 @@ SymPy.Shell = Class.$extend({
 
     enablePrompt: function() {
         this.promptEl.prop('readonly', false);
-        this.focus();
     },
 
     setValue: function(value) {
