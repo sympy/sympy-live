@@ -12,10 +12,12 @@
   background: #FFF;
 }
 
-#shell h2 {
+#shell h2, #shell h2 a:link, #shell h2 a:visited,
+#shell h2 a:hover, #shell h2 a:active {
   font-weight: normal;
   margin: 0;
   text-align: center;
+  color: #000;
 }
 
 .sympy-live-output {

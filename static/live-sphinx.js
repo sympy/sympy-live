@@ -11,7 +11,10 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
         this.shellEl = $(el);
 
-        this.shellEl.prepend($('<h2>SymPy Live Shell</h2>'));
+        var headerLink =
+            $('<a href="http://live.sympy.org">SymPy Live Shell</a>');
+        var header = $("<h2/>").append(headerLink);
+        this.shellEl.prepend(header);
 
         this.toggleShellEl = $('<button/>').
             html("Hide SymPy Live Shell").
