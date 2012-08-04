@@ -64,15 +64,17 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 addClass('sympy-live-eval-button').
                 appendTo(container);
             $("<span> in SymPy Live</span>").appendTo(container);
-            el.children().prepend(container);
+            el.children('.highlight').prepend(container);
 
             var fillShell = $.proxy(function() {
                 this.show();
                 var code = el.find('pre').text();
                 var lines = code.split(/\n/g);
+                console.log(lines);
                 var codeLines = [];
                 for (var i = 0; i < lines.length; i++) {
-                    if (lines[i].substring(0, 4) === ">>> ") {
+                    if (lines[i].substring(0, 4) === ">>> " ||
+                        lines[i].substring(0, 4) === "... ") {
                         codeLines.push(
                             lines[i].substring(4, lines[i].length));
                     }
