@@ -17,9 +17,10 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         this.shellEl.prepend(header);
 
         this.toggleShellEl = $('<button/>').
-            html("Hide SymPy Live Shell").
+            html("<span>Hide SymPy Live Shell</span>").
             attr("id", "toggleShell").
             addClass('shown');
+        this.toggleShellEl.prepend($('<div class="arrow" />'));
 
         this.toggleShellEl.appendTo(document.body);
         this.toggleShellEl.click($.proxy(function() {
@@ -29,6 +30,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         $('<h3 class="shown">Settings</h3>').
             prependTo($("#settings")).
             click($.proxy(this.toggleSettings, this));
+        $("#settings h3").prepend($('<div class="arrow"/>'));
 
         // We don't need the "force desktop version" option since there is
         // no mobile version
@@ -109,7 +111,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         }, duration);
         this.visible = false;
 
-        this.toggleShellEl.html("Show SymPy Live Shell").removeClass('shown');
+        this.toggleShellEl.removeClass('shown').children('span').
+            html("Show SymPy Live Shell");
     },
 
     show: function(duration) {
@@ -128,7 +131,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 $(this).css('height', 'auto');
             });
         this.visible = true;
-        this.toggleShellEl.html("Hide SymPy Live Shell").addClass('shown');
+        this.toggleShellEl.addClass('shown').children('span').
+            html("Hide SymPy Live Shell");
     },
 
     toggle: function(duration) {
