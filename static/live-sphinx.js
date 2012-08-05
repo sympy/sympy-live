@@ -1,5 +1,5 @@
 utilities.namespace("SymPy");
-SymPy.DEFAULT_ANIMATION_DURATION = 800;
+SymPy.DEFAULT_ANIMATION_DURATION = 500;
 SymPy.SphinxShell = SymPy.Shell.$extend({
     evalModeTypes: ['eval', 'copy'],
     evalMode: 'eval',
