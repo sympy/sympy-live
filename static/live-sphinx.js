@@ -10,6 +10,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
         index = this.evalModeTypes.indexOf(config.record);
         this.evalMode = (index == -1) ? this.getCookie('sympy-evalMode', 'eval') : config.evalMode;
+        this.banner = config.banner ? config.banner : '';
     },
 
     render: function(el) {
@@ -224,13 +225,20 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 });
 
 $(document).ready(function() {
-    var shellEl = $('<div id="shell"/>').appendTo($(document.body));
-    var settingsEl = $('<div id="settings"><div class="content"></div></div>');
-    settingsEl.appendTo(shellEl);  // Needed to render the shell
+    var path = SymPy.getBasePath('live-sphinx.js');
 
-    var shell = new SymPy.SphinxShell({baseName: 'live-sphinx.js'});
-    shell.render(shellEl);
-    settingsEl.appendTo(shellEl); // Put it under the shell
-    shell.toggleSettings();
-    shell.hide(0);
+    $.get(path + '/sphinxbanner').done(function(data) {
+        var shellEl = $('<div id="shell"/>').appendTo($(document.body));
+        var settingsEl = $('<div id="settings"><div class="content"></div></div>');
+        settingsEl.appendTo(shellEl);  // Needed to render the shell
+
+        var shell = new SymPy.SphinxShell({
+            baseName: 'live-sphinx.js',
+            banner: data
+        });
+        shell.render(shellEl);
+        settingsEl.appendTo(shellEl); // Put it under the shell
+        shell.toggleSettings();
+        shell.hide(0);
+    });
 });

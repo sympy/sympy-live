@@ -122,6 +122,11 @@ These commands were executed:
 Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.\
 """
 
+VERBOSE_MESSAGE_SPHINX = """\
+These commands were executed:
+%(source)s
+"""
+
 
 # The blueprint used to store user queries
 class Searches(db.Model):
@@ -149,6 +154,27 @@ def banner(quiet=False):
         message += '\n' + VERBOSE_MESSAGE % {'source': source}
 
     return message
+
+
+def banner_sphinx(quiet=False):
+    from sympy import __version__ as sympy_version
+    python_version = "%d.%d.%d" % sys.version_info[:3]
+
+    message = "Python console for SymPy %s (Python %s)\n" % (sympy_version, python_version)
+
+    if not quiet:
+        source = ""
+
+        for line in PREEXEC_MESSAGE.split('\n')[:-1]:
+            if not line:
+                source += '\n'
+            else:
+                source += '>>> ' + line + '\n'
+
+        message += '\n' + VERBOSE_MESSAGE_SPHINX % {'source': source}
+
+    return message
+
 
 class Live(object):
 
@@ -818,6 +844,7 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
 
+
 class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
@@ -843,6 +870,20 @@ class StatementHandler(webapp.RequestHandler):
     evaluate(statement, session, printer, self.response.out)
 
 
+class SphinxBannerHandler(webapp.RequestHandler):
+    """Provides the banner for the Sphinx extension.
+    """
+
+    def _cross_site_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
+
+    def get(self):
+        self._cross_site_headers()
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(banner_sphinx())
+
+
 class DeleteHistory(webapp.RequestHandler):
     """Deletes all of the user's history"""
 
@@ -864,7 +905,8 @@ def main():
       ('/shell.do', StatementHandler),
       ('/forcedesktop', ForceDesktopCookieHandler),
       ('/delete', DeleteHistory),
-      ('/complete', CompletionHandler)
+      ('/complete', CompletionHandler),
+      ('/sphinxbanner', SphinxBannerHandler)
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)

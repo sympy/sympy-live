@@ -77,6 +77,25 @@ SymPy.isTextNode = function(node) {
     return node.nodeType === 3;
 };
 
+SymPy.getBasePath = function(baseName) {
+    if (baseName) {
+        var scripts = document.getElementsByTagName('script');
+
+        var reStart = RegExp("^(https?://[^/]+)/");
+        var reEnd = RegExp("/" + baseName + "(\\?|$)");
+
+        for (var i = scripts.length - 1; i >= 0; --i) {
+            var src = scripts[i].src;
+
+            if (src.match(reEnd) && src.match(reStart)) {
+                return RegExp.$1;
+            }
+        }
+    }
+
+    return null;
+};
+
 SymPy.Shell = Class.$extend({
     banner: null,
     history: [''],
@@ -104,7 +123,7 @@ SymPy.Shell = Class.$extend({
         if (config.basePath) {
             this.basePath = config.basePath;
         } else {
-            this.basePath = this.getBasePath(config.baseName);
+            this.basePath = SymPy.getBasePath(config.baseName);
         }
 
         if (config.banner) {
@@ -152,25 +171,6 @@ SymPy.Shell = Class.$extend({
             this.tabWidth = config.tabWidth;
             delete config.tabWidth;
         }
-    },
-
-    getBasePath: function(baseName) {
-        if (baseName) {
-            var scripts = document.getElementsByTagName('script');
-
-            var reStart = RegExp("^(https?://[^/]+)/");
-            var reEnd = RegExp("/" + baseName + "(\\?|$)");
-
-            for (var i = scripts.length - 1; i >= 0; --i) {
-                var src = scripts[i].src;
-
-                if (src.match(reEnd) && src.match(reStart)) {
-                    return RegExp.$1;
-                }
-            }
-        }
-
-        return null;
     },
 
     render: function(el) {
