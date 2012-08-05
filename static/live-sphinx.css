@@ -10,6 +10,7 @@
   border-radius: 10px 0 0 0;
   padding: 10px 23px 20px 7px;
   background: #FFF;
+  box-shadow: -2px -2px 2px #ccc;
 }
 
 #shell h2, #shell h2 a:link, #shell h2 a:visited,
