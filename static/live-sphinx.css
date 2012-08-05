@@ -87,12 +87,20 @@
   -transform: rotate(180deg) translate(0px, 0px);
 }
 
+#toggleShell div.arrow {
+  -webkit-transform: rotate(135deg) translate(0px, 0px);
+  -moz-transform: rotate(135deg) translate(0px, 0px);
+  -o-transform: rotate(135deg) translate(0px, 0px);
+  -ms-transform: rotate(135deg) translate(0px, 0px);
+  -transform: rotate(135deg) translate(0px, 0px);
+}
+
 #settings h3.shown div.arrow, #toggleShell.shown div.arrow {
-  -webkit-transform: rotate(0deg) translate(0px, 0px);
-  -moz-transform: rotate(0deg) translate(0px, 0px);
-  -o-transform: rotate(0deg) translate(0px, 0px);
-  -ms-transform: rotate(0deg) translate(0px, 0px);
-  -transform: rotate(0deg) translate(0px, 0px);
+  -webkit-transform: rotate(-45deg) translate(0px, 0px);
+  -moz-transform: rotate(-45deg) translate(0px, 0px);
+  -o-transform: rotate(-45deg) translate(0px, 0px);
+  -ms-transform: rotate(-45deg) translate(0px, 0px);
+  -transform: rotate(-45deg) translate(0px, 0px);
 }
 
 /* Code blocks on page */
