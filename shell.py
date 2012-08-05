@@ -48,6 +48,7 @@ import types
 import simplejson
 import wsgiref.handlers
 import rlcompleter
+import codeop
 
 from StringIO import StringIO
 
@@ -181,6 +182,9 @@ class Live(object):
     _header = 'Traceback (most recent call last):\n'
     _file = '<string>'
 
+    def __init__(self):
+        self.compiler = codeop.Compile()
+
     def traceback(self, offset=None):
         """Return nicely formatted most recent traceback. """
         etype, value, tb = sys.exc_info()
@@ -237,28 +241,34 @@ class Live(object):
             stream.write(error[0])
 
     def split(self, source):
-        """Extract last logical line from multi-line source code. """
-        string = StringIO(source).readline
+        """Split source into individual complete statements."""
+        lines = source.split('\n')
+        blocks = [[]]
+        compiler = codeop.CommandCompiler()
 
-        try:
-            tokens = list(tokenize.generate_tokens(string))
-        except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
-            return None, source
+        for line in lines:
+            blocks[-1].append(line)
 
-        for tok, _, (n, _), _, _ in reversed(tokens):
-            if tok == tokenize.NEWLINE:
-                lines = source.split('\n')
+            try:
+                result = compiler('\n'.join(blocks[-1]))
+                # Incomplete statement like 'if True:'
+                if result is not None:
+                    blocks.append([])
+            except SyntaxError:
+                # This is caused by code like
+                # if 2 == 2:
+                #     print 2
+                # print 2
+                #
+                # which the interpreter normally won't allow
+                blocks[-1].pop()
+                blocks.append([line])
 
-                exec_source = '\n'.join(lines[:n])
-                eval_source = '\n'.join(lines[n:])
-
-                return exec_source, eval_source
-        else:
-            return None, source
+        return ['\n'.join(block) for block in blocks if block]
 
     def compile(self, source, mode):
         """Wrapper over Python's built-in function. """
-        return compile(source, self._file, mode)
+        return self.compiler(source, self._file, mode)
 
     def complete(self, statement, session):
         """Autocomplete the statement in the session's globals."""
@@ -313,18 +323,8 @@ class Live(object):
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
 
-        # split source code into 'exec' and 'eval' parts
-        exec_source, eval_source = self.split(source)
-
-        try:
-            self.compile(eval_source, 'eval')
-        except (OverflowError, SyntaxError, ValueError):
-            exec_source, eval_source = source, None
-
-        if exec_source is not None:
-            exec_source += '\n'
-        if eval_source is not None:
-            eval_source += '\n'
+        # split source code into individual runnable statements
+        source_statements = self.split(statement)
 
         # create a dedicated module to be used as this statement's __main__
         statement_module = new.module('__main__')
@@ -374,7 +374,8 @@ class Live(object):
             __builtin__._ = session_globals_dict.get('_')
 
             # run!
-            offset = 0
+            offset = -1  # TODO: find out why traceback line numbers are
+                         # offset by 1
 
             try:
                 old_stdout = sys.stdout
@@ -385,20 +386,23 @@ class Live(object):
                         sys.stdout = stream
                         sys.stderr = stream
 
-                    if exec_source is not None:
+                    for statement in source_statements:
+                        # Ugly, but works
+                        # Try to run it as a simple statement, if that
+                        # fails, try it as a statement before giving up
                         try:
-                            exec_code = self.compile(exec_source, 'exec')
+                            compiled = self.compile(statement, 'single')
+                            offset += len(statement.split('\n'))
                         except (OverflowError, SyntaxError, ValueError):
-                            return self.error(stream, self.syntaxerror())
+                            try:
+                                compiled = self.compile(statement, 'exec')
+                                offset += len(statement.split('\n'))
+                            except (OverflowError, SyntaxError, ValueError):
+                                return self.error(stream, self.syntaxerror())
 
-                        eval(exec_code, statement_module.__dict__)
-
-                    if eval_source is not None:
-                        if exec_source is not None:
-                            offset = len(exec_source.split('\n'))
-
-                        result = eval(eval_source, statement_module.__dict__)
+                        result = eval(compiled, statement_module.__dict__)
                         sys.displayhook(result)
+
                 finally:
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
@@ -415,14 +419,7 @@ class Live(object):
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
-                source = ""
-
-                if exec_source:
-                    source += exec_source
-                if eval_source:
-                    source += eval_source
-
-                source += "\n"
+                source = statement
 
                 session.add_unpicklable(source, new_globals.keys())
                 logging.debug('Storing this statement as an unpicklable.')
