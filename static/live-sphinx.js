@@ -7,6 +7,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
     __init__: function(config) {
         this.$super(config);
         this.visible = true;
+        this.queuedStatements = [];
 
         index = this.evalModeTypes.indexOf(config.record);
         this.evalMode = (index == -1) ? this.getCookie('sympy-evalMode', 'eval') : config.evalMode;
@@ -82,6 +83,26 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         $("#submit-behavior").val("enter");
     },
 
+    done: function(response) {
+        this.$super(response);
+        if (this.queuedStatements.length !== 0) {
+            this.dequeueStatement();
+            this.evaluate();
+        }
+    },
+
+    error: function(xhr, status, error) {
+        this.$super(xhr, status, error);
+        this.queuedStatements.length = 0;
+    },
+
+    dequeueStatement: function() {
+        if (this.queuedStatements.length !== 0) {
+            var statements = this.queuedStatements.shift();
+            this.setValue(statements.join('\n'));
+        }
+    },
+
     processCodeBlocks: function() {
         $('.highlight-python').each($.proxy(function(index, el) {
             var el = $(el);
@@ -97,21 +118,34 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 this.show();
                 var code = el.find('pre').text();
                 var lines = code.split(/\n/g);
-                console.log(lines);
-                var codeLines = [];
+
+                // We want to evaluate each block individually
+                var codeBlocks = [];
+                var currentBlock = [];
                 for (var i = 0; i < lines.length; i++) {
-                    if (lines[i].substring(0, 4) === ">>> " ||
-                        lines[i].substring(0, 4) === "... ") {
-                        codeLines.push(
+                    if (lines[i].substring(0, 4) === ">>> ") {
+                        codeBlocks.push(currentBlock);
+                        currentBlock = [];
+
+                        currentBlock.push(
+                            lines[i].substring(4, lines[i].length));
+                    }
+                    else if (lines[i].substring(0, 4) === "... ") {
+                        currentBlock.push(
                             lines[i].substring(4, lines[i].length));
                     }
                 }
-                this.setValue(codeLines.join('\n'));
+                if (currentBlock.length !== 0) {
+                    codeBlocks.push(currentBlock);
+                }
+                codeBlocks = codeBlocks.slice(1);
+                this.queuedStatements = codeBlocks;
             }, this);
 
             evaluate.click($.proxy(function() {
                 fillShell();
                 if (this.evalModeEl.val() === "eval") {
+                    this.dequeueStatement();
                     this.evaluate();
                 }
                 else {

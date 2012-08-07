@@ -785,7 +785,8 @@ SymPy.Shell = Class.$extend({
                     this.focus();
                 }, this),
                 error: $.proxy(function(a,b,c) {
-                    console.log(a,b,c)
+                    this.error();
+
                     $('<div>Error: Time limit exceeded.</div>').
                         appendTo(this.outputEl);
 
@@ -827,6 +828,10 @@ SymPy.Shell = Class.$extend({
 
         this.setEvaluating(false);
         this.focus();
+    },
+
+    error: function(xhr, status, error) {
+        console.log("Error:", xhr, status, error);
     },
 
     clear: function() {
