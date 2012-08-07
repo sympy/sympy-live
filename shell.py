@@ -386,20 +386,24 @@ class Live(object):
                         sys.stdout = stream
                         sys.stderr = stream
 
-                    for statement in source_statements:
+                    for individual_statement in source_statements:
                         # Ugly, but works
                         # Try to run it as a simple statement, if that
                         # fails, try it as a statement before giving up
                         try:
-                            compiled = self.compile(statement, 'single')
-                            offset += len(statement.split('\n'))
+                            compiled = self.compile(individual_statement, 'single')
+                            offset += len(individual_statement.split('\n'))
                         except (OverflowError, SyntaxError, ValueError):
                             try:
-                                compiled = self.compile(statement, 'exec')
-                                offset += len(statement.split('\n'))
+                                compiled = self.compile(individual_statement, 'exec')
+                                offset += len(individual_statement.split('\n'))
                             except (OverflowError, SyntaxError, ValueError):
                                 return self.error(stream, self.syntaxerror())
 
+                        if stream:
+                            stream.write(
+                                self.formatStatement(individual_statement)
+                            )
                         result = eval(compiled, statement_module.__dict__)
                         sys.displayhook(result)
 
@@ -419,8 +423,7 @@ class Live(object):
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
-                source = statement
-
+                source = statement + '\n'
                 session.add_unpicklable(source, new_globals.keys())
                 logging.debug('Storing this statement as an unpicklable.')
             else:
@@ -454,6 +457,9 @@ class Live(object):
         except RequestTooLargeError:
             stream.truncate(0) # clear output
             self.error(stream, ('Unable to process statement due to its excessive size.',))
+
+    def formatStatement(self, statement):
+        return statement + '\n'
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
@@ -727,7 +733,7 @@ class EvaluateHandler(webapp.RequestHandler):
             except db.Error:
                 self.error(400)
                 return
-        else:
+        if session_key is None or session is None:
             session = Session()
             session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
             session_key = session.put()
