@@ -48,7 +48,6 @@ import types
 import simplejson
 import wsgiref.handlers
 import rlcompleter
-import codeop
 
 from StringIO import StringIO
 
@@ -182,9 +181,6 @@ class Live(object):
     _header = 'Traceback (most recent call last):\n'
     _file = '<string>'
 
-    def __init__(self):
-        self.compiler = codeop.Compile()
-
     def traceback(self, offset=None):
         """Return nicely formatted most recent traceback. """
         etype, value, tb = sys.exc_info()
@@ -241,34 +237,28 @@ class Live(object):
             stream.write(error[0])
 
     def split(self, source):
-        """Split source into individual complete statements."""
-        lines = source.split('\n')
-        blocks = [[]]
-        compiler = codeop.CommandCompiler()
+        """Extract last logical line from multi-line source code. """
+        string = StringIO(source).readline
 
-        for line in lines:
-            blocks[-1].append(line)
+        try:
+            tokens = list(tokenize.generate_tokens(string))
+        except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
+            return None, source
 
-            try:
-                result = compiler('\n'.join(blocks[-1]))
-                # Incomplete statement like 'if True:'
-                if result is not None:
-                    blocks.append([])
-            except SyntaxError:
-                # This is caused by code like
-                # if 2 == 2:
-                #     print 2
-                # print 2
-                #
-                # which the interpreter normally won't allow
-                blocks[-1].pop()
-                blocks.append([line])
+        for tok, _, (n, _), _, _ in reversed(tokens):
+            if tok == tokenize.NEWLINE:
+                lines = source.split('\n')
 
-        return ['\n'.join(block) for block in blocks if block]
+                exec_source = '\n'.join(lines[:n])
+                eval_source = '\n'.join(lines[n:])
+
+                return exec_source, eval_source
+        else:
+            return None, source
 
     def compile(self, source, mode):
         """Wrapper over Python's built-in function. """
-        return self.compiler(source, self._file, mode)
+        return compile(source, self._file, mode)
 
     def complete(self, statement, session):
         """Autocomplete the statement in the session's globals."""
@@ -323,8 +313,18 @@ class Live(object):
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
 
-        # split source code into individual runnable statements
-        source_statements = self.split(statement)
+        # split source code into 'exec' and 'eval' parts
+        exec_source, eval_source = self.split(source)
+
+        try:
+            self.compile(eval_source, 'eval')
+        except (OverflowError, SyntaxError, ValueError):
+            exec_source, eval_source = source, None
+
+        if exec_source is not None:
+            exec_source += '\n'
+        if eval_source is not None:
+            eval_source += '\n'
 
         # create a dedicated module to be used as this statement's __main__
         statement_module = new.module('__main__')
@@ -374,8 +374,7 @@ class Live(object):
             __builtin__._ = session_globals_dict.get('_')
 
             # run!
-            offset = -1  # TODO: find out why traceback line numbers are
-                         # offset by 1
+            offset = 0
 
             try:
                 old_stdout = sys.stdout
@@ -386,27 +385,20 @@ class Live(object):
                         sys.stdout = stream
                         sys.stderr = stream
 
-                    for individual_statement in source_statements:
-                        # Ugly, but works
-                        # Try to run it as a simple statement, if that
-                        # fails, try it as a statement before giving up
+                    if exec_source is not None:
                         try:
-                            compiled = self.compile(individual_statement, 'single')
-                            offset += len(individual_statement.split('\n'))
+                            exec_code = self.compile(exec_source, 'exec')
                         except (OverflowError, SyntaxError, ValueError):
-                            try:
-                                compiled = self.compile(individual_statement, 'exec')
-                                offset += len(individual_statement.split('\n'))
-                            except (OverflowError, SyntaxError, ValueError):
-                                return self.error(stream, self.syntaxerror())
+                            return self.error(stream, self.syntaxerror())
 
-                        if stream:
-                            stream.write(
-                                self.formatStatement(individual_statement)
-                            )
-                        result = eval(compiled, statement_module.__dict__)
+                        eval(exec_code, statement_module.__dict__)
+
+                    if eval_source is not None:
+                        if exec_source is not None:
+                            offset = len(exec_source.split('\n'))
+
+                        result = eval(eval_source, statement_module.__dict__)
                         sys.displayhook(result)
-
                 finally:
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
@@ -423,7 +415,15 @@ class Live(object):
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
-                source = statement + '\n'
+                source = ""
+
+                if exec_source:
+                    source += exec_source
+                if eval_source:
+                    source += eval_source
+
+                source += "\n"
+
                 session.add_unpicklable(source, new_globals.keys())
                 logging.debug('Storing this statement as an unpicklable.')
             else:
@@ -457,9 +457,6 @@ class Live(object):
         except RequestTooLargeError:
             stream.truncate(0) # clear output
             self.error(stream, ('Unable to process statement due to its excessive size.',))
-
-    def formatStatement(self, statement):
-        return statement + '\n'
 
 class Session(db.Model):
   """A shell session. Stores the session's globals.
@@ -733,7 +730,7 @@ class EvaluateHandler(webapp.RequestHandler):
             except db.Error:
                 self.error(400)
                 return
-        if session_key is None or session is None:
+        else:
             session = Session()
             session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
             session_key = session.put()
