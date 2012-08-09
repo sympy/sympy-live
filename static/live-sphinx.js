@@ -202,7 +202,12 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                     }
                     this.setValue(strippedLines.join('\n').trim());
                     this.show();
-                    this.evaluate();
+                    if (this.evalModeEl.val() === "eval") {
+                        this.evaluate();
+                    }
+                    else {
+                        this.focus();
+                    }
                 }
             })(line), this));
             codeEl.append(line);
