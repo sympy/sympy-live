@@ -144,8 +144,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
             evaluate.click($.proxy(function() {
                 fillShell();
+                this.dequeueStatement();
                 if (this.evalModeEl.val() === "eval") {
-                    this.dequeueStatement();
                     this.evaluate();
                 }
                 else {
