@@ -153,25 +153,60 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 }
             }, this));
 
-            // TODO Highlight each line on mouseover
-            // var codeEl = el.find('pre');
-            // var children = codeEl.children();
-            // var currentLine = [];
-
-            // children.each(function(index, node) {
-            //     var domNode = $(node).get(0);
-            //     currentLine.push($(node));
-            //     if (domNode.nextSibling.textContent === "\n") {
-            //         var line = $('<div/>');
-            //         for (var i = 0; i < currentLine.length; i++) {
-            //             line.append(currentLine[i]);
-            //         }
-            //         codeEl.append(line);
-            //         currentLine = [];
-            //     }
-            //     $(node).remove();
-            // });
+            this.processIndividualCodeBlocks(el.find('pre'));
         }, this));
+    },
+
+    processIndividualCodeBlocks: function(codeEl) {
+        // childNodes gives text nodes which we want for whitespace
+        var childNodes = codeEl.get(0).childNodes;
+        var currentLine = [];
+        var lines = [];
+
+        for (var i = 0; i < childNodes.length; i++) {
+            var domNode = childNodes[i];
+            if (domNode.nodeType === domNode.ELEMENT_NODE) {
+                currentLine.push(domNode.cloneNode(true));
+
+                if (currentLine.length === 1 &&
+                    domNode.innerText.substr(0, 3) === "...") {
+                    // First node on line and continuation, so continue from
+                    // the previous line
+                    currentLine = lines.pop();
+                    currentLine.push(domNode.cloneNode(true));
+                }
+            }
+            else if (domNode.nodeType === domNode.TEXT_NODE) {
+                currentLine.push(domNode.cloneNode(true));
+                if (domNode.data.substr(-1) === '\n') {
+                    lines.push(currentLine);
+                    currentLine = [];
+                }
+            }
+        }
+        codeEl.empty();
+        for (var i = 0; i < lines.length; i++) {
+            var line = $('<div />');
+            var processingLine = lines[i];
+            if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
+                line.addClass('live-statement');
+            }
+            line.append(processingLine);
+            line.click($.proxy((function(line) {
+                // Save the current line
+                return function() {
+                    var lines = line.text().split(/\n/g);
+                    var strippedLines = [];
+                    for (var i = 0; i < lines.length; i++) {
+                        strippedLines.push(lines[i].slice(4));
+                    }
+                    this.setValue(strippedLines.join('\n').trim());
+                    this.show();
+                    this.evaluate();
+                }
+            })(line), this));
+            codeEl.append(line);
+        }
     },
 
     hide: function(duration) {

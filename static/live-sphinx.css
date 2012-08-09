@@ -137,3 +137,8 @@
   color: #81B953;
   text-decoration: underline;
 }
+
+.live-statement:hover {
+  background-color: rgba(0,0,0,0.3);
+  cursor: pointer;
+}
