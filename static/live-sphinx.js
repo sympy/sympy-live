@@ -98,8 +98,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
     dequeueStatement: function() {
         if (this.queuedStatements.length !== 0) {
-            var statements = this.queuedStatements.shift();
-            this.setValue(statements.join('\n'));
+            this.setValue(this.queuedStatements.shift());
         }
     },
 
@@ -114,41 +113,22 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 appendTo(container);
             el.children('.highlight').prepend(container);
 
-            var fillShell = $.proxy(function() {
-                this.show();
-                var code = el.find('pre').text();
-                var lines = code.split(/\n/g);
-
-                // We want to evaluate each block individually
-                var codeBlocks = [];
-                var currentBlock = [];
-                for (var i = 0; i < lines.length; i++) {
-                    if (lines[i].substring(0, 4) === ">>> ") {
-                        codeBlocks.push(currentBlock);
-                        currentBlock = [];
-
-                        currentBlock.push(
-                            lines[i].substring(4, lines[i].length));
-                    }
-                    else if (lines[i].substring(0, 4) === "... ") {
-                        currentBlock.push(
-                            lines[i].substring(4, lines[i].length));
-                    }
-                }
-                if (currentBlock.length !== 0) {
-                    codeBlocks.push(currentBlock);
-                }
-                codeBlocks = codeBlocks.slice(1);
-                this.queuedStatements = codeBlocks;
-            }, this);
-
             evaluate.click($.proxy(function() {
-                fillShell();
-                this.dequeueStatement();
+                this.show();
+                var statementBlocks = el.find('div.live-statement');
+                var codeBlocks = [];
+                for (var i = 0; i < statementBlocks.length; i++) {
+                    codeBlocks.push(
+                        this.stripCode($(statementBlocks[i]).text())
+                    );
+                }
                 if (this.evalModeEl.val() === "eval") {
+                    this.queuedStatements = codeBlocks;
+                    this.dequeueStatement();
                     this.evaluate();
                 }
                 else {
+                    this.setValue(codeBlocks.join("\n"));
                     this.focus();
                 }
             }, this));
@@ -195,12 +175,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             line.click($.proxy((function(line) {
                 // Save the current line
                 return function() {
-                    var lines = line.text().split(/\n/g);
-                    var strippedLines = [];
-                    for (var i = 0; i < lines.length; i++) {
-                        strippedLines.push(lines[i].slice(4));
-                    }
-                    this.setValue(strippedLines.join('\n').trim());
+                    this.setValue(this.stripCode(line.text()));
                     this.show();
                     if (this.evalModeEl.val() === "eval") {
                         this.evaluate();
@@ -212,6 +187,16 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             })(line), this));
             codeEl.append(line);
         }
+    },
+
+    // Strips >>> and ... from a string
+    stripCode: function(text) {
+        var lines = text.split(/\n/g);
+        var strippedLines = [];
+        for (var i = 0; i < lines.length; i++) {
+            strippedLines.push(lines[i].slice(4));
+        }
+        return strippedLines.join('\n').trim();
     },
 
     hide: function(duration) {
