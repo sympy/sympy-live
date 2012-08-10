@@ -111,7 +111,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             var evaluate = $("<button>Run in SymPy Live</button>").
                 addClass('sympy-live-eval-button').
                 appendTo(container);
-            el.children('.highlight').prepend(container);
+            el.prepend(container);
 
             evaluate.click($.proxy(function() {
                 this.show();

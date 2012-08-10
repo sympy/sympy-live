@@ -114,23 +114,38 @@
 /* Code blocks on page */
 
 .sympy-live-eval-toolbar {
-  display: none;
   font-family: Arial;
   font-size: 13px;
+  border-radius: 5px 5px 0 0;
+  background-color: #3B5526;
+  display: inline-block;
 }
 
 .sympy-live-eval-button {
+  color: #FFF;
   border: 0;
   background-color: transparent;
-  margin: 0;
   padding: 0;
+  -moz-transition: all 0.2s ease-in;
+  -webkit-transition: all 0.2s ease-in;
+  -o-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+  height: 0px;
+  line-height: 20px;
+  display: block;
 }
 
 .highlight-python:hover .sympy-live-eval-toolbar {
-  display: block;
-  position: absolute;
-  right: 25px;
-  margin-top: 5px;
+  padding: 0.25em;
+}
+
+.highlight-python:hover .sympy-live-eval-button {
+  height: 20px;
+  cursor: pointer;
+}
+
+pre {
+  margin: 0;
 }
 
 .sympy-live-eval-button:hover {
