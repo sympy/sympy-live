@@ -164,28 +164,30 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 }
             }
         }
-        codeEl.empty();
-        for (var i = 0; i < lines.length; i++) {
-            var line = $('<div />');
-            var processingLine = lines[i];
-            if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
-                line.addClass('live-statement');
-            }
-            line.append(processingLine);
-            line.click($.proxy((function(line) {
-                // Save the current line
-                return function() {
-                    this.setValue(this.stripCode(line.text()));
-                    this.show();
-                    if (this.evalModeEl.val() === "eval") {
-                        this.evaluate();
-                    }
-                    else {
-                        this.focus();
-                    }
+        if (lines.length !== 0) {
+            codeEl.empty();
+            for (var i = 0; i < lines.length; i++) {
+                var line = $('<div />');
+                var processingLine = lines[i];
+                if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
+                    line.addClass('live-statement');
                 }
-            })(line), this));
-            codeEl.append(line);
+                line.append(processingLine);
+                line.click($.proxy((function(line) {
+                    // Save the current line
+                    return function() {
+                        this.setValue(this.stripCode(line.text()));
+                        this.show();
+                        if (this.evalModeEl.val() === "eval") {
+                            this.evaluate();
+                        }
+                        else {
+                            this.focus();
+                        }
+                    }
+                })(line), this));
+                codeEl.append(line);
+            }
         }
     },
 
