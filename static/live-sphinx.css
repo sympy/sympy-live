@@ -125,23 +125,10 @@
   color: #FFF;
   border: 0;
   background-color: transparent;
-  padding: 0;
-  -moz-transition: all 0.2s ease-in;
-  -webkit-transition: all 0.2s ease-in;
-  -o-transition: all 0.2s ease-in;
-  transition: all 0.2s ease-in;
-  height: 0px;
+  padding: 0.25em;
+  height: 25px;
   line-height: 20px;
   display: block;
-}
-
-.highlight-python:hover .sympy-live-eval-toolbar {
-  padding: 0.25em;
-}
-
-.highlight-python:hover .sympy-live-eval-button {
-  height: 20px;
-  cursor: pointer;
 }
 
 pre {
