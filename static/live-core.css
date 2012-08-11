@@ -65,11 +65,10 @@ button {
 }
 
 .sympy-live-toolbar > * {
-    margin-left: 0.5em;
     margin-bottom: 0.5em;
 }
 .sympy-live-toolbar > button {
-  margin-left: 0.5em;
+  margin-right: 0.5em;
   -moz-transition: all .5s ease-out;
   -webkit-transition: all .5s ease-out;
   -o-transition: all .5s ease-out;
@@ -79,8 +78,6 @@ button {
   font-weight: bold;
 }
 .sympy-live-toolbar > button:hover {
-  margin-left: 0.5em;
-  color: #FFF;
   background-color: #5B7745;
   -moz-transition: all .2s ease-in;
   -webkit-transition: all .2s ease-in;
