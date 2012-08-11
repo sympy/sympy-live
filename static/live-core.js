@@ -77,6 +77,25 @@ SymPy.isTextNode = function(node) {
     return node.nodeType === 3;
 };
 
+SymPy.getBasePath = function(baseName) {
+    if (baseName) {
+        var scripts = document.getElementsByTagName('script');
+
+        var reStart = RegExp("^(https?://[^/]+)/");
+        var reEnd = RegExp("/" + baseName + "(\\?|$)");
+
+        for (var i = scripts.length - 1; i >= 0; --i) {
+            var src = scripts[i].src;
+
+            if (src.match(reEnd) && src.match(reStart)) {
+                return RegExp.$1;
+            }
+        }
+    }
+
+    return null;
+};
+
 SymPy.Shell = Class.$extend({
     banner: null,
     history: [''],
@@ -104,7 +123,7 @@ SymPy.Shell = Class.$extend({
         if (config.basePath) {
             this.basePath = config.basePath;
         } else {
-            this.basePath = this.getBasePath(config.baseName);
+            this.basePath = SymPy.getBasePath(config.baseName);
         }
 
         if (config.banner) {
@@ -154,25 +173,6 @@ SymPy.Shell = Class.$extend({
         }
     },
 
-    getBasePath: function(baseName) {
-        if (baseName) {
-            var scripts = document.getElementsByTagName('script');
-
-            var reStart = RegExp("^(https?://[^/]+)/");
-            var reEnd = RegExp("/" + baseName + "(\\?|$)");
-
-            for (var i = scripts.length - 1; i >= 0; --i) {
-                var src = scripts[i].src;
-
-                if (src.match(reEnd) && src.match(reStart)) {
-                    return RegExp.$1;
-                }
-            }
-        }
-
-        return null;
-    },
-
     render: function(el) {
         el = $(el) || $(document.body);
 
@@ -205,7 +205,8 @@ SymPy.Shell = Class.$extend({
 
         this.completer = new SymPy.Completer({
             input: this.promptEl,
-            container: this.completionsEl
+            container: this.completionsEl,
+            basePath: this.basePath
         }, this);
         this.completer.setup();
 
@@ -374,7 +375,6 @@ SymPy.Shell = Class.$extend({
 
     enablePrompt: function() {
         this.promptEl.prop('readonly', false);
-        this.focus();
     },
 
     setValue: function(value) {
@@ -785,7 +785,8 @@ SymPy.Shell = Class.$extend({
                     this.focus();
                 }, this),
                 error: $.proxy(function(a,b,c) {
-                    console.log(a,b,c)
+                    this.error();
+
                     $('<div>Error: Time limit exceeded.</div>').
                         appendTo(this.outputEl);
 
@@ -827,6 +828,10 @@ SymPy.Shell = Class.$extend({
 
         this.setEvaluating(false);
         this.focus();
+    },
+
+    error: function(xhr, status, error) {
+        console.log("Error:", xhr, status, error);
     },
 
     clear: function() {

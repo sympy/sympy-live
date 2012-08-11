@@ -55,12 +55,12 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from google.appengine.runtime.apiproxy_errors import RequestTooLargeError 
+from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
-   
+
 import detectmobile
 
 PRINTERS = {
@@ -122,6 +122,11 @@ These commands were executed:
 Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.\
 """
 
+VERBOSE_MESSAGE_SPHINX = """\
+These commands were executed:
+%(source)s
+"""
+
 
 # The blueprint used to store user queries
 class Searches(db.Model):
@@ -149,6 +154,27 @@ def banner(quiet=False):
         message += '\n' + VERBOSE_MESSAGE % {'source': source}
 
     return message
+
+
+def banner_sphinx(quiet=False):
+    from sympy import __version__ as sympy_version
+    python_version = "%d.%d.%d" % sys.version_info[:3]
+
+    message = "Python console for SymPy %s (Python %s)\n" % (sympy_version, python_version)
+
+    if not quiet:
+        source = ""
+
+        for line in PREEXEC_MESSAGE.split('\n')[:-1]:
+            if not line:
+                source += '\n'
+            else:
+                source += '>>> ' + line + '\n'
+
+        message += '\n' + VERBOSE_MESSAGE_SPHINX % {'source': source}
+
+    return message
+
 
 class Live(object):
 
@@ -566,8 +592,8 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-        
-        
+
+
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
@@ -583,9 +609,9 @@ class FrontPageHandler(webapp.RequestHandler):
             forcedesktop = 'false'
 
         if forcedesktop in ('no', 'false'):
-            if detectmobile.isMobile(self.request.headers):          
+            if detectmobile.isMobile(self.request.headers):
                 self.redirect('/shellmobile')
-                
+
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -607,7 +633,16 @@ class FrontPageHandler(webapp.RequestHandler):
 
 class CompletionHandler(webapp.RequestHandler):
     """Takes an incomplete statement and returns possible completions."""
+
+    def _cross_site_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
+
+    def options(self):
+        self._cross_site_headers()
+
     def post(self):
+        self._cross_site_headers()
         try:
             message = simplejson.loads(self.request.body)
         except ValueError:
@@ -809,6 +844,7 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
     rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
     self.response.out.write(rendered)
 
+
 class StatementHandler(webapp.RequestHandler):
   """Evaluates a python statement in a given session and returns the result.
   """
@@ -834,6 +870,20 @@ class StatementHandler(webapp.RequestHandler):
     evaluate(statement, session, printer, self.response.out)
 
 
+class SphinxBannerHandler(webapp.RequestHandler):
+    """Provides the banner for the Sphinx extension.
+    """
+
+    def _cross_site_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
+
+    def get(self):
+        self._cross_site_headers()
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(banner_sphinx())
+
+
 class DeleteHistory(webapp.RequestHandler):
     """Deletes all of the user's history"""
 
@@ -855,7 +905,8 @@ def main():
       ('/shell.do', StatementHandler),
       ('/forcedesktop', ForceDesktopCookieHandler),
       ('/delete', DeleteHistory),
-      ('/complete', CompletionHandler)
+      ('/complete', CompletionHandler),
+      ('/sphinxbanner', SphinxBannerHandler)
   ], debug=_DEBUG)
 
   wsgiref.handlers.CGIHandler().run(application)

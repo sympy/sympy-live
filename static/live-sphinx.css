@@ -1,78 +1,147 @@
+#shell {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 600px;
 
-.sympy-live-base {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    padding: 5px;
-    font-family: monospace;
-    font-size: 10pt;
-    background-color: white;
-    border: 1px solid silver;
+  border: 2px solid #81B953;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 10px 0 0 0;
+  padding: 10px 23px 20px 7px;
+  background: #FFF;
+  box-shadow: -2px -2px 2px #ccc;
 }
 
-.sympy-live-logo {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    padding: 5px;
-    font-family: monospace;
-    font-size: 10pt;
-    background-color: #f5f5f5;
-    border: 1px solid silver;
-    cursor: pointer;
+#shell h2, #shell h2 a:link, #shell h2 a:visited,
+#shell h2 a:hover, #shell h2 a:active {
+  font-weight: normal;
+  margin: 0;
+  text-align: center;
+  color: #000;
 }
 
-.sympy-live-header {
-    padding-bottom: 5px;
+.sympy-live-output {
+  width: 600px;
 }
 
-.sympy-live-header > * {
-    margin-right: 1ex;
+#toggleShell {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 5px 0 0 0;
+  color: #FFF;
+  background-color: #3B5526;
 }
 
-.sympy-live-hide {
-    cursor: pointer;
-    float: right;
-    margin: 0;
+/* Tab completion */
+
+.sympy-live-completions-toolbar #sympy-live-completions-toggle {
+  display: none;
 }
 
-.sympy-live-block {
-    position: relative;
+.sympy-live-completions-toolbar {
+  width: 7%;
 }
 
-.sympy-live-block-toolbar {
-    visibility: hidden;
-    position: absolute;
-    top: 0;
-    right: 0;
+.sympy-live-completions-toolbar button {
+  width: 50%;
 }
 
-.sympy-live-block-toolbar > span {
-    padding-right: 5px;
-    cursor: pointer;
-    color: gray;
+.sympy-live-completions {
+  padding-left: 10px;
+  line-height: 30px;
+  margin: 0;
 }
 
-.sympy-live-block-toolbar > span:hover {
-    text-decoration: underline;
+/* Settings */
+
+#settings {
+  border-top: 1px solid #222;
 }
 
-.sympy-live-block {
-    border: 1px solid transparent;
+#settings h3 {
+  font-weight: normal;
+  margin: 0;
+  cursor: pointer;
+}
+#settings h3 div.arrow, #toggleShell div.arrow {
+  background:
+  url(data:image/png;base64,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)
+  no-repeat left center;
+  background-size: 12px 12px;
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  -moz-transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  transition: all 0.3s ease-in;
+  -webkit-transform: rotate(180deg) translate(0px, 0px);
+  -moz-transform: rotate(180deg) translate(0px, 0px);
+  -o-transform: rotate(180deg) translate(0px, 0px);
+  -ms-transform: rotate(180deg) translate(0px, 0px);
+  -transform: rotate(180deg) translate(0px, 0px);
 }
 
-.sympy-live-block:hover {
-    border: 1px solid silver;
+#settings h3.shown div.arrow {
+  -webkit-transform: rotate(0deg) translate(0px, 0px);
+  -moz-transform: rotate(0deg) translate(0px, 0px);
+  -o-transform: rotate(0deg) translate(0px, 0px);
+  -ms-transform: rotate(0deg) translate(0px, 0px);
+  -transform: rotate(0deg) translate(0px, 0px);
 }
 
-.sympy-live-block:hover .sympy-live-block-toolbar {
-    visibility: visible;
+#toggleShell div.arrow {
+  -webkit-transform: rotate(135deg) translate(0px, 0px);
+  -moz-transform: rotate(135deg) translate(0px, 0px);
+  -o-transform: rotate(135deg) translate(0px, 0px);
+  -ms-transform: rotate(135deg) translate(0px, 0px);
+  -transform: rotate(135deg) translate(0px, 0px);
 }
 
-.sympy-live-python-prompt:hover {
-    cursor: pointer;
+#toggleShell.shown div.arrow {
+  -webkit-transform: rotate(-45deg) translate(0px, 0px);
+  -moz-transform: rotate(-45deg) translate(0px, 0px);
+  -o-transform: rotate(-45deg) translate(0px, 0px);
+  -ms-transform: rotate(-45deg) translate(0px, 0px);
+  -transform: rotate(-45deg) translate(0px, 0px);
+}
+
+/* Code blocks on page */
+
+.sympy-live-eval-toolbar {
+  font-family: Arial;
+  font-size: 13px;
+  border-radius: 5px 5px 0 0;
+  background-color: #3B5526;
+  display: inline-block;
+  margin-bottom: -1px;
+}
+
+.sympy-live-eval-button {
+  color: #FFF;
+  border: 0;
+  background-color: transparent;
+  padding: 0.25em;
+  height: 25px;
+  line-height: 20px;
+  display: block;
+}
+
+pre {
+  margin: 0;
+}
+
+.sympy-live-eval-button:hover {
+  color: #81B953;
+  text-decoration: underline;
+}
+
+.live-statement:hover {
+  background-color: rgba(0,0,0,0.3);
+  cursor: pointer;
 }

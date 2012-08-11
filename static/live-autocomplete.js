@@ -30,6 +30,7 @@ SymPy.Completer = Class.$extend({
         config = $.extend({}, config);
         this.inputEl = config.input;
         this.containerEl = config.container;
+        this.basePath = config.basePath;
         this.shell = shell;
         this.buttonState = {
             prev: false,
