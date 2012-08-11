@@ -119,6 +119,7 @@
   border-radius: 5px 5px 0 0;
   background-color: #3B5526;
   display: inline-block;
+  margin-bottom: -1px;
 }
 
 .sympy-live-eval-button {
