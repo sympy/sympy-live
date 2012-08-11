@@ -108,7 +108,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
             // Add the toolbar
             var container = $("<div/>").addClass('sympy-live-eval-toolbar');
-            var evaluate = $("<button>Run in SymPy Live</button>").
+            var evaluate = $("<button>Run code block in SymPy Live</button>").
                 addClass('sympy-live-eval-button').
                 appendTo(container);
             el.prepend(container);
