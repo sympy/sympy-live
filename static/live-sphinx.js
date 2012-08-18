@@ -105,38 +105,45 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
     processCodeBlocks: function() {
         $('.highlight-python').each($.proxy(function(index, el) {
             var el = $(el);
+            var promptsFound = this.processIndividualCodeBlocks(el.find('pre'));
 
-            // Add the toolbar
-            var container = $("<div/>").addClass('sympy-live-eval-toolbar');
-            var evaluate = $("<button>Run code block in SymPy Live</button>").
-                addClass('sympy-live-eval-button').
-                appendTo(container);
-            el.prepend(container);
+            if (promptsFound) {
+                // Add the toolbar
+                var container = $("<div/>").addClass('sympy-live-eval-toolbar');
+                var evaluate = $("<button>Run code block in SymPy Live</button>").
+                    addClass('sympy-live-eval-button').
+                    appendTo(container);
+                el.prepend(container);
 
-            evaluate.click($.proxy(function() {
-                this.show();
-                var statementBlocks = el.find('div.live-statement');
-                var codeBlocks = [];
-                for (var i = 0; i < statementBlocks.length; i++) {
-                    codeBlocks.push(
-                        this.stripCode($(statementBlocks[i]).text())
-                    );
-                }
-                if (this.evalModeEl.val() === "eval") {
-                    this.queuedStatements = codeBlocks;
-                    this.dequeueStatement();
-                    this.evaluate();
-                }
-                else {
-                    this.setValue(codeBlocks.join("\n"));
-                    this.focus();
-                }
-            }, this));
-
-            this.processIndividualCodeBlocks(el.find('pre'));
+                evaluate.click($.proxy(function() {
+                    this.show();
+                    var statementBlocks = el.find('div.live-statement');
+                    var codeBlocks = [];
+                    for (var i = 0; i < statementBlocks.length; i++) {
+                        codeBlocks.push(
+                            this.stripCode($(statementBlocks[i]).text())
+                        );
+                    }
+                    if (this.evalModeEl.val() === "eval") {
+                        this.queuedStatements = codeBlocks;
+                        this.dequeueStatement();
+                        this.evaluate();
+                    }
+                    else {
+                        this.setValue(codeBlocks.join("\n"));
+                        this.focus();
+                    }
+                }, this));
+            }
         }, this));
     },
 
+    /**
+     * Processes a <pre> block, wrapping each line in a <div>. Additionally,
+     * if the line is a Python prompt, it will be made executable-on-click.
+     *
+     * @return {Boolean} true if prompts were found
+     */
     processIndividualCodeBlocks: function(codeEl) {
         // childNodes gives text nodes which we want for whitespace
         var childNodes = codeEl.get(0).childNodes;
@@ -164,31 +171,45 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
                 }
             }
         }
+
         if (lines.length !== 0) {
+            var foundPrompt = false;
+
             codeEl.empty();
             for (var i = 0; i < lines.length; i++) {
                 var line = $('<div />');
                 var processingLine = lines[i];
                 if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
+                    foundPrompt = true;
+
                     line.addClass('live-statement');
+                    line.click($.proxy((function(line) {
+                        // Save the current line
+                        return function() {
+                            this.setValue(this.stripCode(line.text()));
+                            this.show();
+                            if (this.evalModeEl.val() === "eval") {
+                                this.evaluate();
+                            }
+                            else {
+                                this.focus();
+                            }
+                        }
+                    })(line), this));
+                    line.hover(
+                        function() {},
+                        function() {}
+                    );
                 }
                 line.append(processingLine);
-                line.click($.proxy((function(line) {
-                    // Save the current line
-                    return function() {
-                        this.setValue(this.stripCode(line.text()));
-                        this.show();
-                        if (this.evalModeEl.val() === "eval") {
-                            this.evaluate();
-                        }
-                        else {
-                            this.focus();
-                        }
-                    }
-                })(line), this));
                 codeEl.append(line);
             }
+
+            return foundPrompt;
         }
+
+        // No code was processed so of course no prompts were found
+        return false;
     },
 
     // Strips >>> and ... from a string
