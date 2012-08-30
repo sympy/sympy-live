@@ -155,8 +155,12 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             if (domNode.nodeType === domNode.ELEMENT_NODE) {
                 currentLine.push(domNode.cloneNode(true));
 
+                // innerText is non-standard but only Firefox does not
+                // support it; textContent is standard but IE < 9
+                // does not support it
+                var textContent = domNode.textContent || domNode.innerText;
                 if (currentLine.length === 1 &&
-                    domNode.innerText.substr(0, 3) === "...") {
+                    textContent.substr(0, 3) === "...") {
                     // First node on line and continuation, so continue from
                     // the previous line
                     currentLine = lines.pop();
@@ -179,7 +183,9 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             for (var i = 0; i < lines.length; i++) {
                 var line = $('<div />');
                 var processingLine = lines[i];
-                if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
+                var firstLineContent = processingLine[0].textContent ||
+                    processingLine[0].innerText;
+                if (firstLineContent.substr(0, 4) === ">>> ") {
                     foundPrompt = true;
 
                     line.addClass('live-statement');
