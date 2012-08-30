@@ -778,6 +778,7 @@ SymPy.Shell = Class.$extend({
             $.ajax({
                 type: 'POST',
                 url: (this.basePath || '') + '/evaluate',
+                dataType: 'json',
 				timeout: (timeout * 1000),
                 data: JSON.stringify(data),
                 success: $.proxy(function(response, status) {
