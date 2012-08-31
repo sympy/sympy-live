@@ -6,7 +6,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
     __init__: function(config) {
         this.$super(config);
-        this.visible = true;
+        this.visible = false;
         this.queuedStatements = [];
 
         index = this.evalModeTypes.indexOf(config.record);
@@ -25,9 +25,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         this.shellEl.prepend(header);
 
         this.toggleShellEl = $('<button/>').
-            html("<span>Hide SymPy Live Shell</span>").
-            attr("id", "toggleShell").
-            addClass('shown');
+            html("<span>Show SymPy Live Shell</span>").
+            attr("id", "toggleShell");
         this.toggleShellEl.prepend($('<div class="arrow" />'));
 
         this.toggleShellEl.appendTo(document.body);
@@ -257,7 +256,16 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         if (typeof duration === "undefined") {
             duration = SymPy.DEFAULT_ANIMATION_DURATION;
         }
+        if (typeof this.shellDimensionsRestored === "undefined") {
+            this.shellDimensionsRestored = {};
+            // Quickly show the shell and get its height
+            var shell = $(this.shellEl).css('display', 'block');
+            this.shellDimensionsRestored.height = shell.height();
+            this.shellDimensionsRestored.width = shell.width();
+            shell.css('display', 'none');
+        }
         this.enablePrompt();
+        var shell = $(this.shellEl).css('display', 'block').width(0).height(0);
         $(this.shellEl).animate(
             this.shellDimensionsRestored,
             duration,
@@ -327,6 +335,5 @@ $(document).ready(function() {
         shell.render(shellEl);
         settingsEl.appendTo(shellEl); // Put it under the shell
         shell.toggleSettings();
-        shell.hide(0);
     });
 });
