@@ -6,7 +6,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 
     __init__: function(config) {
         this.$super(config);
-        this.visible = true;
+        this.visible = false;
         this.queuedStatements = [];
 
         index = this.evalModeTypes.indexOf(config.record);
@@ -25,9 +25,8 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         this.shellEl.prepend(header);
 
         this.toggleShellEl = $('<button/>').
-            html("<span>Hide SymPy Live Shell</span>").
-            attr("id", "toggleShell").
-            addClass('shown');
+            html("<span>Show SymPy Live Shell</span>").
+            attr("id", "toggleShell");
         this.toggleShellEl.prepend($('<div class="arrow" />'));
 
         this.toggleShellEl.appendTo(document.body);
@@ -155,8 +154,12 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             if (domNode.nodeType === domNode.ELEMENT_NODE) {
                 currentLine.push(domNode.cloneNode(true));
 
+                // innerText is non-standard but only Firefox does not
+                // support it; textContent is standard but IE < 9
+                // does not support it
+                var textContent = domNode.textContent || domNode.innerText;
                 if (currentLine.length === 1 &&
-                    domNode.innerText.substr(0, 3) === "...") {
+                    textContent.substr(0, 3) === "...") {
                     // First node on line and continuation, so continue from
                     // the previous line
                     currentLine = lines.pop();
@@ -179,7 +182,9 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
             for (var i = 0; i < lines.length; i++) {
                 var line = $('<div />');
                 var processingLine = lines[i];
-                if (processingLine[0].innerText.substr(0, 4) === ">>> ") {
+                var firstLineContent = processingLine[0].textContent ||
+                    processingLine[0].innerText;
+                if (firstLineContent.substr(0, 4) === ">>> ") {
                     foundPrompt = true;
 
                     line.addClass('live-statement');
@@ -251,7 +256,16 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
         if (typeof duration === "undefined") {
             duration = SymPy.DEFAULT_ANIMATION_DURATION;
         }
+        if (typeof this.shellDimensionsRestored === "undefined") {
+            this.shellDimensionsRestored = {};
+            // Quickly show the shell and get its height
+            var shell = $(this.shellEl).css('display', 'block');
+            this.shellDimensionsRestored.height = shell.height();
+            this.shellDimensionsRestored.width = shell.width();
+            shell.css('display', 'none');
+        }
         this.enablePrompt();
+        var shell = $(this.shellEl).css('display', 'block').width(0).height(0);
         $(this.shellEl).animate(
             this.shellDimensionsRestored,
             duration,
@@ -321,6 +335,5 @@ $(document).ready(function() {
         shell.render(shellEl);
         settingsEl.appendTo(shellEl); // Put it under the shell
         shell.toggleSettings();
-        shell.hide(0);
     });
 });
