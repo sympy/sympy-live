@@ -1,5 +1,5 @@
 application: sympy-live
-version: 28
+version: 29
 
 runtime: python
 api_version: 1
