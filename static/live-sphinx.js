@@ -323,7 +323,7 @@ SymPy.SphinxShell = SymPy.Shell.$extend({
 $(document).ready(function() {
     var path = SymPy.getBasePath('live-sphinx.js');
 
-    $.get(path + '/sphinxbanner').done(function(data) {
+    $.get(path + '/sphinxbanner', function(data) {
         var shellEl = $('<div id="shell"/>').appendTo($(document.body));
         var settingsEl = $('<div id="settings"><div class="content"></div></div>');
         settingsEl.appendTo(shellEl);  // Needed to render the shell
