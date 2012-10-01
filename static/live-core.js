@@ -12,6 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+// Taken directly from jQuery source (MIT) - needed because Sphinx uses an
+// old jQuery. Remove if using Sphinx >= 1.2
+if (!jQuery.isNumeric) {
+    jQuery.isNumeric = function( obj ) {
+	    return !isNaN( parseFloat(obj) ) && isFinite( obj );
+    };
+}
+if (!jQuery.fn.on) {
+    jQuery.fn.on = jQuery.fn.bind;
+}
+if (!jQuery.fn.prop) {
+    jQuery.fn.prop = jQuery.fn.attr;
+}
+
 utilities.namespace("SymPy");
 
 SymPy.Keys = {
