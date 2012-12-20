@@ -48,6 +48,7 @@ import types
 import simplejson
 import wsgiref.handlers
 import rlcompleter
+import traceback
 
 from StringIO import StringIO
 
@@ -616,6 +617,7 @@ class FrontPageHandler(webapp.RequestHandler):
 
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
+            'application_version': os.environ['CURRENT_VERSION_ID'],
             'python_version': sys.version,
             'user': users.get_current_user(),
             'login_url': users.create_login_url('/'),
@@ -721,7 +723,6 @@ class EvaluateHandler(webapp.RequestHandler):
 
         session_key = message.get('session')
         printer_key = message.get('printer')
-
         live = Live()
 
         if session_key is not None:
@@ -744,12 +745,23 @@ class EvaluateHandler(webapp.RequestHandler):
             printer = None
 
         stream = StringIO()
-        live.evaluate(statement, session, printer, stream)
-
-        result = {
-            'session': str(session_key),
-            'output': stream.getvalue(),
-        }
+        try:
+            live.evaluate(statement, session, printer, stream)
+            result = {
+                'session': str(session_key),
+                'output': stream.getvalue(),
+            }
+        except Exception as e:
+            errmsg = '\n'.join([
+                'Exception in SymPy Live of type ',
+                str(type(e)),
+                'for reference the last 5 stack trace entries are',
+                traceback.format_exc(5)
+            ])
+            result = {
+                'session': str(session_key),
+                'output': errmsg
+            }
 
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(simplejson.dumps(result))

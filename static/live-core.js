@@ -800,18 +800,7 @@ SymPy.Shell = Class.$extend({
                     this.done(response);
                     this.focus();
                 }, this),
-                error: $.proxy(function(a,b,c) {
-                    this.error();
-
-                    $('<div>Error: Time limit exceeded.</div>').
-                        appendTo(this.outputEl);
-
-					this.scrollToDefault();
-                    this.clearValue();
-                    this.updatePrompt();
-                    this.setEvaluating(false);
-                    this.focus();
-                }, this),
+                error: $.proxy(this.error, this),
             });
             this.focus();
         }
@@ -848,6 +837,23 @@ SymPy.Shell = Class.$extend({
 
     error: function(xhr, status, error) {
         console.log("Error:", xhr, status, error);
+
+        var errorMessage = "Unspecified error.";
+
+        if (status == "timeout") {
+            errorMessage = "Error: Time limit exceeded.";
+        }
+        else if (status == "error") {
+            errorMessage = "Error: " + error + ".";
+        }
+
+        $('<div/>').html(errorMessage).appendTo(this.outputEl);
+
+		this.scrollToDefault();
+        this.clearValue();
+        this.updatePrompt();
+        this.setEvaluating(false);
+        this.focus();
     },
 
     clear: function() {
