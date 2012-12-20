@@ -751,7 +751,7 @@ class EvaluateHandler(webapp.RequestHandler):
                 'session': str(session_key),
                 'output': stream.getvalue(),
             }
-        except Exception as e:
+        except Exception, e:
             errmsg = '\n'.join([
                 'Exception in SymPy Live of type ',
                 str(type(e)),
