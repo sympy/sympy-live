@@ -65,6 +65,7 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 from sympy import srepr, sstr, pretty, latex
 
 import detectmobile
+import settings
 
 PRINTERS = {
     'repr': srepr,
@@ -766,14 +767,21 @@ class EvaluateHandler(webapp.RequestHandler):
                 'session': str(session_key),
                 'output': 'Error: Operation timed out.'
             }
-
         except Exception, e:
-            errmsg = '\n'.join([
-                'Exception in SymPy Live of type ',
-                str(type(e)),
-                'for reference the last 5 stack trace entries are',
-                traceback.format_exc(5)
-            ])
+            if settings.DEBUG:
+                errmsg = '\n'.join([
+                    'Exception in SymPy Live of type ',
+                    str(type(e)),
+                    'for reference the stack trace is',
+                    traceback.format_exc()
+                ])
+            else:
+                errmsg = '\n'.join([
+                    'Exception in SymPy Live of type ',
+                    str(type(e)),
+                    'for reference the last 5 stack trace entries are',
+                    traceback.format_exc(5)
+                ])
             result = {
                 'session': str(session_key),
                 'output': errmsg
