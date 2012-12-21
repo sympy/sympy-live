@@ -49,6 +49,7 @@ import simplejson
 import wsgiref.handlers
 import rlcompleter
 import traceback
+import datetime
 
 from StringIO import StringIO
 
