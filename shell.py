@@ -56,6 +56,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
@@ -757,6 +758,8 @@ class EvaluateHandler(webapp.RequestHandler):
                 'output': stream.getvalue(),
             }
         except Exception, e:
+            if isinstance(e, DeadlineExceededError):
+                raise
             errmsg = '\n'.join([
                 'Exception in SymPy Live of type ',
                 str(type(e)),
