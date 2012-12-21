@@ -405,6 +405,9 @@ class Live(object):
                 finally:
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
+            except DeadlineExceededError:
+                logging.debug("is deadlineexceedederror in evaluate")
+                raise DeadlineExceededError
             except:
                 return self.error(stream, self.traceback(offset))
 
@@ -758,9 +761,13 @@ class EvaluateHandler(webapp.RequestHandler):
                 'session': str(session_key),
                 'output': stream.getvalue(),
             }
+        except DeadlineExceededError:
+            result = {
+                'session': str(session_key),
+                'output': 'Error: Operation timed out.'
+            }
+
         except Exception, e:
-            if isinstance(e, DeadlineExceededError):
-                raise
             errmsg = '\n'.join([
                 'Exception in SymPy Live of type ',
                 str(type(e)),
