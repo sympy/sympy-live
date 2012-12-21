@@ -615,9 +615,14 @@ class FrontPageHandler(webapp.RequestHandler):
 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
+        version, deployed = os.environ['CURRENT_VERSION_ID'].split('.')
+        deployed = datetime.datetime.fromtimestamp(long(deployed) / pow(2, 28))
+        deployed = deployed.strftime("%d/%m/%y %X")
+
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
-            'application_version': os.environ['CURRENT_VERSION_ID'],
+            'application_version': version,
+            'date_deployed': deployed,
             'python_version': sys.version,
             'user': users.get_current_user(),
             'login_url': users.create_login_url('/'),
