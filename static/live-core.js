@@ -271,6 +271,10 @@ SymPy.Shell = Class.$extend({
             this.fullscreen();
         }, this));
 
+        this.makeOneOffEl.click($.proxy(function(event) {
+            this.makeOneOffURL();
+        }, this));
+
         this.clearEl.click($.proxy(function(event) {
             this.clear();
             this.focus();
@@ -378,6 +382,10 @@ SymPy.Shell = Class.$extend({
         this.fullscreenEl = $('<button>Fullscreen</button>').
             attr('id', 'fullscreen-button').
             appendTo(this.buttonsEl);
+        this.makeOneOffEl = $('<button>Make One-Off URL</button>').
+            attr('id', 'make-one-off-button').
+            appendTo(this.buttonsEl).
+            attr('title', 'Make a URL that evaluates the current input when visited');
     },
     getKeyEvent: function() {
         return $.browser.opera ? "keypress" : "keydown";
@@ -1031,6 +1039,29 @@ SymPy.Shell = Class.$extend({
                 appendTo("#shell");
         }
         this.fullscreenMode = false;
+    },
+
+    makeOneOffURL: function() {
+        $('.sympy-live-dialog').remove();
+        var component = encodeURIComponent(this.getValue());
+        var url = window.location.origin + window.location.pathname + '?evaluate=' + component;
+        var offset = this.makeOneOffEl.offset();
+        var outerHeight = this.makeOneOffEl.outerHeight();
+        var output = $('<div/>')
+            .appendTo($('body'))
+            .css({ left: offset.left, top: offset.top + outerHeight });
+        output.addClass('sympy-live-dialog');
+        output.append($('<div>click anywhere to close</div>'));
+        output.append($('<a/>').html(url).attr({ href: url, target: '_blank' }));
+        output.click(function() {
+            output.fadeOut(500);
+        });
+
+        setTimeout(function() {
+            $('body').click(function() {
+                output.fadeOut(500);
+            });
+        }, 500);
     },
 
     focus: function(){

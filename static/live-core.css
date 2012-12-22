@@ -110,3 +110,11 @@ button {
     text-align: center;
     line-height: 50px;
 }
+
+.sympy-live-dialog {
+  background-color: #3b5526;
+  position: absolute;
+  padding: 0.5em;
+  color: #FFF;
+  font-weight: bold;
+}
