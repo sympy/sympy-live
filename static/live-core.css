@@ -112,9 +112,44 @@ button {
 }
 
 .sympy-live-dialog {
-  background-color: #3b5526;
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 100px;
+  bottom: 0;
+  background-color: rgba(1,1,1,0.8);
+}
+
+.sympy-live-dialog div {
+  border: 1px solid #81B953;
+  background-color: #FFF;
   padding: 0.5em;
-  color: #FFF;
   font-weight: bold;
+}
+
+.sympy-live-dialog div p {
+  margin: 0.25em 0;
+}
+
+.sympy-live-dialog div textarea {
+  width: 80%;
+  display: block;
+  margin: auto;
+  height: 300px;
+}
+
+#make-one-off-button {
+  float: right;
+  background-image: url('/static/make_url.png');
+  width: 24px;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  height: 24px;
+  background-size: 100%;
+}
+
+#make-one-off-button:hover {
+  background-color: #AAA;
 }

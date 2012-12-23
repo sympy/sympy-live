@@ -117,6 +117,7 @@ SymPy.Shell = Class.$extend({
     historyCursor: 0,
     previousValue: "",
     evaluating: false,
+    evaluatingCallbacks: [],
     supportsSelection: false,
     fullscreenMode: false,
     leftHeight: $('#left').height(),
@@ -382,7 +383,7 @@ SymPy.Shell = Class.$extend({
         this.fullscreenEl = $('<button>Fullscreen</button>').
             attr('id', 'fullscreen-button').
             appendTo(this.buttonsEl);
-        this.makeOneOffEl = $('<button>Make One-Off URL</button>').
+        this.makeOneOffEl = $('<button></button>').
             attr('id', 'make-one-off-button').
             appendTo(this.buttonsEl).
             attr('title', 'Make a URL that evaluates the current input when visited');
@@ -752,7 +753,14 @@ SymPy.Shell = Class.$extend({
           this.promptEl.removeClass('sympy-live-processing');
           this.evaluateEl.attr({disabled: null});
           this.evaluateEl.removeClass('sympy-live-evaluate-disabled');
+          $.each(this.evaluatingCallbacks, function() {
+              this();
+          });
       }
+    },
+
+    addCallback: function(callback) {
+        this.evaluatingCallbacks.push(callback);
     },
 
     getStatement: function() {
@@ -1044,24 +1052,57 @@ SymPy.Shell = Class.$extend({
     makeOneOffURL: function() {
         $('.sympy-live-dialog').remove();
         var component = encodeURIComponent(this.getValue());
-        var url = window.location.origin + window.location.pathname + '?evaluate=' + component;
+        var url = window.location.origin + window.location.pathname + '?evaluate=';
         var offset = this.makeOneOffEl.offset();
         var outerHeight = this.makeOneOffEl.outerHeight();
-        var output = $('<div/>')
+        var dialog = $('<div/>')
             .appendTo($('body'))
-            .css({ left: offset.left, top: offset.top + outerHeight });
-        output.addClass('sympy-live-dialog');
-        output.append($('<div>click anywhere to close</div>'));
-        output.append($('<a/>').html(url).attr({ href: url, target: '_blank' }));
-        output.click(function() {
-            output.fadeOut(500);
-        });
+            .addClass('sympy-live-dialog');
+        var output = $('<div><p>click anywhere to close</p></div>');
+        dialog.append(output);
+        dialog.fadeIn(250);
 
+        output.append($('<p> This is your history. The #-- comments separate individual statements to be executed and will be removed from the output.</p>'));
+        var history = $('<textarea/>');
+        var contents = this.history.join('\n#--\n');
+        history.val(contents);
+        output.append(history);
+
+        var close = function() {
+            dialog.fadeOut(500);
+        };
+
+        output.append($('<button>Make URL</button>').click(function() {
+            close();
+            window.open(url + encodeURIComponent(history.val()));
+        }));
+
+        output.click(close);
+        $('body').keydown(function(e) {
+            if (e.which == SymPy.Keys.ESC) {
+                close();
+            }
+        });
         setTimeout(function() {
             $('body').click(function() {
-                output.fadeOut(500);
+                close();
             });
         }, 500);
+    },
+
+    evaluateInitial: function(statements) {
+        var statements = statements
+            .replace('\r\n', '\n')
+            .replace('\r', '\n')
+            .split(/#--[^\n]*/);
+        var current = 1;
+        this.addCallback($.proxy(function() {
+            this.setValue(statements[current].trim());
+            this.evaluate();
+            current += 1;
+        }, this));
+        this.setValue(statements[0].trim());
+        this.evaluate();
     },
 
     focus: function(){

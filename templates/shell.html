@@ -51,11 +51,10 @@
                 var el = $('#shell');
                 shell.render(el);
 
-            
-                var statement = utilities.getURLParameter('evaluate');
-                if (statement) {
-                    shell.setValue(statement);
-                    shell.evaluate();
+           
+                var statements = utilities.getURLParameter('evaluate');
+                if (statements) {
+                    shell.evaluateInitial(statements);
                 }       
             });
         </script>
