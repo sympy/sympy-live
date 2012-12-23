@@ -1058,7 +1058,7 @@ SymPy.Shell = Class.$extend({
         var dialog = $('<div/>')
             .appendTo($('body'))
             .addClass('sympy-live-dialog');
-        var output = $('<div><p>click anywhere to close</p></div>');
+        var output = $('<div><p>click outside to close</p></div>');
         dialog.append(output);
         dialog.fadeIn(250);
 
@@ -1077,7 +1077,10 @@ SymPy.Shell = Class.$extend({
             window.open(url + encodeURIComponent(history.val()));
         }));
 
-        output.click(close);
+        output.click(function(e) {
+            e.stopPropagation();
+        });
+        dialog.click(close);
         $('body').keydown(function(e) {
             if (e.which == SymPy.Keys.ESC) {
                 close();
