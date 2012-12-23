@@ -386,7 +386,7 @@ SymPy.Shell = Class.$extend({
         this.makeOneOffEl = $('<button></button>').
             attr('id', 'make-one-off-button').
             appendTo(this.buttonsEl).
-            attr('title', 'Make a URL that evaluates the current input when visited');
+            attr('title', 'Make a URL that evaluates the session history');
     },
     getKeyEvent: function() {
         return $.browser.opera ? "keypress" : "keydown";
