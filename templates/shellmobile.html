@@ -58,17 +58,21 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 
     <script type="text/javascript">
-      $(document).ready(function() {
-        var shell = new SymPy.MobileShell({
-          printer: "{{ printer }}",
-          submit: "{{ submit }}",
-          tabWidth: {{ tabWidth }}
+        $(document).ready(function() {
+            var shell = new SymPy.MobileShell({
+                printer: "{{ printer }}",
+                submit: "{{ submit }}",
+                tabWidth: {{ tabWidth }}
+            });
+
+            var el = $('#shell');
+            shell.render(el);
+           
+           var statements = utilities.getURLParameter('evaluate');
+           if (statements) {
+               shell.evaluateInitial(statements);
+            }    
         });
-
-        var el = $('#shell');
-        shell.render(el);
-
-      });
     </script>
   </head>
   <body>
