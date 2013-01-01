@@ -617,7 +617,7 @@ class FrontPageHandler(webapp.RequestHandler):
 
         if forcedesktop in ('no', 'false'):
             if detectmobile.isMobile(self.request.headers):
-                self.redirect('/shellmobile')
+                self.redirect('/shellmobile?' + self.request.query_string)
 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
