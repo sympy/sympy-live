@@ -23,6 +23,12 @@ $(document).ready(function(){
         $('#' + arrow_id).addClass('arrow');
         $(elem).click(makeTransition('#' + elem_id, '#' + arrow_id));
     });
+
+    setTimeout(function() {
+        if (window.location.hash) {
+            $(window.location.hash).find('.clickable_top').click();
+        }
+    }, 1000);
 });
 
 function clear_searches(){

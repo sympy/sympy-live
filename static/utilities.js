@@ -29,5 +29,9 @@ var utilities = {
             root = root[namespaces[i]];
         }
         return root;
+    },
+
+    getURLParameter: function (name) {
+        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
     }
 }
