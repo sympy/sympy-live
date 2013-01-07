@@ -1,7 +1,8 @@
 application: sympy-live-hrd
 version: 31
 
-runtime: python
+runtime: python27
+threadsafe: false
 api_version: 1
 
 handlers:
