@@ -48,6 +48,8 @@ import types
 import simplejson
 import wsgiref.handlers
 import rlcompleter
+import traceback
+import datetime
 
 from StringIO import StringIO
 
@@ -55,6 +57,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
@@ -62,6 +65,7 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 from sympy import srepr, sstr, pretty, latex
 
 import detectmobile
+import settings
 
 PRINTERS = {
     'repr': srepr,
@@ -402,6 +406,9 @@ class Live(object):
                 finally:
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
+            except DeadlineExceededError:
+                logging.debug("is deadlineexceedederror in evaluate")
+                raise DeadlineExceededError
             except:
                 return self.error(stream, self.traceback(offset))
 
@@ -610,12 +617,18 @@ class FrontPageHandler(webapp.RequestHandler):
 
         if forcedesktop in ('no', 'false'):
             if detectmobile.isMobile(self.request.headers):
-                self.redirect('/shellmobile')
+                self.redirect('/shellmobile?' + self.request.query_string)
 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
+        version, deployed = os.environ['CURRENT_VERSION_ID'].split('.')
+        deployed = datetime.datetime.fromtimestamp(long(deployed) / pow(2, 28))
+        deployed = deployed.strftime("%d/%m/%y %X")
+
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
+            'application_version': version,
+            'date_deployed': deployed,
             'python_version': sys.version,
             'user': users.get_current_user(),
             'login_url': users.create_login_url('/'),
@@ -721,7 +734,6 @@ class EvaluateHandler(webapp.RequestHandler):
 
         session_key = message.get('session')
         printer_key = message.get('printer')
-
         live = Live()
 
         if session_key is not None:
@@ -744,12 +756,36 @@ class EvaluateHandler(webapp.RequestHandler):
             printer = None
 
         stream = StringIO()
-        live.evaluate(statement, session, printer, stream)
-
-        result = {
-            'session': str(session_key),
-            'output': stream.getvalue(),
-        }
+        try:
+            live.evaluate(statement, session, printer, stream)
+            result = {
+                'session': str(session_key),
+                'output': stream.getvalue(),
+            }
+        except DeadlineExceededError:
+            result = {
+                'session': str(session_key),
+                'output': 'Error: Operation timed out.'
+            }
+        except Exception, e:
+            if settings.DEBUG:
+                errmsg = '\n'.join([
+                    'Exception in SymPy Live of type ',
+                    str(type(e)),
+                    'for reference the stack trace is',
+                    traceback.format_exc()
+                ])
+            else:
+                errmsg = '\n'.join([
+                    'Exception in SymPy Live of type ',
+                    str(type(e)),
+                    'for reference the last 5 stack trace entries are',
+                    traceback.format_exc(5)
+                ])
+            result = {
+                'session': str(session_key),
+                'output': errmsg
+            }
 
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(simplejson.dumps(result))

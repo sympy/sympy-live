@@ -32,6 +32,7 @@ SymPy.MobileShell = SymPy.Shell.$extend({
             $("#sympy-live-toolbar-main").
                 appendTo(".sympy-live-completions-toolbar");
             $("#fullscreen-button").remove();
+            $("#make-one-off-button").remove();
             this.completeButtonEl = $("<button>Complete</button>").
                 insertAfter(this.evaluateEl);
             this.historyPrevEl.click($.proxy(function(event){

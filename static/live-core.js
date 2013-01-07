@@ -117,6 +117,7 @@ SymPy.Shell = Class.$extend({
     historyCursor: 0,
     previousValue: "",
     evaluating: false,
+    evaluatingCallbacks: [],
     supportsSelection: false,
     fullscreenMode: false,
     leftHeight: $('#left').height(),
@@ -271,6 +272,10 @@ SymPy.Shell = Class.$extend({
             this.fullscreen();
         }, this));
 
+        this.makeOneOffEl.click($.proxy(function(event) {
+            this.makeOneOffURL();
+        }, this));
+
         this.clearEl.click($.proxy(function(event) {
             this.clear();
             this.focus();
@@ -378,6 +383,10 @@ SymPy.Shell = Class.$extend({
         this.fullscreenEl = $('<button>Fullscreen</button>').
             attr('id', 'fullscreen-button').
             appendTo(this.buttonsEl);
+        this.makeOneOffEl = $('<button></button>').
+            attr('id', 'make-one-off-button').
+            appendTo(this.buttonsEl).
+            attr('title', 'Make a URL that evaluates the session history');
     },
     getKeyEvent: function() {
         return $.browser.opera ? "keypress" : "keydown";
@@ -744,7 +753,14 @@ SymPy.Shell = Class.$extend({
           this.promptEl.removeClass('sympy-live-processing');
           this.evaluateEl.attr({disabled: null});
           this.evaluateEl.removeClass('sympy-live-evaluate-disabled');
+          $.each(this.evaluatingCallbacks, function() {
+              this();
+          });
       }
+    },
+
+    addCallback: function(callback) {
+        this.evaluatingCallbacks.push(callback);
     },
 
     getStatement: function() {
@@ -800,18 +816,7 @@ SymPy.Shell = Class.$extend({
                     this.done(response);
                     this.focus();
                 }, this),
-                error: $.proxy(function(a,b,c) {
-                    this.error();
-
-                    $('<div>Error: Time limit exceeded.</div>').
-                        appendTo(this.outputEl);
-
-					this.scrollToDefault();
-                    this.clearValue();
-                    this.updatePrompt();
-                    this.setEvaluating(false);
-                    this.focus();
-                }, this),
+                error: $.proxy(this.error, this),
             });
             this.focus();
         }
@@ -848,6 +853,23 @@ SymPy.Shell = Class.$extend({
 
     error: function(xhr, status, error) {
         console.log("Error:", xhr, status, error);
+
+        var errorMessage = "Unspecified error.";
+
+        if (status == "timeout") {
+            errorMessage = "Error: Time limit exceeded.";
+        }
+        else if (status == "error") {
+            errorMessage = "Error: " + error + ".";
+        }
+
+        $('<div/>').html(errorMessage).appendTo(this.outputEl);
+
+		this.scrollToDefault();
+        this.clearValue();
+        this.updatePrompt();
+        this.setEvaluating(false);
+        this.focus();
     },
 
     clear: function() {
@@ -1025,6 +1047,65 @@ SymPy.Shell = Class.$extend({
                 appendTo("#shell");
         }
         this.fullscreenMode = false;
+    },
+
+    makeOneOffURL: function() {
+        $('.sympy-live-dialog').remove();
+        var component = encodeURIComponent(this.getValue());
+        var url = window.location.origin + window.location.pathname + '?evaluate=';
+        var offset = this.makeOneOffEl.offset();
+        var outerHeight = this.makeOneOffEl.outerHeight();
+        var dialog = $('<div/>')
+            .appendTo($('body'))
+            .addClass('sympy-live-dialog');
+        var output = $('<div><p>click outside to close</p></div>');
+        dialog.append(output);
+        dialog.fadeIn(250);
+
+        output.append($('<p> This is your history. The #-- comments separate individual statements to be executed and will be removed from the output.</p>'));
+        var history = $('<textarea/>');
+        var contents = this.history.join('\n#--\n');
+        history.val(contents);
+        output.append(history);
+
+        var close = function() {
+            dialog.fadeOut(500);
+        };
+
+        output.append($('<button>Make URL</button>').click(function() {
+            close();
+            window.open(url + encodeURIComponent(history.val()));
+        }));
+
+        output.click(function(e) {
+            e.stopPropagation();
+        });
+        dialog.click(close);
+        $('body').keydown(function(e) {
+            if (e.which == SymPy.Keys.ESC) {
+                close();
+            }
+        });
+        setTimeout(function() {
+            $('body').click(function() {
+                close();
+            });
+        }, 500);
+    },
+
+    evaluateInitial: function(statements) {
+        var statements = statements
+            .replace('\r\n', '\n')
+            .replace('\r', '\n')
+            .split(/#--[^\n]*/);
+        var current = 1;
+        this.addCallback($.proxy(function() {
+            this.setValue(statements[current].trim());
+            this.evaluate();
+            current += 1;
+        }, this));
+        this.setValue(statements[0].trim());
+        this.evaluate();
     },
 
     focus: function(){
