@@ -1,5 +1,5 @@
 application: sympy-live-hrd
-version: 30
+version: 31
 
 runtime: python
 api_version: 1
