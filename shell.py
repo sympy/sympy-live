@@ -931,21 +931,15 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
-def main():
-  application = webapp.WSGIApplication([
-      ('/', FrontPageHandler),
-      ('/evaluate', EvaluateHandler),
-      ('/shelldsi', ShellDsiFrontPageHandler),
-      ('/helpdsi', HelpDsiFrontPageHandler),
-      ('/shellmobile', ShellMobileFrontPageHandler),
-      ('/shell.do', StatementHandler),
-      ('/forcedesktop', ForceDesktopCookieHandler),
-      ('/delete', DeleteHistory),
-      ('/complete', CompletionHandler),
-      ('/sphinxbanner', SphinxBannerHandler)
-  ], debug=_DEBUG)
-
-  wsgiref.handlers.CGIHandler().run(application)
-
-if __name__ == '__main__':
-  main()
+application = webapp.WSGIApplication([
+  ('/', FrontPageHandler),
+  ('/evaluate', EvaluateHandler),
+  ('/shelldsi', ShellDsiFrontPageHandler),
+  ('/helpdsi', HelpDsiFrontPageHandler),
+  ('/shellmobile', ShellMobileFrontPageHandler),
+  ('/shell.do', StatementHandler),
+  ('/forcedesktop', ForceDesktopCookieHandler),
+  ('/delete', DeleteHistory),
+  ('/complete', CompletionHandler),
+  ('/sphinxbanner', SphinxBannerHandler)
+], debug=_DEBUG)
