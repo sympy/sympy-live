@@ -45,7 +45,7 @@ import pdb
 import traceback
 import tokenize
 import types
-import simplejson
+import json
 import wsgiref.handlers
 import rlcompleter
 import traceback
@@ -657,7 +657,7 @@ class CompletionHandler(webapp.RequestHandler):
     def post(self):
         self._cross_site_headers()
         try:
-            message = simplejson.loads(self.request.body)
+            message = json.loads(self.request.body)
         except ValueError:
             self.error(400)
             return
@@ -696,7 +696,7 @@ class CompletionHandler(webapp.RequestHandler):
         }
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(simplejson.dumps(result))
+        self.response.out.write(json.dumps(result))
 
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
@@ -712,7 +712,7 @@ class EvaluateHandler(webapp.RequestHandler):
         self._cross_site_headers()
 
         try:
-            message = simplejson.loads(self.request.body)
+            message = json.loads(self.request.body)
         except ValueError:
             self.error(400)
             return
@@ -788,7 +788,7 @@ class EvaluateHandler(webapp.RequestHandler):
             }
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(simplejson.dumps(result))
+        self.response.out.write(json.dumps(result))
 
 class ShellDsiFrontPageHandler(webapp.RequestHandler):
   """Creates a new session and renders the graphical_shell.html template.
