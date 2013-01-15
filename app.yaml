@@ -8,6 +8,8 @@ api_version: 1
 libraries:
 - name: numpy
   version: latest
+- name: matplotlib
+  version: latest
 
 handlers:
 - url: /static
