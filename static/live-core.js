@@ -388,8 +388,9 @@ SymPy.Shell = Class.$extend({
             appendTo(this.buttonsEl).
             attr('title', 'Make a URL that evaluates the session history');
     },
+
     getKeyEvent: function() {
-        return $.browser.opera ? "keypress" : "keydown";
+        return "keydown";
     },
 
     disablePrompt: function() {
