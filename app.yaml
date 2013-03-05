@@ -9,6 +9,10 @@ handlers:
   static_dir: static
   expiration: 1d
 
+- url: /favicon\.ico
+  static_files: static/images/favicon.ico
+  upload: static/images/favicon\.ico
+
 # if you're adding the shell to your own app, change this regex url to the URL
 # endpoint where you want the shell to run, e.g. /shell . You'll also probably
 # want to add login: admin to restrict to admins only.
