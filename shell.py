@@ -67,6 +67,10 @@ from sympy import srepr, sstr, pretty, latex
 import detectmobile
 import settings
 
+LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
+LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
+LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
+
 PRINTERS = {
     'repr': srepr,
     'str': sstr,
@@ -621,14 +625,10 @@ class FrontPageHandler(webapp.RequestHandler):
 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
-        version, deployed = os.environ['CURRENT_VERSION_ID'].split('.')
-        deployed = datetime.datetime.fromtimestamp(long(deployed) / pow(2, 28))
-        deployed = deployed.strftime("%d/%m/%y %X")
-
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
-            'application_version': version,
-            'date_deployed': deployed,
+            'application_version': LIVE_VERSION,
+            'date_deployed': LIVE_DEPLOYED,
             'python_version': sys.version,
             'user': users.get_current_user(),
             'login_url': users.create_login_url('/'),
@@ -810,6 +810,8 @@ class ShellDsiFrontPageHandler(webapp.RequestHandler):
     session_url = '/shelldsi?session=%s' % session_key
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'session': str(session_key),
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
@@ -838,6 +840,8 @@ class HelpDsiFrontPageHandler(webapp.RequestHandler):
     session_url = '/?session=%s' % session_key
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'session': str(session_key),
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
@@ -870,6 +874,8 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
              'session': str(session_key),
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
              'logout_url': users.create_logout_url(session_url),
