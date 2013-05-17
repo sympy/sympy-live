@@ -4,17 +4,17 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>SymPy Live</title>
 
-        <script type="text/javascript" src="static/utilities.js"></script>
-        <script type="text/javascript" src="static/external/classy.js"></script>
+        <script type="text/javascript" src="static-{{application_version}}/utilities.js"></script>
+        <script type="text/javascript" src="static-{{application_version}}/external/classy.js"></script>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-        <script type="text/javascript" src="static/expand_right.js"></script>
-        <link rel="stylesheet" href="static/live-autocomplete.css" type="text/css" />
-        <link rel="stylesheet" type="text/css" href="static/live-core.css" />
-        <script type="text/javascript" src="static/live-autocomplete.js"></script>
-        <script type="text/javascript" src="static/live-core.js"></script>
-		<link rel="stylesheet" href="static/style.css" type="text/css" />
-		<link rel="stylesheet" href="static/base.css" type="text/css" media="screen" />
-		<link rel="stylesheet" id="current-theme" href="static/style2.css" type="text/css" media="screen" />
+        <script type="text/javascript" src="static-{{application_version}}/expand_right.js"></script>
+        <link rel="stylesheet" href="static-{{application_version}}/live-autocomplete.css" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="static-{{application_version}}/live-core.css" />
+        <script type="text/javascript" src="static-{{application_version}}/live-autocomplete.js"></script>
+        <script type="text/javascript" src="static-{{application_version}}/live-core.js"></script>
+		<link rel="stylesheet" href="static-{{application_version}}/style.css" type="text/css" />
+		<link rel="stylesheet" href="static-{{application_version}}/base.css" type="text/css" media="screen" />
+		<link rel="stylesheet" id="current-theme" href="static-{{application_version}}/style2.css" type="text/css" media="screen" />
 
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({
@@ -61,7 +61,7 @@
     <body>
 	<div id="container">
 	<div id="header">
-        <h1><a href="/"> <img src="static/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
+        <h1><a href="/"> <img src="static-{{application_version}}/logo.png" style="vertical-align:middle" alt="SymPy Logo" /> SymPy Live</a></h1>
 
       <div id="main-navigation">
 
@@ -85,7 +85,7 @@
 
 
 
-        <div id="banner">{{ banner }}</div>
+        <div id="banner">{{ banner|safe }}</div>
         <div id="shell"></div>
 </div><div id="right">
 
@@ -106,7 +106,7 @@
 			<div id="user_searches">
 		        <a href="#user_searches"><div class="clickable_top">
 				<div id="user_searches_arrow">
-                    <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+                    <img height="25" width="25" alt="Arrow" src="static-{{application_version}}/arrow.png">
                 </div>
                 <div class="title"><h3 style="display:block;">My Searches&nbsp;</h3></div>
                 </div></a>
@@ -122,7 +122,7 @@
             <div id="about">
 			<a href="#about"><div class="clickable_top">
 			<div class="title"><h3>About this page</h3></div>
-			<div id="about_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			<div id="about_arrow"><img src="static-{{application_version}}/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
 <div id="about_content" class="content">
         <a href="https://github.com/sympy/sympy-live">SymPy Live</a> is <a href="http://sympy.org/">SymPy</a>
@@ -149,14 +149,14 @@ is 58 seconds.</p>
 			<div id="settings">
 			<a href="#settings"><div class="clickable_top">
 			<div class="title"><h3>Settings</h3></div>
-			<div id="settings_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			<div id="settings_arrow"><img src="static-{{application_version}}/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
 			<div class="content"></div>
 			</div><br/>
             <div id="example">
 			<a href="#example"><div class="clickable_top">
 			<div class="title"><h3>Example session</h3></div>
-			<div id="example_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+			<div id="example_arrow"><img src="static-{{application_version}}/arrow.png" width="25" height="25" alt="Arrow"/></div>
 			</div></a>
 <div class="content">
 <pre>
@@ -180,7 +180,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
 
 				<a href="#other_shells"><div class="clickable_top">
 					<div class="title"><h3>Other Online Shells</h3></div>
-					<div id="other_shells_arrow"><img src="static/arrow.png" width="25" height="25" alt="Arrow"/></div>
+					<div id="other_shells_arrow"><img src="static-{{application_version}}/arrow.png" width="25" height="25" alt="Arrow"/></div>
 				</div></a>
 
 				<div class="content">
@@ -197,7 +197,7 @@ log(x + 1)/3 - log(x**2 - x + 1)/6 + 3**(1/2)*atan(2*3**(1/2)*x/3 - 3**(1/2)/3)/
             <h3>Recent Searches</h3>
             </div>
 			<div id="recent_searches_arrow">
-                <img height="25" width="25" alt="Arrow" src="static/arrow.png">
+                <img height="25" width="25" alt="Arrow" src="static-{{application_version}}/arrow.png">
             </div>
 			</div></a>
             <div id="recent_searches_content" class="content">

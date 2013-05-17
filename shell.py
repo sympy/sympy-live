@@ -45,7 +45,7 @@ import pdb
 import traceback
 import tokenize
 import types
-import simplejson
+import json
 import wsgiref.handlers
 import rlcompleter
 import traceback
@@ -66,6 +66,10 @@ from sympy import srepr, sstr, pretty, latex
 
 import detectmobile
 import settings
+
+LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
+LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
+LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
 
 PRINTERS = {
     'repr': srepr,
@@ -621,14 +625,10 @@ class FrontPageHandler(webapp.RequestHandler):
 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
-        version, deployed = os.environ['CURRENT_VERSION_ID'].split('.')
-        deployed = datetime.datetime.fromtimestamp(long(deployed) / pow(2, 28))
-        deployed = deployed.strftime("%d/%m/%y %X")
-
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
-            'application_version': version,
-            'date_deployed': deployed,
+            'application_version': LIVE_VERSION,
+            'date_deployed': LIVE_DEPLOYED,
             'python_version': sys.version,
             'user': users.get_current_user(),
             'login_url': users.create_login_url('/'),
@@ -657,7 +657,7 @@ class CompletionHandler(webapp.RequestHandler):
     def post(self):
         self._cross_site_headers()
         try:
-            message = simplejson.loads(self.request.body)
+            message = json.loads(self.request.body)
         except ValueError:
             self.error(400)
             return
@@ -696,7 +696,7 @@ class CompletionHandler(webapp.RequestHandler):
         }
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(simplejson.dumps(result))
+        self.response.out.write(json.dumps(result))
 
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
@@ -712,7 +712,7 @@ class EvaluateHandler(webapp.RequestHandler):
         self._cross_site_headers()
 
         try:
-            message = simplejson.loads(self.request.body)
+            message = json.loads(self.request.body)
         except ValueError:
             self.error(400)
             return
@@ -788,7 +788,7 @@ class EvaluateHandler(webapp.RequestHandler):
             }
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(simplejson.dumps(result))
+        self.response.out.write(json.dumps(result))
 
 class ShellDsiFrontPageHandler(webapp.RequestHandler):
   """Creates a new session and renders the graphical_shell.html template.
@@ -810,6 +810,8 @@ class ShellDsiFrontPageHandler(webapp.RequestHandler):
     session_url = '/shelldsi?session=%s' % session_key
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'session': str(session_key),
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
@@ -838,6 +840,8 @@ class HelpDsiFrontPageHandler(webapp.RequestHandler):
     session_url = '/?session=%s' % session_key
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'session': str(session_key),
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
@@ -870,6 +874,8 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
              'session': str(session_key),
+             'application_version': LIVE_VERSION,
+             'date_deployed': LIVE_DEPLOYED,
              'user': users.get_current_user(),
              'login_url': users.create_login_url(session_url),
              'logout_url': users.create_logout_url(session_url),
@@ -931,21 +937,15 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
-def main():
-  application = webapp.WSGIApplication([
-      ('/', FrontPageHandler),
-      ('/evaluate', EvaluateHandler),
-      ('/shelldsi', ShellDsiFrontPageHandler),
-      ('/helpdsi', HelpDsiFrontPageHandler),
-      ('/shellmobile', ShellMobileFrontPageHandler),
-      ('/shell.do', StatementHandler),
-      ('/forcedesktop', ForceDesktopCookieHandler),
-      ('/delete', DeleteHistory),
-      ('/complete', CompletionHandler),
-      ('/sphinxbanner', SphinxBannerHandler)
-  ], debug=_DEBUG)
-
-  wsgiref.handlers.CGIHandler().run(application)
-
-if __name__ == '__main__':
-  main()
+application = webapp.WSGIApplication([
+  ('/', FrontPageHandler),
+  ('/evaluate', EvaluateHandler),
+  ('/shelldsi', ShellDsiFrontPageHandler),
+  ('/helpdsi', HelpDsiFrontPageHandler),
+  ('/shellmobile', ShellMobileFrontPageHandler),
+  ('/shell.do', StatementHandler),
+  ('/forcedesktop', ForceDesktopCookieHandler),
+  ('/delete', DeleteHistory),
+  ('/complete', CompletionHandler),
+  ('/sphinxbanner', SphinxBannerHandler)
+], debug=_DEBUG)

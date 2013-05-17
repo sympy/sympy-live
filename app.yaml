@@ -1,16 +1,29 @@
 application: sympy-live-hrd
 version: 34
 
-runtime: python
+runtime: python27
+threadsafe: true
 api_version: 1
+
+libraries:
+- name: numpy
+  version: latest
+- name: matplotlib
+  version: latest
 
 handlers:
 - url: /static
   static_dir: static
   expiration: 1d
 
+# cache-busting scheme
+# request /static-(app version)/filename
+- url: /static-[0-9]+/(.*)
+  static_files: static/\1
+  upload: static/(.*)
+
 # if you're adding the shell to your own app, change this regex url to the URL
 # endpoint where you want the shell to run, e.g. /shell . You'll also probably
 # want to add login: admin to restrict to admins only.
 - url: .*
-  script: shell.py
+  script: shell.application
