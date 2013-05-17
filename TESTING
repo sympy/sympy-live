@@ -1,0 +1,24 @@
+We currently don't have any automated testing (see
+https://code.google.com/p/sympy/issues/detail?id=3578).  So everything has to
+be tested by hand.  Make sure to test the following:
+
+- All major web browsers.  Safari, Google Chrome, Firefox, and Internet
+  Explorer.  We only need to support the most recent version of each.  If you
+  can't test some (because you aren't on a platform that it supports), try to
+  get someone else to test if you can.
+
+- The mobile version.  This should be tested on the default browsers for the
+  most recent version of each of the major mobile operating systems (again,
+  test what you have, and try to get someone else to test the others if you
+  can).
+
+- The SymPy Live shell in the docs.  This is the shell at docs.sympy.org.  To
+  test this, in the sympy git repo, edit doc/ext/sympylive.py and change the
+  url at the bottom from 'http://live.sympy.org' to what you are testing with
+  ('http://localhost:8080/' if you are testing locally, the testing
+  application if you are deploying).  Then, do `cd doc; make html` in the
+  sympy git repo, and them open the docs in `_build`, and make sure that the
+  live shell works.  This again should work in the latest version of all major
+  web browsers.
+
+See the README for information on how to test locally.
