@@ -855,25 +855,15 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
   """
 
   def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
     #Get the 10 most recent queries
     searches_query = Searches.all().filter('private', False).order('-timestamp')
     search_results = searches_query.fetch(10)
     saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
     template_file = os.path.join(os.path.dirname(__file__), 'templates',
                                  'shellmobile.html')
-    session_url = '/shellmobile?session=%s' % session_key
+    session_url = '/shellmobile'
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
-             'session': str(session_key),
              'application_version': LIVE_VERSION,
              'date_deployed': LIVE_DEPLOYED,
              'user': users.get_current_user(),

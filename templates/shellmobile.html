@@ -67,11 +67,11 @@
 
             var el = $('#shell');
             shell.render(el);
-           
+
            var statements = utilities.getURLParameter('evaluate');
            if (statements) {
                shell.evaluateInitial(statements);
-            }    
+            }
         });
     </script>
   </head>
@@ -113,8 +113,8 @@ This is just a regular Python shell, with the following commands executed by def
 </pre><p></p>
 Please note that the Google App Engine has a timeout of 60 seconds for commands, and that due to a quirk in Safari on iOS, the timeout on iOS is 58 seconds.</div>
 			</div>
-			{% if user %}<br/>{% endif %}
-			<div id="user_searches" {% if not user %}style="display:none;"{% endif %}>
+			{% if user %}<br/>
+			<div id="user_searches">
 		        <div class="clickable_top">
 				<div id="user_searches_arrow">
                     <img height="25" width="25" alt="Arrow" src="static-{{application_version}}/arrow.png">
@@ -132,7 +132,7 @@ Please note that the Google App Engine has a timeout of 60 seconds for commands,
         </div>
                 </div>
 				<div id="clear_searches" onclick="clear_searches();"><a href="#">(Clear History)</a></div>
-        </div><br/>
+        </div>{% endif %}<br/>
 		<div id="recent_searches">
 		    <div class="clickable_top">
 			<div class="title">
