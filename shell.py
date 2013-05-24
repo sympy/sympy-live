@@ -864,7 +864,6 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
     session_url = '/shellmobile'
     vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
              'python_version': sys.version,
-             'session': str(session_key),
              'application_version': LIVE_VERSION,
              'date_deployed': LIVE_DEPLOYED,
              'user': users.get_current_user(),
