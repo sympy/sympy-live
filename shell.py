@@ -63,6 +63,7 @@ from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
+from sympy.interactive.session import int_to_Integer
 
 import detectmobile
 import settings
@@ -320,6 +321,9 @@ class Live(object):
         """Evaluate the statement in sessions's globals. """
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
+
+        # convert int to Integer (1/2 -> Integer(1)/Integer(2))
+        source = int_to_Integer(source)
 
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
