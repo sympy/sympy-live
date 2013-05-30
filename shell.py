@@ -371,8 +371,6 @@ class Live(object):
             for code in session.unpicklables:
                 exec code in statement_module.__dict__
 
-            old_globals = dict(statement_module.__dict__)
-
             # re-initialize the globals
             session_globals_dict = session.globals_dict()
 
@@ -381,6 +379,8 @@ class Live(object):
                     statement_module.__dict__[name] = val
                 except:
                     session.remove_global(name)
+
+            old_globals = dict(statement_module.__dict__)
 
             # re-initialize '_' special variable
             __builtin__._ = session_globals_dict.get('_')
