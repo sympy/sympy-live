@@ -36,6 +36,7 @@ your app.yaml.
 TODO: unit tests!
 """
 
+import ast
 import logging
 import new
 import os
@@ -63,6 +64,7 @@ from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 from sympy import srepr, sstr, pretty, latex
+from sympy.interactive.session import int_to_Integer
 
 import detectmobile
 import settings
@@ -321,6 +323,16 @@ class Live(object):
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
 
+        try:
+            # check for a SyntaxError now; this way the user will see their
+            # original statement and not the transformed one
+            ast.parse(source)
+        except SyntaxError:
+            return self.error(stream, self.syntaxerror())
+
+        # convert int to Integer (1/2 -> Integer(1)/Integer(2))
+        source = int_to_Integer(source)
+
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
 
@@ -367,8 +379,6 @@ class Live(object):
             for code in session.unpicklables:
                 exec code in statement_module.__dict__
 
-            old_globals = dict(statement_module.__dict__)
-
             # re-initialize the globals
             session_globals_dict = session.globals_dict()
 
@@ -377,6 +387,8 @@ class Live(object):
                     statement_module.__dict__[name] = val
                 except:
                     session.remove_global(name)
+
+            old_globals = dict(statement_module.__dict__)
 
             # re-initialize '_' special variable
             __builtin__._ = session_globals_dict.get('_')
