@@ -36,6 +36,7 @@ your app.yaml.
 TODO: unit tests!
 """
 
+import ast
 import logging
 import new
 import os
@@ -321,6 +322,13 @@ class Live(object):
         """Evaluate the statement in sessions's globals. """
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
+
+        try:
+            # check for a SyntaxError now; this way the user will see their
+            # original statement and not the transformed one
+            ast.parse(source)
+        except SyntaxError:
+            return self.error(stream, self.syntaxerror())
 
         # convert int to Integer (1/2 -> Integer(1)/Integer(2))
         source = int_to_Integer(source)
