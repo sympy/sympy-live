@@ -435,6 +435,10 @@ class Live(object):
                 if name not in old_globals or val != old_globals[name]:
                     new_globals[name] = val
 
+            for name in old_globals:
+                if name not in statement_module.__dict__:
+                    session.remove_global(name)
+
             if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
                 # this statement added an unpicklable global. store the statement and
                 # the names of all of the globals it added in the unpicklables
