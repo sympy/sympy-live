@@ -372,12 +372,14 @@ class Live(object):
         old_main = sys.modules.get('__main__')
 
         try:
+            old_globals = {}
             sys.modules['__main__'] = statement_module
             statement_module.__name__ = '__main__'
 
             # re-evaluate the unpicklables
             for code in session.unpicklables:
                 exec code in statement_module.__dict__
+                exec code in old_globals
 
             # re-initialize the globals
             session_globals_dict = session.globals_dict()
@@ -385,10 +387,9 @@ class Live(object):
             for name, val in session_globals_dict.items():
                 try:
                     statement_module.__dict__[name] = val
+                    old_globals[name] = val
                 except:
                     session.remove_global(name)
-
-            old_globals = dict(statement_module.__dict__)
 
             # re-initialize '_' special variable
             __builtin__._ = session_globals_dict.get('_')
