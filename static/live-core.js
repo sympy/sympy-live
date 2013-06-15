@@ -853,7 +853,9 @@ SymPy.Shell = Class.$extend({
     },
 
     error: function(xhr, status, error) {
-        console.log("Error:", xhr, status, error);
+        console.log("Error:", xhr.statusText);
+        console.log(xhr.responseText)
+        console.log(status, error);
 
         var errorMessage = "Unspecified error.";
 

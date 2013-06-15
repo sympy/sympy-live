@@ -51,6 +51,7 @@ import wsgiref.handlers
 import rlcompleter
 import traceback
 import datetime
+import contextlib
 
 from StringIO import StringIO
 
@@ -318,6 +319,20 @@ class Live(object):
             except AttributeError:
                 pass
 
+    @contextlib.contextmanager
+    def redirect_output(self, stdout, stderr):
+        try:
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+
+            sys.stdout = stdout
+            sys.stderr = stderr
+
+            yield
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """
         # the Python compiler doesn't like network line endings
@@ -378,8 +393,12 @@ class Live(object):
 
             # re-evaluate the unpicklables
             for code in session.unpicklables:
-                exec code in statement_module.__dict__
-                exec code in old_globals
+                # redirect output here to avoid inadvertently outputting
+                # things to the response (in case there is a print statement
+                # here)
+                with self.redirect_output(StringIO(), StringIO()):
+                    exec code in statement_module.__dict__
+                    exec code in old_globals
 
             # re-initialize the globals
             session_globals_dict = session.globals_dict()
@@ -387,6 +406,13 @@ class Live(object):
             for name, val in session_globals_dict.items():
                 try:
                     statement_module.__dict__[name] = val
+                except:
+                    session.remove_global(name)
+
+            # re-initialize old globals separately in case of mutables
+            session_globals_dict = session.globals_dict()
+            for name, val in session_globals_dict.items():
+                try:
                     old_globals[name] = val
                 except:
                     session.remove_global(name)
@@ -431,6 +457,9 @@ class Live(object):
 
             # extract the new globals that this statement added
             new_globals = {}
+            # delete this so it doesn't cause the statement to be recorded
+            # as having added an unpicklable
+            del statement_module.__builtin__
 
             for name, val in statement_module.__dict__.items():
                 if name not in old_globals or val != old_globals[name]:
