@@ -46,6 +46,11 @@ We use submodules to include external libraries in sympy-live::
 This is sufficient to clone appropriate repositories in correct versions
 into sympy-live (see git documentation on submodules for information).
 
+For dill we must also build the library::
+
+    $ cd dill
+    $ python setup.py build
+
 Development server
 ------------------
 
