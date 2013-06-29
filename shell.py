@@ -382,11 +382,6 @@ class Live(object):
             old_globals = {}
             sys.modules['__main__'] = statement_module
             statement_module.__name__ = '__main__'
-
-            # session_globals_dict = session.globals_dict()
-            # if u'__session__' in session_globals_dict:
-            #     dill.loads_session(session_globals_dict[u'__session__'], statement_module)
-
             session.load_session(statement_module)
 
             # run!
