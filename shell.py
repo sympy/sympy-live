@@ -722,7 +722,6 @@ application = webapp.WSGIApplication([
     ('/', FrontPageHandler),
     ('/evaluate', EvaluateHandler),
     ('/shellmobile', ShellMobileFrontPageHandler),
-    ('/shell.do', StatementHandler),
     ('/forcedesktop', ForceDesktopCookieHandler),
     ('/delete', DeleteHistory),
     ('/complete', CompletionHandler),
