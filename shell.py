@@ -383,12 +383,11 @@ class Live(object):
             sys.modules['__main__'] = statement_module
             statement_module.__name__ = '__main__'
 
-            session_globals_dict = session.globals_dict()
-            if u'__session__' in session_globals_dict:
-                dill.loads_session(session_globals_dict[u'__session__'], statement_module)
+            # session_globals_dict = session.globals_dict()
+            # if u'__session__' in session_globals_dict:
+            #     dill.loads_session(session_globals_dict[u'__session__'], statement_module)
 
-            # re-initialize '_' special variable
-            statement_module._ = session_globals_dict.get('_')
+            session.load_session(statement_module)
 
             # run!
             offset = 0
@@ -425,16 +424,14 @@ class Live(object):
             except:
                 return self.error(stream, self.traceback(offset))
 
+            # get around pickling problems
             del statement_module.__builtins__
-            session.set_global('__session__', dill.dumps_session(statement_module))
-
-            # save '_' special variable into the datastore
-            val = getattr(__builtin__, '_', None)
-
             try:
-                session.set_global('_', val)
-            except (TypeError, dill.PicklingError):
-                session.set_global('_', None)
+                # save '_' special variable into the datastore
+                statement_module._ = getattr(__builtin__, '_', None)
+                session.save_session(statement_module)
+            except (dill.PicklingError, RuntimeError):
+                stream.write("Could not save changes to session.")
         finally:
             sys.modules['__main__'] = old_main
             sys.displayhook = old_displayhook
@@ -473,10 +470,7 @@ class Session(db.Model):
   Using Text instead of string is an optimization. We don't query on any of
   these properties, so they don't need to be indexed.
   """
-  global_names = db.ListProperty(db.Text)
-  globals = db.ListProperty(db.Blob)
-  unpicklable_names = db.ListProperty(db.Text)
-  unpicklables = db.ListProperty(db.Text)
+  session = db.BlobProperty()
 
   def initialize_globals(self, live):
     for _stmt in INITIAL_UNPICKLABLES:
@@ -489,86 +483,14 @@ class Session(db.Model):
           self.module = new.module('__main__')
       return self.module
 
-  def set_global(self, name, value):
-    """Adds a global, or updates it if it already exists.
-
-    Also removes the global from the list of unpicklable names.
-
-    Args:
-      name: the name of the global to remove
-      value: any picklable value
-    """
+  def save_session(self, module):
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    blob = db.Blob(self.fast_dumps(value, 1))
+    self.session = db.Blob(dill.dumps_session(module))
 
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      self.globals[index] = blob
-    else:
-      self.global_names.append(db.Text(name))
-      self.globals.append(blob)
-
-    self.remove_unpicklable_name(name)
-
-  def remove_global(self, name):
-    """Removes a global, if it exists.
-
-    Args:
-      name: string, the name of the global to remove
-    """
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      del self.global_names[index]
-      del self.globals[index]
-
-  def globals_dict(self):
-    """Returns a dictionary view of the globals.
-    """
-    return dict((name, dill.loads(val, main_module=self.module))
-                for name, val in zip(self.global_names, self.globals))
-
-  def add_unpicklable(self, statement, names):
-    """Adds a statement and list of names to the unpicklables.
-
-    Also removes the names from the globals.
-
-    Args:
-      statement: string, the statement that created new unpicklable global(s).
-      names: list of strings; the names of the globals created by the statement.
-    """
-    self.unpicklables.append(db.Text(statement))
-
-    for name in names:
-      self.remove_global(name)
-      if name not in self.unpicklable_names:
-        self.unpicklable_names.append(db.Text(name))
-
-  def remove_unpicklable_name(self, name):
-    """Removes a name from the list of unpicklable names, if it exists.
-
-    Args:
-      name: string, the name of the unpicklable global to remove
-    """
-    if name in self.unpicklable_names:
-      self.unpicklable_names.remove(name)
-
-  def fast_dumps(self, obj, protocol=None):
-    """Performs the same function as dill.dumps but with optimizations off.
-
-    Args:
-      obj: object, object to be pickled
-      protocol: int, optional protocol option to emulate dill.dumps
-
-    Note: It is necessary to pickle SymPy values with the fast option in order
-          to get the correct assumptions when unpickling. See Issue 2587.
-    """
-    file = StringIO()
-    p = dill.Pickler(file, protocol)
-    p.fast = 1
-    p._main_module = self.module
-    p.dump(obj)
-    return file.getvalue()
+  def load_session(self, module):
+    if self.session:
+        dill.loads_session(self.session, module)
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
