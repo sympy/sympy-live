@@ -64,7 +64,6 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'dill'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
 import dill
-
 import sympy
 from sympy.core.function import UndefinedFunction
 from sympy import srepr, sstr, pretty, latex
@@ -668,66 +667,6 @@ class EvaluateHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
-class ShellDsiFrontPageHandler(webapp.RequestHandler):
-    """Creates a new session and renders the graphical_shell.html template.
-    """
-
-    def get(self):
-        # set up the session. TODO: garbage collect old shell sessions
-        session_key = self.request.get('session')
-        if session_key:
-            session = Session.get(session_key)
-        else:
-            # create a new session
-            session = Session()
-            session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-            session_key = session.put()
-
-        template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                     'shelldsi.html')
-        session_url = '/shelldsi?session=%s' % session_key
-        vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-                 'python_version': sys.version,
-                 'application_version': LIVE_VERSION,
-                 'date_deployed': LIVE_DEPLOYED,
-                 'session': str(session_key),
-                 'user': users.get_current_user(),
-                 'login_url': users.create_login_url(session_url),
-                 'logout_url': users.create_logout_url(session_url),
-        }
-        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-        self.response.out.write(rendered)
-
-class HelpDsiFrontPageHandler(webapp.RequestHandler):
-    """Creates a new session and renders the graphical_shell.html template.
-    """
-
-    def get(self):
-      # set up the session. TODO: garbage collect old shell sessions
-      session_key = self.request.get('session')
-      if session_key:
-          session = Session.get(session_key)
-      else:
-          # create a new session
-          session = Session()
-          session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-          session_key = session.put()
-
-      template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                   'helpdsi.html')
-      session_url = '/?session=%s' % session_key
-      vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-               'python_version': sys.version,
-               'application_version': LIVE_VERSION,
-               'date_deployed': LIVE_DEPLOYED,
-               'session': str(session_key),
-               'user': users.get_current_user(),
-               'login_url': users.create_login_url(session_url),
-               'logout_url': users.create_logout_url(session_url),
-      }
-      rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-      self.response.out.write(rendered)
-
 class ShellMobileFrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the graphical_shell.html template.
     """
@@ -753,32 +692,6 @@ class ShellMobileFrontPageHandler(webapp.RequestHandler):
         }
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
-
-
-class StatementHandler(webapp.RequestHandler):
-    """Evaluates a python statement in a given session and returns the result.
-    """
-
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-
-        # extract the statement to be run
-        statement = self.request.get('statement')
-
-        # load the session from the datastore
-        session = Session.get(self.request.get('session'))
-
-        # setup printing function (srepr, sstr, pretty, upretty, latex)
-        key = self.request.get('printer')
-
-        try:
-            printer = PRINTERS[key]
-        except KeyError:
-            printer = None
-
-        # evaluate the statement in session's globals
-        evaluate(statement, session, printer, self.response.out)
-
 
 class SphinxBannerHandler(webapp.RequestHandler):
     """Provides the banner for the Sphinx extension.
@@ -808,8 +721,6 @@ class DeleteHistory(webapp.RequestHandler):
 application = webapp.WSGIApplication([
     ('/', FrontPageHandler),
     ('/evaluate', EvaluateHandler),
-    ('/shelldsi', ShellDsiFrontPageHandler),
-    ('/helpdsi', HelpDsiFrontPageHandler),
     ('/shellmobile', ShellMobileFrontPageHandler),
     ('/shell.do', StatementHandler),
     ('/forcedesktop', ForceDesktopCookieHandler),
