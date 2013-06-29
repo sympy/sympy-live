@@ -50,6 +50,7 @@ import wsgiref.handlers
 import rlcompleter
 import traceback
 import datetime
+import contextlib
 from StringIO import StringIO
 
 from google.appengine.api import users
@@ -101,21 +102,15 @@ _DEBUG = True
 # The entity kind for shell sessions. Feel free to rename to suit your app.
 _SESSION_KIND = '_Shell_Session'
 
-# Types that can't be pickled.
-UNPICKLABLE_TYPES = []# (
-  # sympy.Function,
-  # UndefinedFunction,
-  # )
-
 # Unpicklable statements to seed new sessions with.
 INITIAL_UNPICKLABLES = [
-  "import logging",
-  "import os",
-  "import sys",
-  "from google.appengine.ext import db",
-  "from google.appengine.api import users",
-  "from __future__ import division",
-  "from sympy import *",
+    "import logging",
+    "import os",
+    "import sys",
+    "from google.appengine.ext import db",
+    "from google.appengine.api import users",
+    "from __future__ import division",
+    "from sympy import *",
 ]
 
 PREEXEC = """\
@@ -277,37 +272,62 @@ class Live(object):
         """Wrapper over Python's built-in function. """
         return compile(source, self._file, mode)
 
-    def complete(self, statement, session):
-        """Autocomplete the statement in the session's globals."""
+    @contextlib.contextmanager
+    def execution_module(self, session):
+        # get a dedicated module to be used as this statement's __main__
+        statement_module = session.get_module()
 
-        statement_module = new.module('__main__')
+        # use this request's __builtin__, since it changes on each request.
+        # this is needed for import statements, among other things.
         import __builtin__
         statement_module.__builtin__ = __builtin__
 
+        # swap in our custom module for __main__. then unpickle the session
+        # globals, run the statement, and re-pickle the session globals, all
+        # inside it.
         old_main = sys.modules.get('__main__')
 
         try:
             sys.modules['__main__'] = statement_module
-
             statement_module.__name__ = '__main__'
+            session.load_session(statement_module)
 
-            # re-evaluate the unpicklables
-            # for code in session.unpicklables:
-            #     exec code in statement_module.__dict__
+            yield statement_module
 
-            old_globals = dict(statement_module.__dict__)
+            # get around pickling problems
+            try:
+                del statement_module.__builtins__
+            except AttributeError:
+                pass
 
-            # re-initialize the globals
-            session_globals_dict = session.globals_dict()
+            try:
+                # save '_' special variable into the datastore
+                statement_module._ = getattr(__builtin__, '_', None)
+                session.save_session(statement_module)
+            except (dill.PicklingError, RuntimeError):
+                pass
+        finally:
+            sys.modules['__main__'] = old_main
 
-            for name, val in session_globals_dict.items():
-                try:
-                    statement_module.__dict__[name] = val
-                except:
-                    session.remove_global(name)
+            try:
+                del __builtin__._
+            except AttributeError:
+                pass
 
-            __builtin__._ = session_globals_dict.get('_')
+    @contextlib.contextmanager
+    def displayhook(self, hook):
+        old_displayhook = sys.displayhook
+        sys.displayhook = hook
 
+        try:
+            yield
+        finally:
+            sys.displayhook = old_displayhook
+
+    def complete(self, statement, session):
+        """Autocomplete the statement in the session's globals."""
+
+        with self.execution_module(session) as statement_module:
             completer = rlcompleter.Completer(statement_module.__dict__)
 
             if '=' in statement:
@@ -317,13 +337,6 @@ class Live(object):
                 return completer.attr_matches(statement)
             else:
                 return completer.global_matches(statement)
-
-        finally:
-            sys.modules['__main__'] = old_main
-            try:
-                del __builtin__._
-            except AttributeError:
-                pass
 
     def evaluate(self, statement, session, printer=None, stream=None):
         """Evaluate the statement in sessions's globals. """
@@ -350,40 +363,20 @@ class Live(object):
 
         if exec_source is not None:
             exec_source += '\n'
-        if eval_source is not None:
-            eval_source += '\n'
-
-        # get a dedicated module to be used as this statement's __main__
-        statement_module = session.get_module()
-
-        # use this request's __builtin__, since it changes on each request.
-        # this is needed for import statements, among other things.
-        import __builtin__
-        statement_module.__builtin__ = __builtin__
+            if eval_source is not None:
+                eval_source += '\n'
 
         # create customized display hook
         stringify_func = printer or sstr
 
+        import __builtin__
         def displayhook(arg):
             if arg is not None:
                 __builtin__._ = None
                 print stringify_func(arg)
                 __builtin__._ = arg
 
-        old_displayhook = sys.displayhook
-        sys.displayhook = displayhook
-
-        # swap in our custom module for __main__. then unpickle the session
-        # globals, run the statement, and re-pickle the session globals, all
-        # inside it.
-        old_main = sys.modules.get('__main__')
-
-        try:
-            old_globals = {}
-            sys.modules['__main__'] = statement_module
-            statement_module.__name__ = '__main__'
-            session.load_session(statement_module)
-
+        with self.execution_module(session) as statement_module, self.displayhook(displayhook):
             # run!
             offset = 0
 
@@ -419,23 +412,6 @@ class Live(object):
             except:
                 return self.error(stream, self.traceback(offset))
 
-            # get around pickling problems
-            del statement_module.__builtins__
-            try:
-                # save '_' special variable into the datastore
-                statement_module._ = getattr(__builtin__, '_', None)
-                session.save_session(statement_module)
-            except (dill.PicklingError, RuntimeError):
-                stream.write("Could not save changes to session.")
-        finally:
-            sys.modules['__main__'] = old_main
-            sys.displayhook = old_displayhook
-
-            try:
-                del __builtin__._
-            except AttributeError:
-                pass
-
         try:
             session.put()
         except RequestTooLargeError:
@@ -443,49 +419,50 @@ class Live(object):
             self.error(stream, ('Unable to process statement due to its excessive size.',))
 
 class Session(db.Model):
-  """A shell session. Stores the session's globals.
+    """A shell session. Stores the session's globals.
 
-  Each session globals is stored in one of two places:
+    Each session globals is stored in one of two places:
 
-  If the global is picklable, it's stored in the parallel globals and
-  global_names list properties. (They're parallel lists to work around the
-  unfortunate fact that the datastore can't store dictionaries natively.)
+    If the global is picklable, it's stored in the parallel globals and
+    global_names list properties. (They're parallel lists to work around the
+    unfortunate fact that the datastore can't store dictionaries natively.)
 
-  If the global is not picklable (e.g. modules, classes, and functions), or if
-  it was created by the same statement that created an unpicklable global,
-  it's not stored directly. Instead, the statement is stored in the
-  unpicklables list property. On each request, before executing the current
-  statement, the unpicklable statements are evaluated to recreate the
-  unpicklable globals.
+    If the global is not picklable (e.g. modules, classes, and functions),
+    or if it was created by the same statement that created an unpicklable
+    global, it's not stored directly. Instead, the statement is stored in
+    the unpicklables list property. On each request, before executing the
+    current statement, the unpicklable statements are evaluated to recreate
+    the unpicklable globals.
 
-  The unpicklable_names property stores all of the names of globals that were
-  added by unpicklable statements. When we pickle and store the globals after
-  executing a statement, we skip the ones in unpicklable_names.
+    The unpicklable_names property stores all of the names of globals that
+    were added by unpicklable statements. When we pickle and store the
+    globals after executing a statement, we skip the ones in
+    unpicklable_names.
 
-  Using Text instead of string is an optimization. We don't query on any of
-  these properties, so they don't need to be indexed.
-  """
-  session = db.BlobProperty()
+    Using Text instead of string is an optimization. We don't query on any of
+    these properties, so they don't need to be indexed.
+    """
+    session = db.BlobProperty()
 
-  def initialize_globals(self, live):
-    for _stmt in INITIAL_UNPICKLABLES:
-      live.evaluate(_stmt, self)
-    live.evaluate(PREEXEC, self)
-    live.evaluate(PREEXEC_INTERNAL, self)
+    def initialize_globals(self, live):
+        for _stmt in INITIAL_UNPICKLABLES:
+            live.evaluate(_stmt, self)
+            live.evaluate(PREEXEC, self)
+            live.evaluate(PREEXEC_INTERNAL, self)
 
-  def get_module(self):
-      if not hasattr(self, 'module'):
-          self.module = new.module('__main__')
-      return self.module
+    def get_module(self):
+        if not hasattr(self, 'module'):
+            self.module = new.module('__main__')
+        return self.module
 
-  def save_session(self, module):
-    # We need to disable the pickling optimization here in order to get the
-    # correct values out.
-    self.session = db.Blob(dill.dumps_session(module))
+    def save_session(self, module):
+        # We need to disable the pickling optimization here in order to get the
+        # correct values out.
+        self.session = db.Blob(dill.dumps_session(module))
 
-  def load_session(self, module):
-    if self.session:
-        dill.loads_session(self.session, module)
+    def load_session(self, module):
+        if self.session:
+            dill.loads_session(self.session, module)
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
@@ -498,14 +475,13 @@ class ForceDesktopCookieHandler(webapp.RequestHandler):
         cookie["desktop"] = "yes"
         #cookie["desktop"]["domain"] = "live.sympy.org"
         cookie["desktop"]["path"] = "/"
-        cookie["desktop"]["expires"] = \
-        expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
+        cookie["desktop"]["expires"] = expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
         print cookie.output()
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'redirect.html')
         vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
                  'python_version': sys.version,
                  'user': users.get_current_user(),
-                 }
+        }
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
 
@@ -693,115 +669,115 @@ class EvaluateHandler(webapp.RequestHandler):
         self.response.out.write(json.dumps(result))
 
 class ShellDsiFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
+    """Creates a new session and renders the graphical_shell.html template.
+    """
 
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
+    def get(self):
+        # set up the session. TODO: garbage collect old shell sessions
+        session_key = self.request.get('session')
+        if session_key:
+            session = Session.get(session_key)
+        else:
+            # create a new session
+            session = Session()
+            session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
+            session_key = session.put()
 
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shelldsi.html')
-    session_url = '/shelldsi?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+        template_file = os.path.join(os.path.dirname(__file__), 'templates',
+                                     'shelldsi.html')
+        session_url = '/shelldsi?session=%s' % session_key
+        vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+                 'python_version': sys.version,
+                 'application_version': LIVE_VERSION,
+                 'date_deployed': LIVE_DEPLOYED,
+                 'session': str(session_key),
+                 'user': users.get_current_user(),
+                 'login_url': users.create_login_url(session_url),
+                 'logout_url': users.create_logout_url(session_url),
+        }
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
 
 class HelpDsiFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
+    """Creates a new session and renders the graphical_shell.html template.
+    """
 
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
+    def get(self):
+      # set up the session. TODO: garbage collect old shell sessions
+      session_key = self.request.get('session')
+      if session_key:
+          session = Session.get(session_key)
+      else:
+          # create a new session
+          session = Session()
+          session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
+          session_key = session.put()
 
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'helpdsi.html')
-    session_url = '/?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+      template_file = os.path.join(os.path.dirname(__file__), 'templates',
+                                   'helpdsi.html')
+      session_url = '/?session=%s' % session_key
+      vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+               'python_version': sys.version,
+               'application_version': LIVE_VERSION,
+               'date_deployed': LIVE_DEPLOYED,
+               'session': str(session_key),
+               'user': users.get_current_user(),
+               'login_url': users.create_login_url(session_url),
+               'logout_url': users.create_logout_url(session_url),
+      }
+      rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+      self.response.out.write(rendered)
 
 class ShellMobileFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
+    """Creates a new session and renders the graphical_shell.html template.
+    """
 
-  def get(self):
-    #Get the 10 most recent queries
-    searches_query = Searches.all().filter('private', False).order('-timestamp')
-    search_results = searches_query.fetch(10)
-    saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shellmobile.html')
-    session_url = '/shellmobile'
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
-             'searches': searches_query,
-             'saved_searches': saved_searches
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
+    def get(self):
+        #Get the 10 most recent queries
+        searches_query = Searches.all().filter('private', False).order('-timestamp')
+        search_results = searches_query.fetch(10)
+        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+        template_file = os.path.join(os.path.dirname(__file__), 'templates',
+                                   'shellmobile.html')
+        session_url = '/shellmobile'
+        vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
+                 'python_version': sys.version,
+                 'application_version': LIVE_VERSION,
+                 'date_deployed': LIVE_DEPLOYED,
+                 'user': users.get_current_user(),
+                 'login_url': users.create_login_url(session_url),
+                 'logout_url': users.create_logout_url(session_url),
+                 'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
+                 'searches': searches_query,
+                 'saved_searches': saved_searches
+        }
+        rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
+        self.response.out.write(rendered)
 
 
 class StatementHandler(webapp.RequestHandler):
-  """Evaluates a python statement in a given session and returns the result.
-  """
+    """Evaluates a python statement in a given session and returns the result.
+    """
 
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/plain'
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
 
-    # extract the statement to be run
-    statement = self.request.get('statement')
+        # extract the statement to be run
+        statement = self.request.get('statement')
 
-    # load the session from the datastore
-    session = Session.get(self.request.get('session'))
+        # load the session from the datastore
+        session = Session.get(self.request.get('session'))
 
-    # setup printing function (srepr, sstr, pretty, upretty, latex)
-    key = self.request.get('printer')
+        # setup printing function (srepr, sstr, pretty, upretty, latex)
+        key = self.request.get('printer')
 
-    try:
-        printer = PRINTERS[key]
-    except KeyError:
-        printer = None
+        try:
+            printer = PRINTERS[key]
+        except KeyError:
+            printer = None
 
-    # evaluate the statement in session's globals
-    evaluate(statement, session, printer, self.response.out)
+        # evaluate the statement in session's globals
+        evaluate(statement, session, printer, self.response.out)
 
 
 class SphinxBannerHandler(webapp.RequestHandler):
@@ -830,14 +806,14 @@ class DeleteHistory(webapp.RequestHandler):
         self.response.out.write("Your queries have been deleted.")
 
 application = webapp.WSGIApplication([
-  ('/', FrontPageHandler),
-  ('/evaluate', EvaluateHandler),
-  ('/shelldsi', ShellDsiFrontPageHandler),
-  ('/helpdsi', HelpDsiFrontPageHandler),
-  ('/shellmobile', ShellMobileFrontPageHandler),
-  ('/shell.do', StatementHandler),
-  ('/forcedesktop', ForceDesktopCookieHandler),
-  ('/delete', DeleteHistory),
-  ('/complete', CompletionHandler),
-  ('/sphinxbanner', SphinxBannerHandler)
+    ('/', FrontPageHandler),
+    ('/evaluate', EvaluateHandler),
+    ('/shelldsi', ShellDsiFrontPageHandler),
+    ('/helpdsi', HelpDsiFrontPageHandler),
+    ('/shellmobile', ShellMobileFrontPageHandler),
+    ('/shell.do', StatementHandler),
+    ('/forcedesktop', ForceDesktopCookieHandler),
+    ('/delete', DeleteHistory),
+    ('/complete', CompletionHandler),
+    ('/sphinxbanner', SphinxBannerHandler)
 ], debug=_DEBUG)
