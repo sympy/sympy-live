@@ -40,7 +40,6 @@ import ast
 import logging
 import new
 import os
-import pickle
 import sys
 import pdb
 import traceback
@@ -51,7 +50,6 @@ import wsgiref.handlers
 import rlcompleter
 import traceback
 import datetime
-
 from StringIO import StringIO
 
 from google.appengine.api import users
@@ -61,13 +59,24 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
+sys.path.insert(0, os.path.join(os.getcwd(), 'dill'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 
+import dill
+
+import sympy
+from sympy.core.function import UndefinedFunction
 from sympy import srepr, sstr, pretty, latex
 from sympy.interactive.session import int_to_Integer
 
+@dill.register(UndefinedFunction)
+def save_function(pickler, obj):
+    pickler.save_reduce(sympy.Function, (repr(obj),), obj=obj)
+
 import detectmobile
 import settings
+
+logging.getLogger('dill').setLevel(logging.ERROR)
 
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
@@ -93,12 +102,10 @@ _DEBUG = True
 _SESSION_KIND = '_Shell_Session'
 
 # Types that can't be pickled.
-UNPICKLABLE_TYPES = (
-  types.ModuleType,
-  types.TypeType,
-  types.ClassType,
-  types.FunctionType,
-  )
+UNPICKLABLE_TYPES = []# (
+  # sympy.Function,
+  # UndefinedFunction,
+  # )
 
 # Unpicklable statements to seed new sessions with.
 INITIAL_UNPICKLABLES = [
@@ -285,8 +292,8 @@ class Live(object):
             statement_module.__name__ = '__main__'
 
             # re-evaluate the unpicklables
-            for code in session.unpicklables:
-                exec code in statement_module.__dict__
+            # for code in session.unpicklables:
+            #     exec code in statement_module.__dict__
 
             old_globals = dict(statement_module.__dict__)
 
@@ -346,8 +353,8 @@ class Live(object):
         if eval_source is not None:
             eval_source += '\n'
 
-        # create a dedicated module to be used as this statement's __main__
-        statement_module = new.module('__main__')
+        # get a dedicated module to be used as this statement's __main__
+        statement_module = session.get_module()
 
         # use this request's __builtin__, since it changes on each request.
         # this is needed for import statements, among other things.
@@ -376,23 +383,12 @@ class Live(object):
             sys.modules['__main__'] = statement_module
             statement_module.__name__ = '__main__'
 
-            # re-evaluate the unpicklables
-            for code in session.unpicklables:
-                exec code in statement_module.__dict__
-                exec code in old_globals
-
-            # re-initialize the globals
             session_globals_dict = session.globals_dict()
-
-            for name, val in session_globals_dict.items():
-                try:
-                    statement_module.__dict__[name] = val
-                    old_globals[name] = val
-                except:
-                    session.remove_global(name)
+            if u'__session__' in session_globals_dict:
+                dill.loads_session(session_globals_dict[u'__session__'], statement_module)
 
             # re-initialize '_' special variable
-            __builtin__._ = session_globals_dict.get('_')
+            statement_module._ = session_globals_dict.get('_')
 
             # run!
             offset = 0
@@ -429,47 +425,15 @@ class Live(object):
             except:
                 return self.error(stream, self.traceback(offset))
 
-            # extract the new globals that this statement added
-            new_globals = {}
-
-            for name, val in statement_module.__dict__.items():
-                if name not in old_globals or val != old_globals[name]:
-                    new_globals[name] = val
-
-            for name in old_globals:
-                if name not in statement_module.__dict__:
-                    session.remove_global(name)
-
-            if True in [isinstance(val, UNPICKLABLE_TYPES) for val in new_globals.values()]:
-                # this statement added an unpicklable global. store the statement and
-                # the names of all of the globals it added in the unpicklables
-                source = ""
-
-                if exec_source:
-                    source += exec_source
-                if eval_source:
-                    source += eval_source
-
-                source += "\n"
-
-                session.add_unpicklable(source, new_globals.keys())
-                logging.debug('Storing this statement as an unpicklable.')
-            else:
-                # this statement didn't add any unpicklables. pickle and store the
-                # new globals back into the datastore
-                for name, val in new_globals.items():
-                    if not name.startswith('__'):
-                        try:
-                            session.set_global(name, val)
-                        except (TypeError, pickle.PicklingError):
-                            pass
+            del statement_module.__builtins__
+            session.set_global('__session__', dill.dumps_session(statement_module))
 
             # save '_' special variable into the datastore
             val = getattr(__builtin__, '_', None)
 
             try:
                 session.set_global('_', val)
-            except (TypeError, pickle.PicklingError):
+            except (TypeError, dill.PicklingError):
                 session.set_global('_', None)
         finally:
             sys.modules['__main__'] = old_main
@@ -514,6 +478,17 @@ class Session(db.Model):
   unpicklable_names = db.ListProperty(db.Text)
   unpicklables = db.ListProperty(db.Text)
 
+  def initialize_globals(self, live):
+    for _stmt in INITIAL_UNPICKLABLES:
+      live.evaluate(_stmt, self)
+    live.evaluate(PREEXEC, self)
+    live.evaluate(PREEXEC_INTERNAL, self)
+
+  def get_module(self):
+      if not hasattr(self, 'module'):
+          self.module = new.module('__main__')
+      return self.module
+
   def set_global(self, name, value):
     """Adds a global, or updates it if it already exists.
 
@@ -550,7 +525,7 @@ class Session(db.Model):
   def globals_dict(self):
     """Returns a dictionary view of the globals.
     """
-    return dict((name, pickle.loads(val))
+    return dict((name, dill.loads(val, main_module=self.module))
                 for name, val in zip(self.global_names, self.globals))
 
   def add_unpicklable(self, statement, names):
@@ -579,18 +554,19 @@ class Session(db.Model):
       self.unpicklable_names.remove(name)
 
   def fast_dumps(self, obj, protocol=None):
-    """Performs the same function as pickle.dumps but with optimizations off.
+    """Performs the same function as dill.dumps but with optimizations off.
 
     Args:
       obj: object, object to be pickled
-      protocol: int, optional protocol option to emulate pickle.dumps
+      protocol: int, optional protocol option to emulate dill.dumps
 
     Note: It is necessary to pickle SymPy values with the fast option in order
           to get the correct assumptions when unpickling. See Issue 2587.
     """
     file = StringIO()
-    p = pickle.Pickler(file, protocol)
+    p = dill.Pickler(file, protocol)
     p.fast = 1
+    p._main_module = self.module
     p.dump(obj)
     return file.getvalue()
 
@@ -620,8 +596,6 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-
-
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
         search_results = searches_query.fetch(10)
@@ -691,11 +665,8 @@ class CompletionHandler(webapp.RequestHandler):
                 return
         else:
             session = Session()
-            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
             session_key = session.put()
-
-            live.evaluate(PREEXEC, session)
-            live.evaluate(PREEXEC_INTERNAL, session)
+            session.initialize_globals(live)
 
         completions = list(sorted(set(live.complete(statement, session))))
         if not statement.split('.')[-1].startswith('_'):
@@ -761,11 +732,8 @@ class EvaluateHandler(webapp.RequestHandler):
                 return
         else:
             session = Session()
-            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
             session_key = session.put()
-
-            live.evaluate(PREEXEC, session)
-            live.evaluate(PREEXEC_INTERNAL, session)
+            session.initialize_globals(live)
 
         try:
             printer = PRINTERS[printer_key]
