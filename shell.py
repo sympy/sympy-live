@@ -627,19 +627,6 @@ class FrontPageHandler(webapp.RequestHandler):
         search_results = searches_query.fetch(10)
 
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-        #cookie stuff
-        import Cookie
-        import os
-        try:
-            cookie = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
-            forcedesktop = cookie['desktop'].value
-        except (Cookie.CookieError, KeyError):
-            forcedesktop = 'false'
-
-        if forcedesktop in ('no', 'false'):
-            if detectmobile.isMobile(self.request.headers):
-                self.redirect('/shellmobile?' + self.request.query_string)
-
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
