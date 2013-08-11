@@ -66,7 +66,6 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 from sympy import srepr, sstr, pretty, latex
 from sympy.interactive.session import int_to_Integer
 
-import detectmobile
 import settings
 
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
