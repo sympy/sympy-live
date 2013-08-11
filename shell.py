@@ -818,11 +818,20 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
+class RedirectHandler(webapp.RedirectHandler):
+    """Redirects deprecated pages to the frontpage."""
+
+    def get(self):
+        self.redirect('/', permanent=True)
+
 application = webapp.WSGIApplication([
   ('/', FrontPageHandler),
   ('/evaluate', EvaluateHandler),
   ('/forcedesktop', ForceDesktopCookieHandler),
   ('/delete', DeleteHistory),
   ('/complete', CompletionHandler),
-  ('/sphinxbanner', SphinxBannerHandler)
+  ('/sphinxbanner', SphinxBannerHandler),
+  ('/shellmobile', RedirectHandler),
+  ('/shelldsi', RedirectHandler),
+  ('/helpdsi', RedirectHandler),
 ], debug=_DEBUG)
