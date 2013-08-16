@@ -21,36 +21,7 @@
         {% if user %}
         <p><a href="{{ logout_url }}">Log Out</a></p>
         {% endif %}
-
-        <!--Show saved searches only if the user is logged in-->
-        {% if user %}
-        <h3 style="display:block;">My Statements</h3>
-        <div id="saved_searches" class="content">
-            {% for search in saved_searches %}
-            {% if search.query %}
-            <a><pre>{{ search.query|escape }}</pre></a>
-            {% endif %}
-            {% endfor %}
-        </div>
-        <p><a href="javascript:clear_searches();">(Clear History)</a></p>
-        {% endif %}
-
-        <h3>Recent Statments</h3>
-        <div id="recent_searches" class="content">
-            {% for search in searches %}
-            <a><pre>{{ search.query|escape }}</pre></a>
-            {% endfor %}
-        </div>
     </div>
-</div>
-
-<div id="settings" class="sidebar_card">
-    <a id="#settings">
-        <div class="clickable_top">
-            <h3>Settings</h3>
-        </div>
-    </a>
-    <div class="content"></div>
 </div>
 
 <div id="about" class="sidebar_card">
@@ -105,4 +76,52 @@ $$ x - \frac16 x^3 + O(x^5) $$</pre>
 
     </div>
 </div>
+
+<div id="settings" class="sidebar_card">
+    <a id="#settings">
+        <div class="clickable_top">
+            <h3>Settings</h3>
+        </div>
+    </a>
+    <div class="content"></div>
+</div>
+
+<div id="recent_statements" class="sidebar_card">
+  <div class="clickable_top">
+    <h3>Recent Statments</h3>
+  </div>
+  <div class="content">
+    <div id="recent_searches">
+      {% if has_searches %}
+      {% for search in searches %}
+      <a><pre>{{ search.query|escape }}</pre></a>
+      {% endfor %}
+      {% else %}
+      <p>No recent statements</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!--Show saved searches only if the user is logged in-->
+{% if user %}
+<div id="saved_statements" class="sidebar_card">
+  <div class="clickable_top">
+    <h3>My Statements</h3>
+  </div>
+  <div class="content">
+    {% if has_saved_searches %}
+    {% for search in saved_searches %}
+    {% if search.query %}
+    <a><pre>{{ search.query|escape }}</pre></a>
+    {% endif %}
+    {% endfor %}
+
+    <p><a href="javascript:clear_searches();">(Clear History)</a></p>
+    {% else %}
+    <p>No saved statements</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
 {% endblock %}

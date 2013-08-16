@@ -619,11 +619,9 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-
-
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
-        search_results = searches_query.fetch(10)
+        search_results = searches_query.fetch(limit=10)
 
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
@@ -641,7 +639,9 @@ class FrontPageHandler(webapp.RequestHandler):
             'submit': self.request.get('submit').lower() or '',
             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
             'searches': search_results,
+            'has_searches': bool(search_results),
             'saved_searches': saved_searches,
+            'has_saved_searches': saved_searches.count()
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
