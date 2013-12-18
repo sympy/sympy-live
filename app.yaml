@@ -12,6 +12,21 @@ libraries:
   version: latest
 
 handlers:
+# redirect Sphinx extension
+# request /static/live-filename
+- url: /static/live-(.*)\.css
+  static_files: static/sympy-live/css/live-\1.css
+  upload: static/(.*)
+- url: /static/live-(.*)\.js
+  static_files: static/sympy-live/javascript/live-\1.js
+  upload: static/(.*)
+- url: /static/external/classy\.js
+  static_files: static/external/javascript/classy.js
+  upload: static/(.*)
+- url: /static/utilities\.js
+  static_files: static/sympy-live/javascript/utilities.js
+  upload: static/(.*)
+
 - url: /static
   static_dir: static
   expiration: 1d

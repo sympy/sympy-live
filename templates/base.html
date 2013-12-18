@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>{% block title %}{% endblock %}</title>
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/static-{{application_version}}/external/css/reset.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/static-{{application_version}}/external/css/responsive-gs-12col.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/static-{{application_version}}/css/base.css" type="text/css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Gentium+Basic" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/static-{{application_version}}/SymPy-Favicon.ico" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static-{{application_version}}/javascript/main.js"></script>
+    <script type="text/javascript" src="static-{{application_version}}/external/javascript/classy.js"></script>
+    <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/utilities.js"></script>
+    <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/expand_right.js"></script>
+    <link rel="stylesheet" href="static-{{application_version}}/sympy-live/css/live-autocomplete.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="static-{{application_version}}/sympy-live/css/live-core.css" />
+    <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/live-autocomplete.js"></script>
+    <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/live-core.js"></script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+      extensions: ["MathMenu.js", "MathZoom.js"],
+      showProcessingMessages: false,
+      tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$']],
+      skipTags: ["<pre>"]
+      },
+      TeX: {
+      extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js", "noUndefined.js"]
+      },
+      menuSettings: {
+      context: "MathJax",
+      zoom: "Hover",
+      ALT: true
+      },
+      MathZoom: {
+      delay: 100
+      }
+      });
+    </script>
+
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+          var shell = new SymPy.Shell({
+              printer: "{{ printer }}",
+              submit: "{{ submit }}",
+              tabWidth: {{ tabWidth }}
+          });
+
+          var el = $('#shell');
+          shell.render(el);
+
+          var statements = utilities.getURLParameter('evaluate');
+          if (statements) {
+              shell.evaluateInitial(statements);
+          }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><a href="/"> <img src="/static-{{application_version}}/images/logo.png" alt="SymPy Logo" /> SymPy</a></h1>
+        <div id="mobile-menu"><i class="icon-ellipsis-vertical"></i></div>
+      </header>
+      <nav id="main-navigation" class="row">
+        {% block navigation %}
+        <ul>
+          <li><a href="index.html">Main Page</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="http://docs.sympy.org">Documentation</a></li>
+          <li><a href="support.html">Support</a></li>
+          <li><a href="development.html">Development</a></li>
+          <li><a href="donate.html">Donate</a></li>
+          <li class="active"><a href="http://live.sympy.org/">Online Shell</a></li>
+        </ul>
+        {% endblock %}
+      </nav>
+      <section class="row" id="main">
+        <article id="content" class="col span_7 clr small_span_4">
+          {% block content %}{% endblock %}
+        </article>
+        <div id="spacer" class="col span_1 clr small_span_0">&nbsp;</div>
+        <aside id="sidebar" class="col span_4 clr small_span_2">
+          {% block sidebar %}
+          {% endblock %}
+        </aside>
+      </section>
+      <footer class="row">
+        <p>Copyright &copy; 2013 SymPy Development Team. SymPy Live version
+          {{application_version}} deployed on {{date_deployed}}</p>
+        <p>SymPy Live is open source. Fork
+          <a href="https://github.com/sympy/sympy-live/">the project on
+            GitHub</a> to edit it.</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -66,7 +66,6 @@ sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 from sympy import srepr, sstr, pretty, latex
 from sympy.interactive.session import int_to_Integer
 
-import detectmobile
 import settings
 
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
@@ -620,26 +619,11 @@ class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
 
     def get(self):
-
-
         #Get the 10 most recent queries
         searches_query = Searches.all().filter('private', False).order('-timestamp')
-        search_results = searches_query.fetch(10)
+        search_results = searches_query.fetch(limit=10)
 
         saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-        #cookie stuff
-        import Cookie
-        import os
-        try:
-            cookie = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
-            forcedesktop = cookie['desktop'].value
-        except (Cookie.CookieError, KeyError):
-            forcedesktop = 'false'
-
-        if forcedesktop in ('no', 'false'):
-            if detectmobile.isMobile(self.request.headers):
-                self.redirect('/shellmobile?' + self.request.query_string)
-
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -655,7 +639,9 @@ class FrontPageHandler(webapp.RequestHandler):
             'submit': self.request.get('submit').lower() or '',
             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
             'searches': search_results,
+            'has_searches': bool(search_results),
             'saved_searches': saved_searches,
+            'has_saved_searches': saved_searches.count()
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
@@ -807,118 +793,6 @@ class EvaluateHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
-class ShellDsiFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
-
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
-
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shelldsi.html')
-    session_url = '/shelldsi?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
-
-class HelpDsiFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
-
-  def get(self):
-    # set up the session. TODO: garbage collect old shell sessions
-    session_key = self.request.get('session')
-    if session_key:
-      session = Session.get(session_key)
-    else:
-      # create a new session
-      session = Session()
-      session.unpicklables = [db.Text(line) for line in INITIAL_UNPICKLABLES]
-      session_key = session.put()
-
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'helpdsi.html')
-    session_url = '/?session=%s' % session_key
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'session': str(session_key),
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
-
-class ShellMobileFrontPageHandler(webapp.RequestHandler):
-  """Creates a new session and renders the graphical_shell.html template.
-  """
-
-  def get(self):
-    #Get the 10 most recent queries
-    searches_query = Searches.all().filter('private', False).order('-timestamp')
-    search_results = searches_query.fetch(10)
-    saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
-    template_file = os.path.join(os.path.dirname(__file__), 'templates',
-                                 'shellmobile.html')
-    session_url = '/shellmobile'
-    vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
-             'python_version': sys.version,
-             'application_version': LIVE_VERSION,
-             'date_deployed': LIVE_DEPLOYED,
-             'user': users.get_current_user(),
-             'login_url': users.create_login_url(session_url),
-             'logout_url': users.create_logout_url(session_url),
-             'tabWidth': self.request.get('tabWidth').lower() or 'undefined',
-             'searches': searches_query,
-             'saved_searches': saved_searches
-             }
-    rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
-    self.response.out.write(rendered)
-
-
-class StatementHandler(webapp.RequestHandler):
-  """Evaluates a python statement in a given session and returns the result.
-  """
-
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/plain'
-
-    # extract the statement to be run
-    statement = self.request.get('statement')
-
-    # load the session from the datastore
-    session = Session.get(self.request.get('session'))
-
-    # setup printing function (srepr, sstr, pretty, upretty, latex)
-    key = self.request.get('printer')
-
-    try:
-        printer = PRINTERS[key]
-    except KeyError:
-        printer = None
-
-    # evaluate the statement in session's globals
-    evaluate(statement, session, printer, self.response.out)
-
-
 class SphinxBannerHandler(webapp.RequestHandler):
     """Provides the banner for the Sphinx extension.
     """
@@ -944,15 +818,20 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
+class RedirectHandler(webapp.RedirectHandler):
+    """Redirects deprecated pages to the frontpage."""
+
+    def get(self):
+        self.redirect('/', permanent=True)
+
 application = webapp.WSGIApplication([
   ('/', FrontPageHandler),
   ('/evaluate', EvaluateHandler),
-  ('/shelldsi', ShellDsiFrontPageHandler),
-  ('/helpdsi', HelpDsiFrontPageHandler),
-  ('/shellmobile', ShellMobileFrontPageHandler),
-  ('/shell.do', StatementHandler),
   ('/forcedesktop', ForceDesktopCookieHandler),
   ('/delete', DeleteHistory),
   ('/complete', CompletionHandler),
-  ('/sphinxbanner', SphinxBannerHandler)
+  ('/sphinxbanner', SphinxBannerHandler),
+  ('/shellmobile', RedirectHandler),
+  ('/shelldsi', RedirectHandler),
+  ('/helpdsi', RedirectHandler),
 ], debug=_DEBUG)
