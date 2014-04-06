@@ -123,7 +123,9 @@ _ = None
 PREEXEC_MESSAGE = """\
 from __future__ import division
 from sympy import *
-""" + PREEXEC
+""" + PREEXEC + """\
+init_printing()
+"""
 
 VERBOSE_MESSAGE = """\
 These commands were executed:
