@@ -118,6 +118,9 @@ f, g, h = symbols('f g h', cls=Function)
 
 PREEXEC_INTERNAL = """\
 _ = None
+def init_printing(*args, **kwargs):
+    print "To change the printing method of SymPy Live, use the settings" + \
+          " in the menu to the right (below on mobile)."
 """
 
 PREEXEC_MESSAGE = """\
