@@ -118,6 +118,9 @@ f, g, h = symbols('f g h', cls=Function)
 
 PREEXEC_INTERNAL = """\
 _ = None
+def init_printing(*args, **kwargs):
+    print "To change the printing method of SymPy Live, use the settings" + \
+          " in the menu to the right (below on mobile)."
 """
 
 PREEXEC_MESSAGE = """\
@@ -128,7 +131,7 @@ from sympy import *
 VERBOSE_MESSAGE = """\
 These commands were executed:
 %(source)s
-Documentation can be found at <a href="http://docs.sympy.org/">http://docs.sympy.org/</a>.\
+Documentation can be found at <a href="http://docs.sympy.org/%(version)s">http://docs.sympy.org/%(version)s</a>.\
 """
 
 VERBOSE_MESSAGE_SPHINX = """\
@@ -160,7 +163,14 @@ def banner(quiet=False):
             else:
                 source += '>>> ' + line + '\n'
 
-        message += '\n' + VERBOSE_MESSAGE % {'source': source}
+        docs_version = sympy_version
+        if 'git' in sympy_version or '.rc' in sympy_version:
+            docs_version = 'dev'
+
+        message += '\n' + VERBOSE_MESSAGE % {
+            'source': source,
+            'version': docs_version
+        }
 
     return message
 
