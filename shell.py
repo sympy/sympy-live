@@ -62,6 +62,7 @@ from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
+sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
 
 from sympy import srepr, sstr, pretty, latex
 from sympy.interactive.session import int_to_Integer
