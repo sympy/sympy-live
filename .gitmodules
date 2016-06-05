@@ -1,6 +1,9 @@
 [submodule "sympy"]
 	path = sympy
 	url = git://github.com/sympy/sympy.git
+[submodule "mpmath"]
+	path = mpmath
+	url = https://github.com/fredrik-johansson/mpmath
 [submodule "static"]
 	path = static
 	url = git@github.com:sympy/sympy-web-static.git
