@@ -237,14 +237,15 @@ class Live(object):
         sys.last_type = etype
         sys.last_value = value
 
-        if etype is SyntaxError:
-            try:
-                msg, (dummy_filename, line, offset, source) = value
-            except:
-                pass
-            else:
-                value = SyntaxError(msg, (self._file, line, offset, source))
-                sys.last_value = value
+        # extract info from error value (specifcally, we want the line number)
+        try:
+            msg, (dummy_filename, line, offset, source) = value
+        except:
+            pass
+        else:
+            # re-package error with `self._file` instead of `dummy_filename`
+            value = etype(msg, (self._file, line, offset, source))
+            sys.last_value = value
 
         text = [self._header]
         text = text + traceback.format_exception_only(etype, value)
