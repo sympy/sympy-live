@@ -132,7 +132,8 @@ from sympy import *
 VERBOSE_MESSAGE = """\
 These commands were executed:
 %(source)s
-Warning: this shell runs with Sympy %(version)s and so examples pulled from other documentation may provide unexpected results.
+Warning: this shell runs with SymPy %(version)s and so examples pulled from
+other documentation may provide unexpected results.
 Documentation can be found at <a href="http://docs.sympy.org/%(version)s">http://docs.sympy.org/%(version)s</a>.\
 """
 
