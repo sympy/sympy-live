@@ -334,6 +334,10 @@ class Live(object):
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
 
+        # allow spaces before one-liners (to emulate Python shell's behaviour)
+        if '\n' not in source:
+            source = source.lstrip()
+
         try:
             # check for a SyntaxError now; this way the user will see their
             # original statement and not the transformed one
