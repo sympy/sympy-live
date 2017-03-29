@@ -8,7 +8,8 @@
 # This file is up-to-date if the command git log --format="%aN <%aE>" | sort -u
 # gives no duplicates.
 Ondřej Čertík <ondrej@certik.cz> Ondrej Certik <ondrej@certik.cz>
-David Li <l33tnerd.li@gmail.com> <li.davidm96@gmail.com>
+David Li <li.davidm96@gmail.com> <l33tnerd.li@gmail.com>
 Alex Houlton <alex@alexhoulton.co.uk> alex houlton <alex@randomthing.co.cc>
 areke <dookarate@yahoo.com> areke2 <imawnnr@gmail.com>
 areke <dookarate@yahoo.com> bob bob <dookarate@yahoo.com>
+Ivan Savov <ivan@minireference.com> <ivan.savov@gmail.com>
