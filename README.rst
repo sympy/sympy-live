@@ -20,11 +20,13 @@ documentation for details).
 Installation
 ------------
 
-Download and unpack most recent Google App Engine SDK for Python from
-http://code.google.com/appengine/downloads.html, e.g.::
+Download 1.9.xx version of the original Google App Engine SDK for Python from
+https://cloud.google.com/appengine/docs/python/download/ - it may be neccessary
+to click ``Or, you can download the original App Engine SDK for Python.`` link
+first to expand proper download section. Than move in the command line to the
+location where you downloaded SDK and unpack the downloaded package.
 
-    $ wget http://googleappengine.googlecode.com/files/google_appengine_1.5.1.zip
-    $ unzip google_appengine_1.5.1.zip
+    $ unzip google_appengine_1.9.xx.zip
 
 On the Mac, it is a disk image with an application, which you should
 drag to your Applications folder.  Open the program and install the
