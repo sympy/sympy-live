@@ -329,7 +329,11 @@ class Live(object):
             return self.error(stream, self.syntaxerror())
 
         # convert int to Integer (1/2 -> Integer(1)/Integer(2))
-        source = int_to_Integer(source)
+        print('Before int_to_Integer =', source)
+        after_source = int_to_Integer(source)
+        ## THIS PR IS A WORK IN PROGRESS: temporarily disbaling `int_to_Integer`
+        ## see sympy upstream issue https://github.com/sympy/sympy/issues/13027
+        print('After int_to_Integer =', after_source)
 
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
@@ -430,8 +434,18 @@ class Live(object):
             # extract the new globals that this statement added
             new_globals = {}
 
+            def should_update(val, old_val):
+                """
+                Returns True if `val` and `old_val` are different, or if either
+                of `val` or `old_val` is of type `numpy.ndarray`.
+                """
+                if type(val) is numpy.ndarray or type(old_val) is numpy.ndarray:
+                    return True  # don't use `==` to comapre, always return True
+                else:
+                    return not (val == old_val)
+
             for name, val in statement_module.__dict__.items():
-                if name not in old_globals or val != old_globals[name]:
+                if name not in old_globals or should_update(val, old_globals[name]):
                     new_globals[name] = val
 
             for name in old_globals:
