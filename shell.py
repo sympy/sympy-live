@@ -52,6 +52,7 @@ import rlcompleter
 import traceback
 import datetime
 
+import numpy                       # uses version bundled with GAE: numpy==1.6.1
 from StringIO import StringIO
 
 from google.appengine.api import users
@@ -449,8 +450,18 @@ class Live(object):
             # extract the new globals that this statement added
             new_globals = {}
 
+            def should_update(val, old_val):
+                """
+                Returns True if `val` and `old_val` are different or if `val` is
+                of type `numpy.ndarray`.
+                """
+                if type(val) is numpy.ndarray:
+                    return True
+                else:
+                    return not (val == old_val)
+
             for name, val in statement_module.__dict__.items():
-                if name not in old_globals or val != old_globals[name]:
+                if name not in old_globals or should_update(val, old_globals[name]):
                     new_globals[name] = val
 
             for name in old_globals:
