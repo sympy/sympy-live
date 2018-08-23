@@ -1,5 +1,5 @@
 application: sympy-live-hrd
-version: 52
+version: 53
 
 runtime: python27
 threadsafe: true
@@ -46,3 +46,4 @@ handlers:
 # want to add login: admin to restrict to admins only.
 - url: .*
   script: shell.application
+  secure: always
