@@ -108,7 +108,7 @@ a semi-official testing server at sympy-live-tests.appspot.com.  If you want
 write access to it, just ask Aaron Meurer.  The convention there is to push
 to the version corresponding to the pull request (so if you have a branch that
 is pull request #55, you would push to version 55, and access it by
-55.sympy-live-tests.appspot.com).  Alternately, you can set up your own
+55-dot-sympy-live-tests.appspot.com).  Alternately, you can set up your own
 testing server (it's free, though it requires a cell phone to set up).
 
 Either way, to test, you will need to edit the ``app.yaml`` file.  You should
