@@ -1,5 +1,5 @@
 application: sympy-live-hrd
-version: 56
+version: 57
 
 runtime: python27
 threadsafe: true
