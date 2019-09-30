@@ -226,3 +226,5 @@ across commands.
 To use the shell in your app, copy shell.py, static/*, and templates/* into
 your app's source directory. Then, copy the URL handlers from app.yaml into
 your app.yaml.
+
+modificando README ariel
