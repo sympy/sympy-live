@@ -72,18 +72,17 @@ should see GUI of SymPy Online Shell.
 Uploading to GAE
 ----------------
 
-Before updating the the sympy-live app (the official one), you need to do two
-things.  First you need to bump the version in the ``app.yaml`` file.  Just
-change the second line ("version") to one more, and commit it (``git commit
-app.yaml -m "Bump version to NN"``, where ``NN`` is the new version) and push
-it.  Second, you need to go to the ``Versions`` section of the sympy-live
-dashboard at appspot.com and delete the oldest version, as we can only upload
-ten versions at a time.
+The version of the app will be set automatically when deploying. Before
+deploying you need to delete the ``version: 58`` line from the top of
+``app.yaml`` or the deploy script will refuse to work. We need that line to be
+there though so that local testing with ``dev_appserver.py`` works and can
+find the CSS files.
 
 Assuming that sympy-live works properly (also across different mainstream web
 browsers), you can upload your changes to Google App Engine::
 
-    $ ../appcfg.py update .
+    $ gcloud config set project sympy-live-hrd
+    $ gcloud app deploy
 
 Or, in Mac OS X, just open the GoogleAppEngineLauncher program, add the
 project if you haven't already, and click "Deploy" in the toolbar.  And then
@@ -93,11 +92,11 @@ This requires admin privileges to http://sympy-live.appspot.com. If you don't
 have access to this App Engine application, but want to test it, see the
 instructions in the `Testing on the App Engine`_ section below.
 
-Finally, go to http://NN.sympy-live.appspot.com, where ``NN`` is the version
-you just uploaded, and make sure that it works.  If it does, go to the
-``Versions`` section of the sympy-live dashboard, and set this as the new
-default version.  If there are any issues, you can roll back to the previous
-version from this same screen.
+You can open the newly deployed web app with::
+
+    $ gcloud app browse
+
+which will open https://sympy-live-hrd.appspot.com/ in a browser.
 
 Testing on the App Engine
 -------------------------

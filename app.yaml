@@ -1,4 +1,3 @@
-application: sympy-live-hrd
 version: 58
 
 runtime: python27
@@ -43,7 +42,7 @@ handlers:
 
 # cache-busting scheme
 # request /static-(app version)/filename
-- url: /static-[0-9]+/(.*)
+- url: /static-[0-9a-z]+/(.*)
   static_files: static/\1
   upload: static/(.*)
   secure: always
