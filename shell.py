@@ -1,73 +1,40 @@
 #!/usr/bin/python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """
-An interactive, stateful AJAX shell that runs Python code on the server.
-
-Part of http://code.google.com/p/google-app-engine-samples/.
-
-May be run as a standalone app or in an existing app as an admin-only handler.
-Can be used for system administration tasks, as an interactive way to try out
-APIs, or as a debugging aid during development.
-
-The logging, os, sys, db, and users modules are imported automatically.
-
+The SymPy Live interactive shell is a Python shell that allows you to play with
+Python and SymPy from your browser or your phone without installing anything.
 Interpreter state is stored in the datastore so that variables, function
 definitions, and other values in the global and local namespaces can be used
 across commands.
-
-To use the shell in your app, copy shell.py, static/*, and templates/* into
-your app's source directory. Then, copy the URL handlers from app.yaml into
-your app.yaml.
-
-TODO: unit tests!
 """
-
 import ast
+import datetime
+import json
 import logging
 import new
 import os
-import pickle
-import sys
 import pdb
-import traceback
-import tokenize
-import types
-import json
-import wsgiref.handlers
+import pickle
 import rlcompleter
+import sys
+import tokenize
 import traceback
-import datetime
-
+import types
 from StringIO import StringIO
 
+import numpy  # uses version bundled with GAE: numpy==1.6.1
+import settings
 from google.appengine.api import users
-from google.appengine.ext import db
-from google.appengine.ext import webapp
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
-
-from sympy import srepr, sstr, pretty, latex
+from sympy import latex, pretty, srepr, sstr
 from sympy.interactive.session import int_to_Integer
 
-import settings
+
 
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
@@ -81,8 +48,8 @@ PRINTERS = {
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
 
+# Enter pdb (used for debugging)
 def gdb():
-    """Enter pdb in Google App Engine. """
     pdb.Pdb(stdin=getattr(sys, '__stdin__'),
             stdout=getattr(sys, '__stderr__')).set_trace(sys._getframe().f_back)
 
@@ -98,7 +65,7 @@ UNPICKLABLE_TYPES = (
   types.TypeType,
   types.ClassType,
   types.FunctionType,
-  )
+)
 
 # Unpicklable statements to seed new sessions with.
 INITIAL_UNPICKLABLES = [
@@ -204,7 +171,9 @@ class Live(object):
     _file = '<string>'
 
     def traceback(self, offset=None):
-        """Return nicely formatted most recent traceback. """
+        """
+        Return nicely formatted most recent traceback.
+        """
         etype, value, tb = sys.exc_info()
 
         if tb.tb_next is not None:
@@ -233,7 +202,9 @@ class Live(object):
         return ''.join(text), line
 
     def syntaxerror(self):
-        """Return nicely formatted syntax error. """
+        """
+        Return nicely formatted syntax error.
+        """
         etype, value, sys.last_traceback = sys.exc_info()
 
         sys.last_type = etype
@@ -255,12 +226,16 @@ class Live(object):
         return ''.join(text), line
 
     def error(self, stream, error):
-        """Write error message to a stream. """
+        """
+        Write error message to a stream.
+        """
         if stream is not None:
             stream.write(error[0])
 
     def split(self, source):
-        """Extract last logical line from multi-line source code. """
+        """
+        Extract last logical line from multi-line source code.
+        """
         string = StringIO(source).readline
 
         try:
@@ -280,11 +255,15 @@ class Live(object):
             return None, source
 
     def compile(self, source, mode):
-        """Wrapper over Python's built-in function. """
+        """
+        Wrapper over Python's built-in function. `mode` is either 'exec' or 'eval'
+        """
         return compile(source, self._file, mode)
 
     def complete(self, statement, session):
-        """Autocomplete the statement in the session's globals."""
+        """
+        Autocomplete the statement in the session's globals.
+        """
 
         statement_module = new.module('__main__')
         import __builtin__
@@ -332,7 +311,9 @@ class Live(object):
                 pass
 
     def evaluate(self, statement, session, printer=None, stream=None):
-        """Evaluate the statement in sessions's globals. """
+        """
+        Evaluate the statement in sessions's globals.
+        """
         # the Python compiler doesn't like network line endings
         source = statement.replace('\r\n', '\n').rstrip()
 
@@ -348,7 +329,11 @@ class Live(object):
             return self.error(stream, self.syntaxerror())
 
         # convert int to Integer (1/2 -> Integer(1)/Integer(2))
-        source = int_to_Integer(source)
+        print('Before int_to_Integer =', source)
+        after_source = int_to_Integer(source)
+        ## THIS PR IS A WORK IN PROGRESS: temporarily disbaling `int_to_Integer`
+        ## see sympy upstream issue https://github.com/sympy/sympy/issues/13027
+        print('After int_to_Integer =', after_source)
 
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
@@ -449,8 +434,18 @@ class Live(object):
             # extract the new globals that this statement added
             new_globals = {}
 
+            def should_update(val, old_val):
+                """
+                Returns True if `val` and `old_val` are different, or if either
+                of `val` or `old_val` is of type `numpy.ndarray`.
+                """
+                if type(val) is numpy.ndarray or type(old_val) is numpy.ndarray:
+                    return True  # don't use `==` to comapre, always return True
+                else:
+                    return not (val == old_val)
+
             for name, val in statement_module.__dict__.items():
-                if name not in old_globals or val != old_globals[name]:
+                if name not in old_globals or should_update(val, old_globals[name]):
                     new_globals[name] = val
 
             for name in old_globals:
@@ -504,112 +499,119 @@ class Live(object):
             self.error(stream, ('Unable to process statement due to its excessive size.',))
 
 class Session(db.Model):
-  """A shell session. Stores the session's globals.
-
-  Each session globals is stored in one of two places:
-
-  If the global is picklable, it's stored in the parallel globals and
-  global_names list properties. (They're parallel lists to work around the
-  unfortunate fact that the datastore can't store dictionaries natively.)
-
-  If the global is not picklable (e.g. modules, classes, and functions), or if
-  it was created by the same statement that created an unpicklable global,
-  it's not stored directly. Instead, the statement is stored in the
-  unpicklables list property. On each request, before executing the current
-  statement, the unpicklable statements are evaluated to recreate the
-  unpicklable globals.
-
-  The unpicklable_names property stores all of the names of globals that were
-  added by unpicklable statements. When we pickle and store the globals after
-  executing a statement, we skip the ones in unpicklable_names.
-
-  Using Text instead of string is an optimization. We don't query on any of
-  these properties, so they don't need to be indexed.
-  """
-  global_names = db.ListProperty(db.Text)
-  globals = db.ListProperty(db.Blob)
-  unpicklable_names = db.ListProperty(db.Text)
-  unpicklables = db.ListProperty(db.Text)
-
-  def set_global(self, name, value):
-    """Adds a global, or updates it if it already exists.
-
-    Also removes the global from the list of unpicklable names.
-
-    Args:
-      name: the name of the global to remove
-      value: any picklable value
     """
-    # We need to disable the pickling optimization here in order to get the
-    # correct values out.
-    blob = db.Blob(self.fast_dumps(value, 1))
+    A shell session. Stores the session's globals.
 
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      self.globals[index] = blob
-    else:
-      self.global_names.append(db.Text(name))
-      self.globals.append(blob)
+    Each session globals is stored in one of two places:
 
-    self.remove_unpicklable_name(name)
+    If the global is picklable, it's stored in the parallel globals and
+    global_names list properties. (They're parallel lists to work around the
+    unfortunate fact that the datastore can't store dictionaries natively.)
 
-  def remove_global(self, name):
-    """Removes a global, if it exists.
+    If the global is not picklable (e.g. modules, classes, and functions), or if
+    it was created by the same statement that created an unpicklable global,
+    it's not stored directly. Instead, the statement is stored in the
+    unpicklables list property. On each request, before executing the current
+    statement, the unpicklable statements are evaluated to recreate the
+    unpicklable globals.
 
-    Args:
-      name: string, the name of the global to remove
+    The unpicklable_names property stores all of the names of globals that were
+    added by unpicklable statements. When we pickle and store the globals after
+    executing a statement, we skip the ones in unpicklable_names.
+
+    Using Text instead of string is an optimization. We don't query on any of
+    these properties, so they don't need to be indexed.
     """
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      del self.global_names[index]
-      del self.globals[index]
+    global_names = db.ListProperty(db.Text)
+    globals = db.ListProperty(db.Blob)
+    unpicklable_names = db.ListProperty(db.Text)
+    unpicklables = db.ListProperty(db.Text)
 
-  def globals_dict(self):
-    """Returns a dictionary view of the globals.
-    """
-    return dict((name, pickle.loads(val))
-                for name, val in zip(self.global_names, self.globals))
+    def set_global(self, name, value):
+        """
+        Adds a global, or updates it if it already exists.
 
-  def add_unpicklable(self, statement, names):
-    """Adds a statement and list of names to the unpicklables.
+        Also removes the global from the list of unpicklable names.
 
-    Also removes the names from the globals.
+        Args:
+          name: the name of the global to remove
+          value: any picklable value
+        """
+        # We need to disable the pickling optimization here in order to get the
+        # correct values out.
+        blob = db.Blob(self.fast_dumps(value, 1))
 
-    Args:
-      statement: string, the statement that created new unpicklable global(s).
-      names: list of strings; the names of the globals created by the statement.
-    """
-    self.unpicklables.append(db.Text(statement))
+        if name in self.global_names:
+            index = self.global_names.index(name)
+            self.globals[index] = blob
+        else:
+            self.global_names.append(db.Text(name))
+            self.globals.append(blob)
 
-    for name in names:
-      self.remove_global(name)
-      if name not in self.unpicklable_names:
-        self.unpicklable_names.append(db.Text(name))
+        self.remove_unpicklable_name(name)
 
-  def remove_unpicklable_name(self, name):
-    """Removes a name from the list of unpicklable names, if it exists.
+    def remove_global(self, name):
+        """
+        Removes a global, if it exists.
 
-    Args:
-      name: string, the name of the unpicklable global to remove
-    """
-    if name in self.unpicklable_names:
-      self.unpicklable_names.remove(name)
+        Args:
+          name: string, the name of the global to remove
+        """
+        if name in self.global_names:
+            index = self.global_names.index(name)
+            del self.global_names[index]
+            del self.globals[index]
 
-  def fast_dumps(self, obj, protocol=None):
-    """Performs the same function as pickle.dumps but with optimizations off.
+    def globals_dict(self):
+        """
+        Returns a dictionary view of the globals.
+        """
+        return dict((name, pickle.loads(val))
+                    for name, val in zip(self.global_names, self.globals))
 
-    Args:
-      obj: object, object to be pickled
-      protocol: int, optional protocol option to emulate pickle.dumps
+    def add_unpicklable(self, statement, names):
+        """
+        Adds a statement and list of names to the unpicklables.
 
-    Note: It is necessary to pickle SymPy values with the fast option in order
-          to get the correct assumptions when unpickling. See Issue 2587.
-    """
-    file = StringIO()
-    p = pickle.Pickler(file, protocol)
-    p.fast = 1
-    p.dump(obj)
-    return file.getvalue()
+        Also removes the names from the globals.
+
+        Args:
+          statement: string, the statement that created new unpicklable global(s).
+          names: list of strings; the names of the globals created by the statement.
+        """
+        self.unpicklables.append(db.Text(statement))
+
+        for name in names:
+            self.remove_global(name)
+            if name not in self.unpicklable_names:
+                self.unpicklable_names.append(db.Text(name))
+
+    def remove_unpicklable_name(self, name):
+        """
+        Removes a name from the list of unpicklable names, if it exists.
+
+        Args:
+          name: string, the name of the unpicklable global to remove
+        """
+        if name in self.unpicklable_names:
+            self.unpicklable_names.remove(name)
+
+    def fast_dumps(self, obj, protocol=None):
+        """
+        Performs the same function as pickle.dumps but with optimizations off.
+
+        Args:
+          obj: object, object to be pickled
+          protocol: int, optional protocol option to emulate pickle.dumps
+
+        Note: It is necessary to pickle SymPy values with the fast option in order
+              to get the correct assumptions when unpickling. See Issue 2587.
+        """
+        file = StringIO()
+        p = pickle.Pickler(file, protocol)
+        p.fast = 1
+        p.dump(obj)
+        return file.getvalue()
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
@@ -634,7 +636,9 @@ class ForceDesktopCookieHandler(webapp.RequestHandler):
         self.response.out.write(rendered)
 
 class FrontPageHandler(webapp.RequestHandler):
-    """Creates a new session and renders the ``shell.html`` template. """
+    """
+    Creates a new session and renders the ``shell.html`` template.
+    """
 
     def get(self):
         #Get the 10 most recent queries
@@ -666,7 +670,9 @@ class FrontPageHandler(webapp.RequestHandler):
         self.response.out.write(rendered)
 
 class CompletionHandler(webapp.RequestHandler):
-    """Takes an incomplete statement and returns possible completions."""
+    """
+    Takes an incomplete statement and returns possible completions.
+    """
 
     def _cross_site_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -719,8 +725,11 @@ class CompletionHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
+
 class EvaluateHandler(webapp.RequestHandler):
-    """Evaluates a Python statement in a given session and returns the result. """
+    """
+    Evaluates a Python statement in a given session and returns the result.
+    """
 
     def _cross_site_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -811,10 +820,11 @@ class EvaluateHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
-class SphinxBannerHandler(webapp.RequestHandler):
-    """Provides the banner for the Sphinx extension.
-    """
 
+class SphinxBannerHandler(webapp.RequestHandler):
+    """
+    Provides the banner for the Sphinx extension.
+    """
     def _cross_site_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-Requested-With'
@@ -826,8 +836,9 @@ class SphinxBannerHandler(webapp.RequestHandler):
 
 
 class DeleteHistory(webapp.RequestHandler):
-    """Deletes all of the user's history"""
-
+    """
+    Deletes all of the user's history
+    """
     def get(self):
         results = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
 
@@ -836,11 +847,15 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
-class RedirectHandler(webapp.RedirectHandler):
-    """Redirects deprecated pages to the frontpage."""
 
+class RedirectHandler(webapp.RedirectHandler):
+    """
+    Redirects deprecated pages to the frontpage.
+    """
     def get(self):
         self.redirect('/', permanent=True)
+
+
 
 application = webapp.WSGIApplication([
   ('/', FrontPageHandler),
