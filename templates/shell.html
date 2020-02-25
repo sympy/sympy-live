@@ -10,15 +10,15 @@
 
 {% block sidebar %}
 <div id="user" class="sidebar_card">
-    {% if user %}
+    {% if user.is_authenticated %}
     <div class="clickable_top">
-        <h3>{{ user.nickname }}</h3>
+        <h3>{{ user.first_name }}</h3>
     </div>
     {% else %}
     <h3><a href="{{ login_url }}">Log In</a></h3>
     {% endif %}
     <div class="content">
-        {% if user %}
+        {% if user.is_authenticated %}
         <p><a href="{{ logout_url }}">Log Out</a></p>
         {% endif %}
     </div>
@@ -39,7 +39,6 @@
             default:
         </p>
         <pre>
-&gt;&gt;&gt; from __future__ import division
 &gt;&gt;&gt; from sympy import *
 &gt;&gt;&gt; x, y, z, t = symbols('x y z t')
 &gt;&gt;&gt; k, m, n = symbols('k m n', integer=True)

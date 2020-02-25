@@ -1,15 +1,5 @@
-application: sympy-live-hrd
-version: 58
-
-runtime: python27
-threadsafe: true
-api_version: 1
-
-libraries:
-- name: numpy
-  version: latest
-- name: matplotlib
-  version: latest
+runtime: python37
+entrypoint: gunicorn -b :8080 sympy_live_django.wsgi
 
 handlers:
 # redirect Sphinx extension
@@ -52,5 +42,6 @@ handlers:
 # endpoint where you want the shell to run, e.g. /shell . You'll also probably
 # want to add login: admin to restrict to admins only.
 - url: .*
-  script: shell.application
+#  script: shell.application
+  script: auto
   secure: always

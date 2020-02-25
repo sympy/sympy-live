@@ -39,13 +39,13 @@ used, and this module (and the readline module) are silently inactive.
 
 """
 
-import __builtin__
-# import __main__
+import builtins
+import __main__
 
 __all__ = ["Completer"]
 
 class Completer:
-    def __init__(self, namespace = None):
+    def __init__(self, namespace=None):
         """Create a new completer for the command line.
 
         Completer([namespace]) -> completer instance.
@@ -61,7 +61,7 @@ class Completer:
         """
 
         if namespace and not isinstance(namespace, dict):
-            raise TypeError,'namespace must be a dictionary'
+            raise TypeError('namespace must be a dictionary')
 
         # Don't bind to namespace quite yet, but flag whether the user wants a
         # specific namespace or to use __main__.__dict__. This will allow us
@@ -110,8 +110,8 @@ class Completer:
         for word in keyword.kwlist:
             if word[:n] == text:
                 matches.append(word)
-        for nspace in [__builtin__.__dict__, self.namespace]:
-            for word, val in nspace.items():
+        for nspace in [builtins.__dict__, self.namespace]:
+            for word, val in list(nspace.items()):
                 if word[:n] == text and word != "__builtins__":
                     matches.append(self._callable_postfix(val, word))
         return matches
