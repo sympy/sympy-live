@@ -29,7 +29,7 @@ Interpreter state is stored in the datastore so that variables, function
 definitions, and other values in the global and local namespaces can be used
 across commands.
 
-To use the shell in your app, copy shell.py, sympy/*, and templates/* into
+To use the shell in your app, copy shell.py, static/*, and templates/* into
 your app's source directory. Then, copy the URL handlers from app.yaml into
 your app.yaml.
 
@@ -652,6 +652,16 @@ def index(request):
     else:
         saved_searches = Searches.objects.none()
 
+    try:
+        printer = request.GET['printer']
+    except:
+        printer = ''
+
+    try:
+        submit = request.GET['submit']
+    except:
+        submit = ''
+
     context = {
         # 'server_software': os.environ['SERVER_SOFTWARE'],
         'application_version': LIVE_VERSION,
@@ -661,8 +671,8 @@ def index(request):
         'login_url': '/admin/login/?next=/',
         'logout_url': '/admin/logout/?next=/',
         'banner': banner(),
-        'printer': '',
-        'submit': '',
+        'printer': printer,
+        'submit': submit,
         'tabWidth': 'undefined',
         'searches': search_results,
         'has_searches': bool(search_results),
@@ -731,7 +741,7 @@ def evaluate(request):
     live = Live()
     session = request.session
     session.set_expiry(6000)
-    print('PR1', session_key)
+    # print('PR1', session_key)
     if not ('unpicklables' in session):
         session['unpicklables'] = [line for line in INITIAL_UNPICKLABLES]
     if not ('global_names' in session):
@@ -740,7 +750,7 @@ def evaluate(request):
         session['globals'] = []
     if not ('unpicklable_names' in session):
         session['unpicklable_names'] = []
-    print('PR1', session_key, request.session['unpicklables'], session['global_names'])
+    # print('PR1', session_key, request.session['unpicklables'], session['global_names'])
 
     # if session_key is not None:
     #     try:
