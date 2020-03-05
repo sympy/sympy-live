@@ -6,3 +6,4 @@ __pycache__/
 nohup.out
 .gcloudignore
 cloud_sql_proxy
+.vscode/

@@ -37,20 +37,6 @@ TODO: unit tests!
 """
 
 import ast
-from typing import Dict, Union
-
-from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.contrib.sessions.middleware import SessionMiddleware
-from django.contrib.sessions.models import Session as Session_d
-from django.views import View
-
-from . import rlcompleter
-from .models import Searches, User
-from base64 import b64encode, b64decode
-from sympy_live_django.settings import BASE_DIR, DEBUG
 import logging
 import types
 import os
@@ -59,14 +45,25 @@ import sys
 import pdb
 import traceback
 import tokenize
-import types
 import json
-from json import JSONEncoder
-import wsgiref.handlers
-import traceback
 import datetime
+import wsgiref.handlers
 from io import StringIO, BytesIO
+from json import JSONEncoder
+from base64 import b64encode, b64decode
+from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.views import View
+from inspect import currentframe, getframeinfo
+from typing import Dict, Union
+
 import numpy
+
+from sympy_live_django.settings import BASE_DIR, DEBUG
+from . import rlcompleter
+from .models import Searches, User
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
@@ -79,7 +76,7 @@ from sympy.interactive.session import int_to_Integer
 # LIVE_VERSION = os.environ['GAE_VERSION']
 # LIVE_DEPLOYED = LIVE_VERSION[6:8] + '/' + LIVE_VERSION[4:6] + '/' + LIVE_VERSION[0:4] + ' ' + LIVE_VERSION[9:11]
 # LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
-v = '58.383096322806301043'
+v = '58.423596622806301043'
 LIVE_VERSION, LIVE_DEPLOYED = v.split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(int(LIVE_DEPLOYED) / pow(2, 28))
 LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
@@ -482,7 +479,6 @@ class Live(object):
         # this is needed for import statements, among other things.
         import builtins
         statement_module.__builtins__ = __builtins__
-        # print('PR7', statement_module, __builtins__)
 
         # create customized display hook
         stringify_func = printer or sstr
@@ -523,6 +519,7 @@ class Live(object):
 
             # re-initialize '_' special variable
             __builtins__['_'] = session_globals_dict.get('_')
+            # print(getframeinfo(currentframe()).lineno, __builtins__['_'])
 
             # run!
             offset = 0
@@ -598,8 +595,8 @@ class Live(object):
                             pass
 
             # save '_' special variable into the datastore
-            val = getattr(__builtins__, '_', None)
-            # val = __builtins__['_']
+            val = __builtins__['_']
+            # print(getframeinfo(currentframe()).lineno, 'val', val)
 
             try:
                 set_global(session, '_', val)
@@ -683,6 +680,7 @@ def index(request):
     return render(request, 'shell.html', context)
 
 
+@csrf_exempt
 def complete(request):
     """Takes an incomplete statement and returns possible completions."""
 
@@ -694,10 +692,33 @@ def complete(request):
         # self.error(400)
         return
 
-    session_key = message.get('session')
+    session = request.session
+    session_key = request.session.session_key
     # statement = message.get('statement').encode('utf-8')
     statement = message.get('statement')
     live = Live()
+    session['unpicklables'] = list(INITIAL_UNPICKLABLES)
+    session.save()
+    live.evaluate(PREEXEC, session)
+    live.evaluate(PREEXEC_INTERNAL, session)
+
+    completions = list(sorted(set(live.complete(statement, session))))
+    if not statement.split('.')[-1].startswith('_'):
+        completions = [x for x in completions if
+                       not x.split('.')[-1].startswith('_')]
+
+    common = os.path.commonprefix(completions)
+
+    result = {
+        'session': str(session_key),
+        'completions': completions,
+        'prefix': common
+    }
+
+    # response = HttpResponse(content_type="application/json")
+    # response.write(json.dumps(result))
+    response = JsonResponse(result)
+    return response
 
 
 @csrf_exempt
