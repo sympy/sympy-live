@@ -68,7 +68,7 @@ from .models import Searches, User
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
 
-from sympy import srepr, sstr, pretty, latex
+from sympy import srepr, sstr, pretty, latex, __version__ as sympy_version
 from sympy.interactive.session import int_to_Integer
 
 # import settings
@@ -158,7 +158,6 @@ class DeadlineExceededError(Exception):
 
 
 def banner(quiet=False):
-    from sympy import __version__ as sympy_version
     python_version = "%d.%d.%d" % sys.version_info[:3]
 
     message = "Python console for SymPy %s (Python %s)\n" % (sympy_version, python_version)
@@ -185,7 +184,6 @@ def banner(quiet=False):
 
 
 def banner_sphinx(quiet=False):
-    from sympy import __version__ as sympy_version
     python_version = "%d.%d.%d" % sys.version_info[:3]
 
     message = "Python console for SymPy %s (Python %s)\n" % (sympy_version, python_version)
@@ -722,6 +720,7 @@ def complete(request):
 
 
 @csrf_exempt
+# @login_required(login_url='/admin/login/?next=/')
 def evaluate(request):
     """Evaluates a Python statement in a given session and returns the result. """
 
@@ -747,13 +746,17 @@ def evaluate(request):
     statement = message.get('statement')
     privacy = message.get('privacy')
 
+    user = request.user
+    if not request.user.is_authenticated:
+        user = User.objects.get(username='anonymous')
+
     if statement != '':
 
         if privacy == 'off':
-            searches = Searches.objects.create(user_id=request.user, query=print_statement, private=False)
+            searches = Searches.objects.create(user_id=user, query=print_statement, private=False)
 
         if privacy == 'on':
-            searches = Searches.objects.create(user_id=request.user, query=print_statement, private=True)
+            searches = Searches.objects.create(user_id=user, query=print_statement, private=True)
 
     searches.save()
 
@@ -837,11 +840,17 @@ def evaluate(request):
             'output': str(errmsg)
         }
 
-    # print('PR16', type(result['output']), result)
     response = HttpResponse(content_type="application/json")
     response.write(json.dumps(result))
-    # print('PR17', response)
     return response
+
+
+def sphinxbanner(request):
+    response = HttpResponse(content_type='text/plain')
+    print(banner_sphinx())
+    response.write(banner_sphinx())
+    return response
+
 
 def delete(request):
     results = Searches.objects.filter(user_id=request.user).delete()
