@@ -55,6 +55,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib.sessions.backends.db import SessionStore
 from django.views import View
 from inspect import currentframe, getframeinfo
 from typing import Dict, Union
@@ -146,11 +147,6 @@ VERBOSE_MESSAGE_SPHINX = """\
 These commands were executed:
 %(source)s
 """
-
-
-class MyEncoder(JSONEncoder):
-    def default(self, o):
-        return o.__dict__
 
 
 class DeadlineExceededError(Exception):
@@ -367,21 +363,31 @@ class Live(object):
         """Extract last logical line from multi-line source code. """
         string = StringIO(source).readline
 
-        try:
-            tokens = list(tokenize.generate_tokens(string))
-        except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
-            return None, source
-
-        for tok, _, (n, _), _, _ in reversed(tokens):
-            if tok == tokenize.NEWLINE:
-                lines = source.split('\n')
-
-                exec_source = '\n'.join(lines[:n])
-                eval_source = '\n'.join(lines[n:])
-
-                return exec_source, eval_source
+        lines = source.split('\n')
+        n = len(lines)
+        if n > 1:
+            if lines[n-1][0] != ' ' or lines[n-1][0] != '\t':
+                return source, (lines[n-1])
+            else:
+                return source, None
         else:
-            return None, source
+            return source, source
+
+        # try:
+        #     tokens = list(tokenize.generate_tokens(string))
+        # except (OverflowError, SyntaxError, ValueError, tokenize.TokenError):
+        #     return None, source
+
+        # for tok, _, (n, _), _, _ in reversed(tokens):
+        #     if tok == tokenize.NEWLINE:
+        #         lines = source.split('\n')
+
+        #         exec_source = '\n'.join(lines[:n])
+        #         eval_source = '\n'.join(lines[n:])
+
+        #         return exec_source, eval_source
+        # else:
+        #     return None, source
 
     def compile(self, source, mode):
         """Wrapper over Python's built-in function. """
@@ -456,14 +462,17 @@ class Live(object):
 
         # convert int to Integer (1/2 -> Integer(1)/Integer(2))
         source = int_to_Integer(source)
+        # print(getframeinfo(currentframe()).lineno, source)
 
         # split source code into 'exec' and 'eval' parts
         exec_source, eval_source = self.split(source)
+        # print(getframeinfo(currentframe()).lineno, exec_source, eval_source)
 
         try:
             self.compile(eval_source, 'eval')
         except (OverflowError, SyntaxError, ValueError):
             exec_source, eval_source = source, None
+        # print(getframeinfo(currentframe()).lineno, exec_source, eval_source)
 
         if exec_source is not None:
             exec_source += '\n'
@@ -540,14 +549,17 @@ class Live(object):
                         eval(exec_code, statement_module.__dict__)
 
                     # print('PR eval', eval_source, exec_source)
-                    if '=' not in exec_source and 'print' not in exec_source and 'import' not in exec_source:
-                        eval_source = exec_source
-                    if eval_source is not None:
+                    # if '=' not in exec_source and 'print' not in exec_source and 'import' not in exec_source:
+                    # eval_source = exec_source
+                    if eval_source is not None and 'print' not in eval_source:
                         if exec_source is not None:
                             offset = len(exec_source.split('\n'))
 
-                        result = eval(eval_source, statement_module.__dict__)
-                        sys.displayhook(result)
+                        try:
+                            result = eval(eval_source, statement_module.__dict__)
+                            sys.displayhook(result)
+                        except:
+                            pass
                 finally:
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
@@ -638,7 +650,7 @@ def force_desktop_cookie(request):
 
 
 @csrf_exempt
-@login_required(login_url='/admin/login/?next=/')
+# @login_required(login_url='/admin/login/?next=/')
 def index(request):
     searches_query = Searches.objects.filter(private=False).order_by('timestamp')
     search_results = searches_query.reverse()[:10]
@@ -713,14 +725,11 @@ def complete(request):
         'prefix': common
     }
 
-    # response = HttpResponse(content_type="application/json")
-    # response.write(json.dumps(result))
     response = JsonResponse(result)
     return response
 
 
 @csrf_exempt
-# @login_required(login_url='/admin/login/?next=/')
 def evaluate(request):
     """Evaluates a Python statement in a given session and returns the result. """
 
@@ -733,9 +742,10 @@ def evaluate(request):
 
     # def post(self, request):
     #     self._cross_site_headers()
-
+    # print(getframeinfo(currentframe()).lineno, request.body)
     try:
         message = json.loads(request.body)
+        # print(getframeinfo(currentframe()).lineno, message)
     except ValueError:
         # error(400)
         print(400)
@@ -745,10 +755,22 @@ def evaluate(request):
     print_statement = '\n'.join(message.get('print_statement'))
     statement = message.get('statement')
     privacy = message.get('privacy')
+    session_key = message.get('session')
 
-    user = request.user
+    # print(getframeinfo(currentframe()).lineno, request.user, request.session.session_key)
     if not request.user.is_authenticated:
-        user = User.objects.get(username='anonymous')
+        request.user = User.objects.get(username='anonymous')
+        if request.session.session_key is None:
+            if session_key is not None:
+                session = SessionStore(session_key=session_key)
+            else:
+                session = SessionStore()
+                session.create()
+            request.session = session
+            session.modified = True
+            session.save()
+    # print(getframeinfo(currentframe()).lineno, request.user, request.session.session_key)
+    user = request.user
 
     if statement != '':
 
@@ -765,7 +787,6 @@ def evaluate(request):
     live = Live()
     session = request.session
     session.set_expiry(6000)
-    # print('PR1', session_key)
     if not ('unpicklables' in session):
         session['unpicklables'] = [line for line in INITIAL_UNPICKLABLES]
     if not ('global_names' in session):
@@ -774,31 +795,8 @@ def evaluate(request):
         session['globals'] = []
     if not ('unpicklable_names' in session):
         session['unpicklable_names'] = []
-    # print('PR1', session_key, request.session['unpicklables'], session['global_names'])
 
-    # if session_key is not None:
-    #     try:
-    #         session = request.session
-    #         print('PR2', session)
-    #         print('unpicklables' in session)
-    #         if not ('unpicklables' in session):
-    #             print('PR3', session_key)
-    #             session['unpicklables'] = [line for line in INITIAL_UNPICKLABLES]
-    #             print('PR3', session_key)
-    #         # session = request.session
-    #     except:
-    #     # except db.Error:
-    #         # self.error(400)
-    #         return HttpResponseBadRequest
-    # else:
-    #     session = Session_d()
-    #     session['unpicklables'] = [line for line in INITIAL_UNPICKLABLES]
-    #     session_key = session.session_key
-
-    # session = Session()
-    # print('PR3', session, type(session), INITIAL_UNPICKLABLES)
-    # session.unpicklables = [line for line in INITIAL_UNPICKLABLES]
-    session.modified = True
+    # session.modified = True
     session.save()
     live.evaluate(PREEXEC, session)
     live.evaluate(PREEXEC_INTERNAL, session)
@@ -840,8 +838,7 @@ def evaluate(request):
             'output': str(errmsg)
         }
 
-    response = HttpResponse(content_type="application/json")
-    response.write(json.dumps(result))
+    response = JsonResponse(result)
     return response
 
 
