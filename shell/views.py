@@ -58,6 +58,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sessions.backends.db import SessionStore
 from django.views import View
 from inspect import currentframe, getframeinfo
+# from IPython.terminal.embed import InteractiveShellEmbed
 from typing import Dict, Union
 
 import numpy
@@ -654,6 +655,7 @@ def force_desktop_cookie(request):
 def index(request):
     searches_query = Searches.objects.filter(private=False).order_by('timestamp')
     search_results = searches_query.reverse()[:10]
+    # ipshell = InteractiveShellEmbed(banner1='banner', exit_msg='exit_msg')
     if request.user.is_authenticated:
         saved_searches = Searches.objects.filter(user_id=request.user)
     else:
@@ -760,15 +762,21 @@ def evaluate(request):
     # print(getframeinfo(currentframe()).lineno, request.user, request.session.session_key)
     if not request.user.is_authenticated:
         request.user = User.objects.get(username='anonymous')
-        if request.session.session_key is None:
-            if session_key is not None:
-                session = SessionStore(session_key=session_key)
-            else:
-                session = SessionStore()
-                session.create()
-            request.session = session
-            session.modified = True
-            session.save()
+        # if request.session.session_key is None:
+        if session_key is not None:
+            session = SessionStore(session_key=session_key)
+        else:
+            session = SessionStore()
+            session.create()
+        request.session = session
+        session.modified = True
+        session.save()
+    elif session_key is None:
+        session = SessionStore()
+        session.create()
+        request.session = session
+        session.modified = True
+        session.save()
     # print(getframeinfo(currentframe()).lineno, request.user, request.session.session_key)
     user = request.user
 
@@ -850,7 +858,8 @@ def sphinxbanner(request):
 
 
 def delete(request):
-    results = Searches.objects.filter(user_id=request.user).delete()
+    Searches.objects.filter(user_id=request.user).delete()
+    request.session.clear()
     return HttpResponse("Your queries have been deleted.")
 
 

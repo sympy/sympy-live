@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Searches(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    query = models.CharField(max_length=100, default=None)
+    query = models.CharField(max_length=1000, default=None)
     timestamp = models.DateTimeField(auto_now_add=True)
     private = models.BooleanField()
 
