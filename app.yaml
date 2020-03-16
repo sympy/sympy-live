@@ -1,5 +1,5 @@
 runtime: python37
-entrypoint: gunicorn -b :8080 sympy_live_django.wsgi
+entrypoint: gunicorn -b :8080 sympy_live.wsgi
 
 handlers:
 # redirect Sphinx extension

@@ -63,7 +63,7 @@ from typing import Dict, Union
 
 import numpy
 
-from sympy_live_django.settings import BASE_DIR, DEBUG
+from sympy_live.settings import BASE_DIR, DEBUG
 from . import rlcompleter
 from .models import Searches, User
 
@@ -211,7 +211,7 @@ def set_global(session, name, value):
     """
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    
+
     # blob = b64encode(fast_dumps(value, 1)).decode('utf-8')
     blob = b64encode(pickle.dumps(value, 1)).decode('utf-8')
 
@@ -399,7 +399,7 @@ class Live(object):
         """Autocomplete the statement in the session's globals."""
 
         statement_module = types.ModuleType('__main__')
-        import builtins
+        # import builtins
         # statement_module.__builtin__ = __builtins__
         statement_module.__builtins__ = __builtins__
 
@@ -485,7 +485,7 @@ class Live(object):
 
         # use this request's __builtin__, since it changes on each request.
         # this is needed for import statements, among other things.
-        import builtins
+        # import builtins
         statement_module.__builtins__ = __builtins__
 
         # create customized display hook
@@ -795,13 +795,13 @@ def evaluate(request):
     live = Live()
     session = request.session
     session.set_expiry(6000)
-    if not ('unpicklables' in session):
+    if not 'unpicklables' in session:
         session['unpicklables'] = [line for line in INITIAL_UNPICKLABLES]
-    if not ('global_names' in session):
+    if not 'global_names' in session:
         session['global_names'] = []
-    if not ('globals' in session):
+    if not 'globals' in session:
         session['globals'] = []
-    if not ('unpicklable_names' in session):
+    if not 'unpicklable_names' in session:
         session['unpicklable_names'] = []
 
     # session.modified = True
