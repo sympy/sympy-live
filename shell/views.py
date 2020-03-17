@@ -29,7 +29,7 @@ Interpreter state is stored in the datastore so that variables, function
 definitions, and other values in the global and local namespaces can be used
 across commands.
 
-To use the shell in your app, copy shell.py, static/*, and templates/* into
+To use the shell in your app, copy shell/*, static/*, and templates/* into
 your app's source directory. Then, copy the URL handlers from app.yaml into
 your app.yaml.
 
@@ -78,7 +78,7 @@ from sympy.interactive.session import int_to_Integer
 # LIVE_VERSION = os.environ['GAE_VERSION']
 # LIVE_DEPLOYED = LIVE_VERSION[6:8] + '/' + LIVE_VERSION[4:6] + '/' + LIVE_VERSION[0:4] + ' ' + LIVE_VERSION[9:11]
 # LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
-v = '58.423596622806301043'
+v = '59.423596622806301043'
 LIVE_VERSION, LIVE_DEPLOYED = v.split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(int(LIVE_DEPLOYED) / pow(2, 28))
 LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
