@@ -117,6 +117,8 @@ INITIAL_UNPICKLABLES = [
     "import os",
     "import sys",
     "from sympy import *",
+    "import numpy",
+    "import scipy"
 ]
 
 PREEXEC = """\
@@ -134,6 +136,8 @@ def init_printing(*args, **kwargs):
 
 PREEXEC_MESSAGE = """\
 from sympy import *
+import numpy
+import scipy
 """ + PREEXEC
 
 VERBOSE_MESSAGE = """\
