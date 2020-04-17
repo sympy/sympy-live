@@ -48,6 +48,87 @@ We use submodules to include external libraries in sympy-live::
 This is sufficient to clone appropriate repositories in correct versions
 into sympy-live (see git documentation on submodules for information).
 
+Setting Up for Testing PR 144
+-----------------------------
+Here are the steps to be followed for testing the PR 
+https://github.com/sympy/sympy-live/pull/144. The following are 
+the steps to be followed for Ubuntu. The steps for other Operating Systems 
+could be reproduced similiarly.
+
+You must have python3 installed. You can check your version by::
+
+    $ python3 -V
+
+The version must be greater than 3.4. If not present you can install it by::
+
+    $ sudo apt install python3
+
+You need to create the virtual environment and activate it::
+
+    $ sudo apt-get install python3-venv
+    $ python3 -m venv env
+    $ source env/bin/activate
+
+SymPy Live uses MySQL for database purpose. So you need to setup mysql::
+
+    $ sudo apt-get install mysql-server
+    $ sudo apt-get install libmysqlclient-dev
+    $ sudo apt-get install python3-dev
+    $ sudo systemctl start mysql
+    $ sudo mysql
+
+This will open mysql. You will now have to create a new database with name 
+{database_name}. Create a new user {user_name} and password {user_password}.
+Grant all previleges to {user_name} on {database_name}::
+
+    mysql> CREATE DATABASE {database_name};
+    mysql> CREATE USER '{user_name}'@'localhost' IDENTIFIED BY '{user_password}';
+    mysql> FLUSH PRIVILEGES;
+    mysql> GRANT ALL PRIVILEGES ON *.* TO '{user_name}'@'localhost' IDENTIFIED BY '{user_password}';
+
+These are the steps for MySQL v8.0.19. The above steps could be bit different for 
+you depending on the version of MySQL. You can check the MySQL documentation for 
+help. Using MySQL is not a compulsion. You can use any other DataBase for testing 
+but you must properly configure it.
+
+To ensure that the database server launches after a reboot, run the following command::
+
+    $ sudo systemctl enable mysql
+
+Now in settings.py set up the database for MySQL::
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '127.0.0.1',    # DataBase's IP address
+            'PORT': '3306',
+            'NAME': '{database_name}',
+            'USER': '{user_name}',
+            'PASSWORD': '{user_password}',
+        }
+    }
+
+Install dependencies from requirements.txt::
+
+    $ pip install -r requirements.txt
+
+Migrate the changes so that all DataBase tables are created::
+
+    $ python3 manage.py makemigrations
+    $ python3 manage.py migrate
+    $ python3 manage.py createsuperuser     # Admin. It will be used to login into admin panel
+
+And finally you need to run the server::
+
+    $ python3 manage.py runserver
+
+This runs the site on localhost. But before using the SymPy Live go to 
+admin panel http://127.0.0.1:8000/admin/. Login using the Admin details. 
+There you need to create new user 'anonymous'. You can keep password 
+anything but name must be exactly same as 'anonymous'.
+
+Congratulations, now you can test the SymPy Live.
+
 Development server
 ------------------
 

@@ -105,7 +105,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'HOST': '127.0.0.1', # DB's IP address
+            'HOST': '127.0.0.1',    # DataBase's IP address
             'PORT': '3306',
             'NAME': 'sympyDB',
             'USER': 'root',

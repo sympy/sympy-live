@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>{% block title %}{% endblock %}</title>
     <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet" type="text/css" />
+    {% if hosted_on_app_engine %}
     <link rel="stylesheet" href="/static-{{application_version}}/external/css/reset.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/static-{{application_version}}/external/css/responsive-gs-12col.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/static-{{application_version}}/css/base.css" type="text/css" media="screen" />
@@ -19,6 +20,22 @@
     <link rel="stylesheet" type="text/css" href="static-{{application_version}}/sympy-live/css/live-core.css" />
     <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/live-autocomplete.js"></script>
     <script type="text/javascript" src="static-{{application_version}}/sympy-live/javascript/live-core.js"></script>
+    {% else %}
+    <link rel="stylesheet" href="/static/external/css/reset.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/static/external/css/responsive-gs-12col.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/static/css/base.css" type="text/css" media="screen" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Gentium+Basic" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="/static/SymPy-Favicon.ico" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/main.js"></script>
+    <script type="text/javascript" src="static/external/javascript/classy.js"></script>
+    <script type="text/javascript" src="static/sympy-live/javascript/utilities.js"></script>
+    <script type="text/javascript" src="static/sympy-live/javascript/expand_right.js"></script>
+    <link rel="stylesheet" href="static/sympy-live/css/live-autocomplete.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="static/sympy-live/css/live-core.css" />
+    <script type="text/javascript" src="static/sympy-live/javascript/live-autocomplete.js"></script>
+    <script type="text/javascript" src="static/sympy-live/javascript/live-core.js"></script>
+    {% endif %}
 
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
@@ -66,7 +83,11 @@
   <body>
     <div class="container">
       <header>
+        {% if hosted_on_app_engine %}
         <h1><a href="/"> <img src="/static-{{application_version}}/images/logo.png" alt="SymPy Logo" /> SymPy</a></h1>
+        {% else %}
+        <h1><a href="/"> <img src="/static/images/logo.png" alt="SymPy Logo" /> SymPy</a></h1>
+        {% endif %}
         <div id="mobile-menu"><i class="icon-ellipsis-vertical"></i></div>
       </header>
       <nav id="main-navigation" class="row">

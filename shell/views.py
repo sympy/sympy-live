@@ -677,6 +677,7 @@ def index(request):
 
     context = {
         # 'server_software': os.environ['SERVER_SOFTWARE'],
+        'hosted_on_app_engine': os.getenv('GAE_APPLICATION', None),
         'application_version': LIVE_VERSION,
         'date_deployed': LIVE_DEPLOYED,
         'python_version': sys.version,
