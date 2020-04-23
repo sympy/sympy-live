@@ -9,7 +9,7 @@ This is accomplished by providing a HTML/JavaScript GUI for entering source
 code and visualization of output, and a server part which evaluates the
 requested source code. Note that this shell is not scalable and it uses
 only one instance on GAE, thus all evaluation requests are queued and it
-make take quite a lot of time, before our code can be evaluated (depending
+may take quite a lot of time, before our code can be evaluated (depending
 on the current load of the instance).
 
 Google App Engine has intrinsic 30 second request handling limit, so each
