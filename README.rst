@@ -72,10 +72,15 @@ should see GUI of SymPy Online Shell.
 Deploying to GAE
 ----------------
 
-Travis-CI is used to deploy automatically to the official server. To upload
-the application manually, you need to do a few things.  First, tag the
-current commit with the App Engine application version (this is not
-necessary unless you are deploying to the official server)::
+Travis-CI is used to deploy automatically to the official server
+via Github Releases. Go to https://github.com/sympy/sympy-live/releases
+and click on create a release and name the release as `version-NN`
+where `NN` is the release version. After this travis will automatically
+release version `NN`.
+
+To upload the application manually, you need to do a few things.
+First, tag th current commit with the App Engine application version
+(this is not necessary unless you are deploying to the official server)::
 
   $ git tag -a version-42
 
@@ -98,11 +103,12 @@ This requires admin privileges to http://sympy-live.appspot.com. If you don't
 have access to this App Engine application, but want to test it, see the
 instructions in the `Testing on the App Engine`_ section below.
 
-Finally, go to http://NN.sympy-live.appspot.com, where ``NN`` is the version
-you just uploaded, and make sure that it works.  If it does, go to the
-``Versions`` section of the sympy-live dashboard, and set this as the new
-default version.  If there are any issues, you can roll back to the previous
-version from this same screen.
+After doing either of the steps (via github release or manually),
+go to http://NN.sympy-live.appspot.com, where ``NN`` is the version
+you just uploaded (or released), and make sure that it works.
+If it does, go to the ``Versions`` section of the sympy-live dashboard,
+and set this as the new default version.  If there are any issues, you
+can roll back to the previous version from this same screen.
 
 Creating Deployment Credentials
 -------------------------------
