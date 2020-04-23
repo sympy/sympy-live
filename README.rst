@@ -69,25 +69,30 @@ This is a local server that runs on port 8080 (use ``--port`` option to
 change this). Open a web browser and go to http://localhost:8080. You
 should see GUI of SymPy Online Shell.
 
-Uploading to GAE
+Deploying to GAE
 ----------------
 
-Before updating the the sympy-live app (the official one), you need to do two
-things.  First you need to bump the version in the ``app.yaml`` file.  Just
-change the second line ("version") to one more, and commit it (``git commit
-app.yaml -m "Bump version to NN"``, where ``NN`` is the new version) and push
-it.  Second, you need to go to the ``Versions`` section of the sympy-live
-dashboard at appspot.com and delete the oldest version, as we can only upload
-ten versions at a time.
+Travis-CI is used to deploy automatically to the official server. To upload
+the application manually, you need to do a few things.  First, tag the
+current commit with the App Engine application version (this is not
+necessary unless you are deploying to the official server)::
+
+  $ git tag -a version-42
+
+Then install the Google Cloud SDK for your OS from here:
+https://cloud.google.com/sdk/install
+
+This will let you use the "gcloud" CLI. After this configure the CLI to access
+the google cloud console for the project::
+
+    $ gcloud init
+
 
 Assuming that sympy-live works properly (also across different mainstream web
-browsers), you can upload your changes to Google App Engine::
+browsers), you can upload your changes to Google App Engine, replacing the
+<TAGGED_VERSION> with actual version we tagged with::
 
-    $ ../appcfg.py update .
-
-Or, in Mac OS X, just open the GoogleAppEngineLauncher program, add the
-project if you haven't already, and click "Deploy" in the toolbar.  And then
-it should just work (follow the log that comes up to see.
+    $ gcloud app deploy --project sympy-live-hrd --no-promote --version <TAGGED_VERSION>
 
 This requires admin privileges to http://sympy-live.appspot.com. If you don't
 have access to this App Engine application, but want to test it, see the
@@ -98,6 +103,26 @@ you just uploaded, and make sure that it works.  If it does, go to the
 ``Versions`` section of the sympy-live dashboard, and set this as the new
 default version.  If there are any issues, you can roll back to the previous
 version from this same screen.
+
+Creating Deployment Credentials
+-------------------------------
+
+Travis-CI deploys the application using service account credentials. To create a
+service account for deployment with suitable permissions, follow these steps:
+
+https://cloud.google.com/solutions/continuous-delivery-with-travis-ci#creating_credentials
+
+These are stored encrypted in the ``client-secret.json.enc`` file in the repository, and are generated
+using the Travis command-line tools (client-secret.json is the credentials file for the service account
+created int the step above) ::
+
+
+  travis encrypt-file client-secret.json --add
+
+This also adds the encrypted keys in travis environment variables, which you can
+check from here: https://travis-ci.org/github/aktech/sympy-live/settings in the
+"Environment Variables" section.
+
 
 Testing on the App Engine
 -------------------------
@@ -111,33 +136,20 @@ is pull request #55, you would push to version 55, and access it by
 55-dot-sympy-live-tests.appspot.com).  Alternately, you can set up your own
 testing server (it's free, though it requires a cell phone to set up).
 
-Either way, to test, you will need to edit the ``app.yaml`` file.  You should
-edit the first line, ``application``, to the name of the testing application
-(like ``sympy-live-tests``), and the second line to the version number you
-want to use.
+Either way, to test, you will need to edit the Project ID in the deploy command
+mentioned above with your Project ID and the version you want to deploy to::
 
-You should not actually commit these changes to ``app.yaml``, as the official
-version should still use the ``sympy-live`` application.  Therefore, it is
-recommended that you run::
+    gcloud app deploy --project <your-project-name> --no-promote --version <TAGGED_VERSION>
 
-    git update-index --assume-unchanged app.yaml
-
-This will make git ignore all changes to the ``app.yaml`` file, so that
-commands like ``git commit -a`` will not commit them.  This command works on
-the local level only, so you don't need to worry about it affecting other
-people who pull your branch.
-
-If you later want to commit an actual change to ``app.yaml`` (e.g., to modify
-some metadata, or to bump the version as described above), you need to run::
-
-    git update-index --no-assume-unchanged app.yaml
-
-This will undo the above command, so that git will recognize changes to the
-file again.
 
 If you have a test app online, remember to update it every time you update a
 pull request, so that others can easily review your work, without even having
 to use ``dev_appserver.py``.
+
+Branch builds are automatically deployed by Travis to
+`https://<BRANCH-NAME>-dot-sympy-live-hrd.appspot.com/`.
+Note that the pull request has to from a branch on this repository, as
+forks do not have access to the key to deploy to the app engine.
 
 Development notes
 -----------------
