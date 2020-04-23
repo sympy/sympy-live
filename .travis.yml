@@ -1,0 +1,34 @@
+language: python
+python:
+  - '2.7'
+virtualenv:
+  system_site_packages: true
+
+# Stub: do nothing
+before_install:
+  - ls
+install:
+  - ls
+
+# Stub: do nothing
+before_script:
+  - ls
+script:
+  - ls
+
+before_deploy:
+  - openssl aes-256-cbc -K $encrypted_2fd045226a67_key -iv $encrypted_2fd045226a67_iv
+    -in client-secret.json.enc -out client-secret.json -d
+  - version=$(if [ ! -z "$TRAVIS_TAG" ]; then echo $(cut -d'-' -f2 <<<"$TRAVIS_TAG");
+    else echo "$TRAVIS_BRANCH"; fi)
+  - echo "Version = $version"
+deploy:
+  provider: gae
+  keyfile: client-secret.json
+  project: sympy-live-hrd
+  skip_cleanup: true
+  no_promote: true
+  version: "$version"
+  on:
+    all_branches: true
+    repo: sympy/sympy-live
