@@ -40,7 +40,7 @@ handlers:
 
 # cache-busting scheme
 # request /static-(app version)/filename
-- url: /static-[0-9a-z]+/(.*)
+- url: /static-[0-9a-zA-Z]+/(.*)
   static_files: static/\1
   upload: static/(.*)
   secure: always
