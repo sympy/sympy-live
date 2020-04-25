@@ -647,6 +647,7 @@ class FrontPageHandler(webapp.RequestHandler):
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
             'application_version': LIVE_VERSION,
+            'current_year': datetime.datetime.utcnow().year,
             'date_deployed': LIVE_DEPLOYED,
             'python_version': sys.version,
             'user': users.get_current_user(),

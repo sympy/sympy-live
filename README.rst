@@ -156,7 +156,7 @@ Branch builds are automatically deployed by Travis to
 `https://<BRANCH-NAME>-dot-sympy-live-hrd.appspot.com/`.
 Note that branch has to be on this repository, as forks
 do not have access to the key to deploy to the app engine,
-and branch name should match the regex: `[0-9a-zA-Z-_]`
+and branch name should match the regex: ``[0-9a-zA-Z-_]``
 (See app.yaml to check out the static files regex) for
 the static files to load properly
 
