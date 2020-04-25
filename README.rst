@@ -154,8 +154,11 @@ to use ``dev_appserver.py``.
 
 Branch builds are automatically deployed by Travis to
 `https://<BRANCH-NAME>-dot-sympy-live-hrd.appspot.com/`.
-Note that the pull request has to from a branch on this repository, as
-forks do not have access to the key to deploy to the app engine.
+Note that branch has to be on this repository, as forks
+do not have access to the key to deploy to the app engine,
+and branch name should match the regex: `[0-9a-zA-Z-_]`
+(See app.yaml to check out the static files regex) for
+the static files to load properly
 
 Development notes
 -----------------
