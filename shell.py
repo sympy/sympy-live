@@ -127,7 +127,9 @@ def init_printing(*args, **kwargs):
 PREEXEC_MESSAGE = """\
 from __future__ import division
 from sympy import *
-""" + PREEXEC
+""" + PREEXEC + """\
+init_printing()
+"""
 
 VERBOSE_MESSAGE = """\
 These commands were executed:
