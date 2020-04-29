@@ -23,7 +23,7 @@ May be run as a standalone app or in an existing app as an admin-only handler.
 Can be used for system administration tasks, as an interactive way to try out
 APIs, or as a debugging aid during development.
 
-The logging, os, sys, db, and users modules are imported automatically.
+The logging, os, sys, ndb, and users modules are imported automatically.
 
 Interpreter state is stored in the datastore so that variables, function
 definitions, and other values in the global and local namespaces can be used
@@ -49,17 +49,26 @@ import types
 import json
 import wsgiref.handlers
 import rlcompleter
-import traceback
 import datetime
 
 from StringIO import StringIO
+import six
+# https://github.com/googleapis/python-ndb/issues/249#issuecomment-560957294
+six.moves.reload_module(six)
+
+# https://cloud.google.com/appengine/docs/standard/python/issue-requests#requests
+import requests_toolbelt.adapters.appengine
+# Use the App Engine Requests adapter. This makes sure that Requests uses URLFetch.
+requests_toolbelt.adapters.appengine.monkeypatch()
 
 from google.appengine.api import users
-from google.appengine.ext import db
+from google.cloud import ndb
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
+
+ndb_client = ndb.Client()
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
@@ -105,7 +114,7 @@ INITIAL_UNPICKLABLES = [
   "import logging",
   "import os",
   "import sys",
-  "from google.appengine.ext import db",
+  "from google.cloud import ndb",
   "from google.appengine.api import users",
   "from __future__ import division",
   "from sympy import *",
@@ -144,11 +153,11 @@ These commands were executed:
 
 
 # The blueprint used to store user queries
-class Searches(db.Model):
-    user_id = db.UserProperty()
-    query = db.StringProperty(multiline=True)
-    timestamp = db.DateTimeProperty(auto_now_add=True)
-    private = db.BooleanProperty()
+class Searches(ndb.Model):
+    user_id = ndb.UserProperty()
+    query_ = ndb.StringProperty()
+    timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    private = ndb.BooleanProperty()
 
 
 def banner(quiet=False):
@@ -498,12 +507,13 @@ class Live(object):
                 pass
 
         try:
-            session.put()
+            with ndb_client.context():
+                session.put()
         except RequestTooLargeError:
             stream.truncate(0) # clear output
             self.error(stream, ('Unable to process statement due to its excessive size.',))
 
-class Session(db.Model):
+class Session(ndb.Model):
   """A shell session. Stores the session's globals.
 
   Each session globals is stored in one of two places:
@@ -526,10 +536,10 @@ class Session(db.Model):
   Using Text instead of string is an optimization. We don't query on any of
   these properties, so they don't need to be indexed.
   """
-  global_names = db.ListProperty(db.Text)
-  globals = db.ListProperty(db.Blob)
-  unpicklable_names = db.ListProperty(db.Text)
-  unpicklables = db.ListProperty(db.Text)
+  global_names = ndb.TextProperty(repeated=True)
+  globals = ndb.BlobProperty(repeated=True)
+  unpicklable_names = ndb.TextProperty(repeated=True)
+  unpicklables = ndb.TextProperty(repeated=True)
 
   def set_global(self, name, value):
     """Adds a global, or updates it if it already exists.
@@ -542,13 +552,13 @@ class Session(db.Model):
     """
     # We need to disable the pickling optimization here in order to get the
     # correct values out.
-    blob = db.Blob(self.fast_dumps(value, 1))
+    blob = self.fast_dumps(value, 1)
 
     if name in self.global_names:
       index = self.global_names.index(name)
       self.globals[index] = blob
     else:
-      self.global_names.append(db.Text(name))
+      self.global_names.append(name)
       self.globals.append(blob)
 
     self.remove_unpicklable_name(name)
@@ -579,12 +589,12 @@ class Session(db.Model):
       statement: string, the statement that created new unpicklable global(s).
       names: list of strings; the names of the globals created by the statement.
     """
-    self.unpicklables.append(db.Text(statement))
+    self.unpicklables.append(statement)
 
     for name in names:
       self.remove_global(name)
       if name not in self.unpicklable_names:
-        self.unpicklable_names.append(db.Text(name))
+        self.unpicklable_names.append(name)
 
   def remove_unpicklable_name(self, name):
     """Removes a name from the list of unpicklable names, if it exists.
@@ -638,10 +648,12 @@ class FrontPageHandler(webapp.RequestHandler):
 
     def get(self):
         #Get the 10 most recent queries
-        searches_query = Searches.all().filter('private', False).order('-timestamp')
-        search_results = searches_query.fetch(limit=10)
+        with ndb_client.context():
+            searches_query = Searches.query(Searches.private == False).order(-Searches.timestamp)
+            search_results = searches_query.fetch(10)
 
-        saved_searches = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+            saved_searches = Searches.query(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
+            saved_searches_count = saved_searches.count()
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -660,7 +672,7 @@ class FrontPageHandler(webapp.RequestHandler):
             'searches': search_results,
             'has_searches': bool(search_results),
             'saved_searches': saved_searches,
-            'has_saved_searches': saved_searches.count()
+            'has_saved_searches': saved_searches_count
         }
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
@@ -690,14 +702,16 @@ class CompletionHandler(webapp.RequestHandler):
 
         if session_key is not None:
             try:
-                session = Session.get(session_key)
-            except db.Error:
+                with ndb_client.context():
+                    session = ndb.Key(urlsafe=session_key).get()
+            except ndb.exceptions.Error:
                 self.error(400)
                 return
         else:
-            session = Session()
-            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
-            session_key = session.put()
+            with ndb_client.context():
+                session = Session()
+                session.unpicklables = [ line for line in INITIAL_UNPICKLABLES ]
+                session_key = session.put().urlsafe()
 
             live.evaluate(PREEXEC, session)
             live.evaluate(PREEXEC_INTERNAL, session)
@@ -744,15 +758,17 @@ class EvaluateHandler(webapp.RequestHandler):
         statement = message.get('statement')
         privacy = message.get('privacy')
 
-        if statement != '':
-            searches = Searches()
-            searches.user_id = users.get_current_user()
-            searches.query = print_statement
+        with ndb_client.context():
+            if statement != '':
 
-        if privacy == 'off': searches.private = False
-        if privacy == 'on': searches.private = True
+                searches = Searches()
+                searches.user_id = users.get_current_user()
+                searches.query_ = print_statement
 
-        searches.put()
+            if privacy == 'off': searches.private = False
+            if privacy == 'on': searches.private = True
+
+            searches.put()
 
         session_key = message.get('session')
         printer_key = message.get('printer')
@@ -760,14 +776,16 @@ class EvaluateHandler(webapp.RequestHandler):
 
         if session_key is not None:
             try:
-                session = Session.get(session_key)
-            except db.Error:
+                with ndb_client.context():
+                    session = ndb.Key(urlsafe=session_key).get()
+            except ndb.exceptions.Error:
                 self.error(400)
                 return
         else:
-            session = Session()
-            session.unpicklables = [ db.Text(line) for line in INITIAL_UNPICKLABLES ]
-            session_key = session.put()
+            with ndb_client.context():
+                session = Session()
+                session.unpicklables = [ line for line in INITIAL_UNPICKLABLES ]
+                session_key = session.put().urlsafe()
 
             live.evaluate(PREEXEC, session)
             live.evaluate(PREEXEC_INTERNAL, session)
@@ -830,10 +848,11 @@ class DeleteHistory(webapp.RequestHandler):
     """Deletes all of the user's history"""
 
     def get(self):
-        results = Searches.all().filter('user_id', users.get_current_user()).order('-timestamp')
+        with ndb_client.context():
+            results = Searches.query(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
 
-        for result in results:
-            db.delete(result)
+            for result in results:
+                ndb.delete(result)
 
         self.response.out.write("Your queries have been deleted.")
 
