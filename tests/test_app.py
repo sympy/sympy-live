@@ -18,3 +18,15 @@ def test_sidebar_loaded(browser):
         'Settings',
         'Recent Statements'
     ]
+
+
+def test_input_output(browser):
+    live_page = SymPyLivePage(browser)
+    live_page.load()
+    live_page.enter_query(query='x')
+    output_text = live_page.get_output_text(lines=3)
+    assert output_text == [
+        '>>> x',
+        'x',
+        'x'
+    ]

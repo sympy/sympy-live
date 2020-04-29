@@ -25,7 +25,7 @@ before_script:
   - python $SDK_LOCATION/dev_appserver.py --skip_sdk_update_check 1 . &
   - pip install selenium pytest
 script:
-  - pytest tests
+  - pytest tests -v
 
 before_deploy:
   - openssl aes-256-cbc -K $encrypted_2fd045226a67_key -iv $encrypted_2fd045226a67_iv
