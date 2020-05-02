@@ -173,6 +173,19 @@ App Engine uses Python 2.5, so if the default Python isn't 2.5, then make
 sure to test your changes to the server part, if it runs properly on 2.5.
 Also don't use any modules that aren't supported by GAE.
 
+Running Tests
+-------------
+
+Install testing requirements::
+
+    pip install selenium pytest
+
+Start the application in the background, (See instructions above to start the app).
+
+Run selenium tests via the following command::
+
+    $ pytest tests -v
+
 Pulling changes
 ---------------
 
