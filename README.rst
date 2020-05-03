@@ -190,6 +190,13 @@ Install testing requirements::
 
 Start the application in the background, (See instructions above to start the app).
 
+You would need Google Chrome browser installed for running these tests:
+Download it from here: https://www.google.com/chrome/
+
+You would also need chrome driver (for your chrome version). Download it from here:
+https://chromedriver.storage.googleapis.com/index.html?path=81.0.4044.69/ and put
+it into PATH.
+
 Run selenium tests via the following command::
 
     $ pytest tests -v
