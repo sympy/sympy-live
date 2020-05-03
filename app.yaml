@@ -51,3 +51,6 @@ handlers:
 - url: .*
   script: shell.application
   secure: always
+
+env_variables:
+  PROJECT_ID: "sympy-live-hrd"
