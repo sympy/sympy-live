@@ -48,6 +48,14 @@ We use submodules to include external libraries in sympy-live::
 This is sufficient to clone appropriate repositories in correct versions
 into sympy-live (see git documentation on submodules for information).
 
+You will need to install Datastore Emulator as well, which comes from gcloud's SDK,
+install the Google Cloud SDK for your OS from here: https://cloud.google.com/sdk/install
+Then run the following commands to install and run the datastore emulator in the background::
+
+    gcloud components install cloud-datastore-emulator --quiet
+    gcloud beta emulators datastore start &
+
+
 Development server
 ------------------
 
@@ -181,6 +189,13 @@ Install testing requirements::
     pip install selenium pytest
 
 Start the application in the background, (See instructions above to start the app).
+
+You would need Google Chrome browser installed for running these tests:
+Download it from here: https://www.google.com/chrome/
+
+You would also need chrome driver (for your chrome version). Download it from here:
+https://chromedriver.storage.googleapis.com/index.html?path=81.0.4044.69/ and put
+it into PATH.
 
 Run selenium tests via the following command::
 
