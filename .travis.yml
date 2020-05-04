@@ -34,7 +34,7 @@ before_script:
   - unzip -q chromedriver_linux64.zip
   - cp chromedriver $HOME/bin/
   - cd $TRAVIS_BUILD_DIR
-  - python $SDK_LOCATION/dev_appserver.py --skip_sdk_update_check 1 . &  --env_var DATASTORE_EMULATOR_HOST=localhost:8081 --env_var DATASTORE_USE_PROJECT_ID_AS_APP_ID=true &
+  - python $SDK_LOCATION/dev_appserver.py --skip_sdk_update_check 1 . --env_var DATASTORE_EMULATOR_HOST=localhost:8081 --env_var DATASTORE_USE_PROJECT_ID_AS_APP_ID=true &
 script:
   - pytest tests -v
 

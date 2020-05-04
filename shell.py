@@ -154,11 +154,17 @@ These commands were executed:
 
 # The blueprint used to store user queries
 class Searches(ndb.Model):
-    user_id = ndb.UserProperty()
-    query_ = ndb.StringProperty()
+    user_id = ndb.StringProperty()
+    query = ndb.StringProperty()
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
     private = ndb.BooleanProperty()
 
+    @classmethod
+    def query_(cls, *args, **kwargs):
+        """This method is for backwards compatibility, the ndb.Model now have a query
+        method, which conflicts with the query StringProperty of Searches.
+        """
+        return super(Searches, cls).query(*args, **kwargs)
 
 def banner(quiet=False):
     from sympy import __version__ as sympy_version
@@ -649,11 +655,15 @@ class FrontPageHandler(webapp.RequestHandler):
     def get(self):
         #Get the 10 most recent queries
         with ndb_client.context():
-            searches_query = Searches.query(Searches.private == False).order(-Searches.timestamp)
-            search_results = searches_query.fetch(10)
-
-            saved_searches = Searches.query(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
-            saved_searches_count = saved_searches.count()
+            searches_query = Searches.query_(Searches.private == False).order(-Searches.timestamp)
+            search_results = [result.query for result in searches_query.fetch(10)]
+            user = users.get_current_user()
+            if user:
+                _saved_searches = Searches.query_(Searches.user_id == user.user_id()).order(-Searches.timestamp).fetch()
+                saved_searches = [search.query for search in _saved_searches]
+            else:
+                saved_searches = []
+            saved_searches_count = len(saved_searches)
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
 
         vars = {
@@ -760,10 +770,11 @@ class EvaluateHandler(webapp.RequestHandler):
 
         with ndb_client.context():
             if statement != '':
+                user = users.get_current_user()
 
                 searches = Searches()
-                searches.user_id = users.get_current_user()
-                searches.query_ = print_statement
+                searches.user_id = user.user_id() if user else None
+                searches.query = print_statement
 
             if privacy == 'off': searches.private = False
             if privacy == 'on': searches.private = True
@@ -849,7 +860,7 @@ class DeleteHistory(webapp.RequestHandler):
 
     def get(self):
         with ndb_client.context():
-            results = Searches.query(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
+            results = Searches.query_(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
 
             for result in results:
                 ndb.delete(result)
