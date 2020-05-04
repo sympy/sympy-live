@@ -864,7 +864,7 @@ class DeleteHistory(webapp.RequestHandler):
             results = Searches.query_(Searches.user_id == user.user_id()).order(-Searches.timestamp)
 
             for result in results:
-                ndb.delete(result)
+                result.key.delete()
 
         self.response.out.write("Your queries have been deleted.")
 
