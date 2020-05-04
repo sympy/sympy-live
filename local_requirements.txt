@@ -1,1 +1,7 @@
 grpcio
+protobuf
+pytest
+selenium
+enum34
+nose
+requests

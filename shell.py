@@ -68,7 +68,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
-ndb_client = ndb.Client()
+ndb_client = ndb.Client(project=os.environ['PROJECT_ID'])
 
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))

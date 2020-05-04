@@ -31,7 +31,7 @@ class SymPyLivePage(object):
         ]
         return sidebar_headings
 
-    def enter_query(self, query, wait=1):
+    def enter_query(self, query, wait=2):
         """Enters the query in the SymPy Live's Online Shell."""
         live_input = self.browser.find_element(By.CLASS_NAME, 'sympy-live-prompt')
         live_input.send_keys(query + Keys.RETURN)
