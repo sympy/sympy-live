@@ -860,7 +860,8 @@ class DeleteHistory(webapp.RequestHandler):
 
     def get(self):
         with ndb_client.context():
-            results = Searches.query_(Searches.user_id == users.get_current_user()).order(-Searches.timestamp)
+            user = users.get_current_user()
+            results = Searches.query_(Searches.user_id == user.user_id()).order(-Searches.timestamp)
 
             for result in results:
                 ndb.delete(result)
