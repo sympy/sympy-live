@@ -1,25 +1,20 @@
+import six
+# https://github.com/googleapis/python-ndb/issues/249#issuecomment-560957294
+six.moves.reload_module(six)
+
 from google.appengine.ext import webapp
-from app.shell import (
-    FrontPageHandler,
-    EvaluateHandler,
-    ForceDesktopCookieHandler,
-    DeleteHistory,
-    CompletionHandler,
-    SphinxBannerHandler,
-    RedirectHandler,
-    StatusHandler,
-    _DEBUG
-)
+from app import handlers
+
 
 application = webapp.WSGIApplication([
-    ('/', FrontPageHandler),
-    ('/evaluate', EvaluateHandler),
-    ('/forcedesktop', ForceDesktopCookieHandler),
-    ('/delete', DeleteHistory),
-    ('/complete', CompletionHandler),
-    ('/sphinxbanner', SphinxBannerHandler),
-    ('/shellmobile', RedirectHandler),
-    ('/shelldsi', RedirectHandler),
-    ('/helpdsi', RedirectHandler),
-    ('/status', StatusHandler),
-], debug=_DEBUG)
+    ('/', handlers.FrontPageHandler),
+    ('/evaluate', handlers.EvaluateHandler),
+    ('/forcedesktop', handlers.ForceDesktopCookieHandler),
+    ('/delete', handlers.DeleteHistory),
+    ('/complete', handlers.CompletionHandler),
+    ('/sphinxbanner', handlers.SphinxBannerHandler),
+    ('/shellmobile', handlers.RedirectHandler),
+    ('/shelldsi', handlers.RedirectHandler),
+    ('/helpdsi', handlers.RedirectHandler),
+    ('/status', handlers.StatusHandler),
+], debug=handlers._DEBUG)
