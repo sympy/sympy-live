@@ -52,8 +52,15 @@ import datetime
 from StringIO import StringIO
 import six
 # https://github.com/googleapis/python-ndb/issues/249#issuecomment-560957294
-from app.constants import UNPICKLABLE_TYPES, INITIAL_UNPICKLABLES, PREEXEC, PREEXEC_INTERNAL, PREEXEC_MESSAGE, \
-    VERBOSE_MESSAGE, VERBOSE_MESSAGE_SPHINX
+from app.constants import (
+    UNPICKLABLE_TYPES,
+    INITIAL_UNPICKLABLES,
+    PREEXEC,
+    PREEXEC_INTERNAL,
+    PREEXEC_MESSAGE,
+    VERBOSE_MESSAGE,
+    VERBOSE_MESSAGE_SPHINX
+)
 
 six.moves.reload_module(six)
 
