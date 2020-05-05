@@ -48,7 +48,7 @@ deploy:
   provider: gae
   keyfile: "../client-secret.json"
   project: sympy-live-hrd
-  skip_cleanup: true
+  skip_cleanup: false
   no_promote: true
   version: "$version"
   on:
