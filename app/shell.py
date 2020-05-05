@@ -829,11 +829,21 @@ class DeleteHistory(webapp.RequestHandler):
 
         self.response.out.write("Your queries have been deleted.")
 
+
 class RedirectHandler(webapp.RedirectHandler):
     """Redirects deprecated pages to the frontpage."""
 
     def get(self):
         self.redirect('/', permanent=True)
+
+
+class StatusHandler(webapp.RequestHandler):
+    """Status endpoint to check if the app is running or not."""
+
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(json.dumps({"status": "ok"}))
+
 
 application = webapp.WSGIApplication([
   ('/', FrontPageHandler),
@@ -845,4 +855,5 @@ application = webapp.WSGIApplication([
   ('/shellmobile', RedirectHandler),
   ('/shelldsi', RedirectHandler),
   ('/helpdsi', RedirectHandler),
+  ('/status', StatusHandler),
 ], debug=_DEBUG)

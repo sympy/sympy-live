@@ -58,6 +58,9 @@ deploy:
 after_deploy:
   - pip install requests
   - python bin/update_status_on_pr.py
+  - status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://$TRAVIS_BRANCH-dot-sympy-live-hrd.appspot.com/status)
+  - echo "App status code => $status_code"
+  - if [ "$status_code" != "200" ]; then travis_terminate; fi
 
 env:
   global:
