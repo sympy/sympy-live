@@ -45,15 +45,23 @@ import sys
 import pdb
 import traceback
 import tokenize
-import types
 import json
-import wsgiref.handlers
 import rlcompleter
 import datetime
 
 from StringIO import StringIO
 import six
 # https://github.com/googleapis/python-ndb/issues/249#issuecomment-560957294
+from app.constants import (
+    UNPICKLABLE_TYPES,
+    INITIAL_UNPICKLABLES,
+    PREEXEC,
+    PREEXEC_INTERNAL,
+    PREEXEC_MESSAGE,
+    VERBOSE_MESSAGE,
+    VERBOSE_MESSAGE_SPHINX
+)
+
 six.moves.reload_module(six)
 
 # https://cloud.google.com/appengine/docs/standard/python/issue-requests#requests
@@ -63,8 +71,8 @@ requests_toolbelt.adapters.appengine.monkeypatch()
 
 from google.appengine.api import users
 from google.cloud import ndb
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.ext import webapp
 from google.appengine.runtime import DeadlineExceededError
 from google.appengine.runtime.apiproxy_errors import RequestTooLargeError
 
@@ -90,66 +98,18 @@ PRINTERS = {
     'latex': lambda arg: latex(arg, mode="equation*"),
 }
 
+
 def gdb():
     """Enter pdb in Google App Engine. """
     pdb.Pdb(stdin=getattr(sys, '__stdin__'),
             stdout=getattr(sys, '__stderr__')).set_trace(sys._getframe().f_back)
+
 
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = True
 
 # The entity kind for shell sessions. Feel free to rename to suit your app.
 _SESSION_KIND = '_Shell_Session'
-
-# Types that can't be pickled.
-UNPICKLABLE_TYPES = (
-  types.ModuleType,
-  types.TypeType,
-  types.ClassType,
-  types.FunctionType,
-  )
-
-# Unpicklable statements to seed new sessions with.
-INITIAL_UNPICKLABLES = [
-  "import logging",
-  "import os",
-  "import sys",
-  "from google.cloud import ndb",
-  "from google.appengine.api import users",
-  "from __future__ import division",
-  "from sympy import *",
-]
-
-PREEXEC = """\
-x, y, z, t = symbols('x y z t')
-k, m, n = symbols('k m n', integer=True)
-f, g, h = symbols('f g h', cls=Function)
-"""
-
-PREEXEC_INTERNAL = """\
-_ = None
-def init_printing(*args, **kwargs):
-    print "To change the printing method of SymPy Live, use the settings" + \
-          " in the menu to the right (below on mobile)."
-"""
-
-PREEXEC_MESSAGE = """\
-from __future__ import division
-from sympy import *
-""" + PREEXEC
-
-VERBOSE_MESSAGE = """\
-These commands were executed:
-%(source)s
-Warning: this shell runs with SymPy %(version)s and so examples pulled from
-other documentation may provide unexpected results.
-Documentation can be found at <a href="http://docs.sympy.org/%(version)s">http://docs.sympy.org/%(version)s</a>.\
-"""
-
-VERBOSE_MESSAGE_SPHINX = """\
-These commands were executed:
-%(source)s
-"""
 
 
 # The blueprint used to store user queries
@@ -165,6 +125,7 @@ class Searches(ndb.Model):
         method, which conflicts with the query StringProperty of Searches.
         """
         return super(Searches, cls).query(*args, **kwargs)
+
 
 def banner(quiet=False):
     from sympy import __version__ as sympy_version
@@ -641,7 +602,7 @@ class ForceDesktopCookieHandler(webapp.RequestHandler):
         cookie["desktop"]["expires"] = \
         expiration.strftime("%a, %d-%b-%Y %H:%M:%S PST")
         print cookie.output()
-        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'redirect.html')
+        template_file = os.path.join(os.path.dirname(__file__), '../templates', 'redirect.html')
         vars = { 'server_software': os.environ['SERVER_SOFTWARE'],
                  'python_version': sys.version,
                  'user': users.get_current_user(),
@@ -664,7 +625,7 @@ class FrontPageHandler(webapp.RequestHandler):
             else:
                 saved_searches = []
             saved_searches_count = len(saved_searches)
-        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'shell.html')
+        template_file = os.path.join(os.path.dirname(__file__), '../templates', 'shell.html')
 
         vars = {
             'server_software': os.environ['SERVER_SOFTWARE'],
@@ -720,7 +681,7 @@ class CompletionHandler(webapp.RequestHandler):
         else:
             with ndb_client.context():
                 session = Session()
-                session.unpicklables = [ line for line in INITIAL_UNPICKLABLES ]
+                session.unpicklables = [line for line in INITIAL_UNPICKLABLES]
                 session_key = session.put().urlsafe()
 
             live.evaluate(PREEXEC, session)
@@ -795,7 +756,7 @@ class EvaluateHandler(webapp.RequestHandler):
         else:
             with ndb_client.context():
                 session = Session()
-                session.unpicklables = [ line for line in INITIAL_UNPICKLABLES ]
+                session.unpicklables = [line for line in INITIAL_UNPICKLABLES]
                 session_key = session.put().urlsafe()
 
             live.evaluate(PREEXEC, session)

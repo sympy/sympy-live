@@ -20,13 +20,13 @@ install:
   - pip install -r local_requirements.txt
 
 before_script:
+  - cd ..
   - gcloud version || true
   - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
   - source /home/travis/google-cloud-sdk/path.bash.inc
   - gcloud version
   - gcloud components install cloud-datastore-emulator --quiet
   - gcloud beta emulators datastore start &
-  - cd ..
   - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.90.zip -nv
   - unzip -q google_appengine_1.9.90.zip
   - export SDK_LOCATION="$(pwd)/google_appengine"

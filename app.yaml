@@ -47,7 +47,7 @@ handlers:
 # endpoint where you want the shell to run, e.g. /shell . You'll also probably
 # want to add login: admin to restrict to admins only.
 - url: .*
-  script: shell.application
+  script: app.shell.application
   secure: always
 
 env_variables:
