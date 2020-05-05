@@ -3,10 +3,8 @@ threadsafe: true
 api_version: 1
 
 libraries:
-- name: numpy
-  version: latest
-- name: matplotlib
-  version: latest
+- name: grpcio
+  version: "1.0.0"
 
 handlers:
 # redirect Sphinx extension

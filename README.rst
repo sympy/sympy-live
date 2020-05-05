@@ -52,9 +52,24 @@ You will need to install Datastore Emulator as well, which comes from gcloud's S
 install the Google Cloud SDK for your OS from here: https://cloud.google.com/sdk/install
 Then run the following commands to install and run the datastore emulator in the background::
 
-    gcloud components install cloud-datastore-emulator --quiet
-    gcloud beta emulators datastore start &
+    $ gcloud components install cloud-datastore-emulator --quiet
+    $ gcloud beta emulators datastore start &
 
+Install Dependencies
+--------------------
+
+The project depends on some third-party libraries that are not on the list
+of built-in libraries (in app.yaml) bundled with the runtime, to install them
+run the following command.::
+
+    $ pip install -r requirements.txt -t lib/
+
+Some libraries although available on app engine runtime, but needs to be
+installed locally for development.
+
+Ref: https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27#local_development ::
+
+    $ pip install -r local_requirements.txt
 
 Development server
 ------------------
@@ -153,7 +168,7 @@ testing server (it's free, though it requires a cell phone to set up).
 Either way, to test, you will need to edit the Project ID in the deploy command
 mentioned above with your Project ID and the version you want to deploy to::
 
-    gcloud app deploy --project <your-project-name> --no-promote --version <TAGGED_VERSION>
+    $ gcloud app deploy --project <your-project-name> --no-promote --version <TAGGED_VERSION>
 
 
 If you have a test app online, remember to update it every time you update a
@@ -184,11 +199,22 @@ Also don't use any modules that aren't supported by GAE.
 Running Tests
 -------------
 
-Install testing requirements::
+To run the tests you need to have ``pytest`` and ``selenium`` installed. These are 
+already present in the ``local_requirements.txt``. If you you have installed 
+them you may skip this step. Otherwise to install testing requirements::
 
-    pip install selenium pytest
+    $ pip install selenium pytest
 
-Start the application in the background, (See instructions above to start the app).
+For testing you need to download the ``chromedriver``::
+
+    $ wget https://chromedriver.storage.googleapis.com/81.0.4044.69/chromedriver_linux64.zip
+    $ unzip -q chromedriver_linux64.zip
+
+Copy the ``chromedriver`` in your ``$HOME/bin/`` directory::
+
+    $ cp chromedriver $HOME/bin/
+
+Now run the application in the background, (See ``dev_appserver`` instructions above to start the app).
 
 You would need Google Chrome browser installed for running these tests:
 Download it from here: https://www.google.com/chrome/

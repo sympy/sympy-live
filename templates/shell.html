@@ -94,7 +94,7 @@ $$ x - \frac16 x^3 + O(x^5) $$</pre>
     <div id="recent_searches">
       {% if has_searches %}
       {% for search in searches %}
-      <a><pre>{{ search.query|escape }}</pre></a>
+      <a><pre>{{ search|escape }}</pre></a>
       {% endfor %}
       {% else %}
       <p>No recent statements</p>
@@ -112,8 +112,8 @@ $$ x - \frac16 x^3 + O(x^5) $$</pre>
   <div class="content">
     {% if has_saved_searches %}
     {% for search in saved_searches %}
-    {% if search.query %}
-    <a><pre>{{ search.query|escape }}</pre></a>
+    {% if search %}
+    <a><pre>{{ search|escape }}</pre></a>
     {% endif %}
     {% endfor %}
 

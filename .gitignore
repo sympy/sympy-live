@@ -1,3 +1,9 @@
 *.swp
 *.~
 *.py[co]
+__pycache__/
+.idea/
+.gcloudignore
+.vscode/
+client-secret.json
+lib/
