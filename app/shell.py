@@ -59,7 +59,8 @@ from app.constants import (
     PREEXEC_INTERNAL,
     PREEXEC_MESSAGE,
     VERBOSE_MESSAGE,
-    VERBOSE_MESSAGE_SPHINX
+    VERBOSE_MESSAGE_SPHINX,
+    PRINTERS
 )
 
 six.moves.reload_module(six)
@@ -81,7 +82,7 @@ ndb_client = ndb.Client(project=os.environ['PROJECT_ID'])
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
 
-from sympy import srepr, sstr, pretty, latex
+from sympy import sstr
 from sympy.interactive.session import int_to_Integer
 
 import settings
@@ -91,14 +92,6 @@ from .models import Session, Searches
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
 LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
-
-PRINTERS = {
-    'repr': srepr,
-    'str': sstr,
-    'ascii': lambda arg: pretty(arg, use_unicode=False, wrap_line=False),
-    'unicode': lambda arg: pretty(arg, use_unicode=True, wrap_line=False),
-    'latex': lambda arg: latex(arg, mode="equation*"),
-}
 
 
 def gdb():
