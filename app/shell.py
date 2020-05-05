@@ -59,7 +59,8 @@ from app.constants import (
     PREEXEC_INTERNAL,
     PREEXEC_MESSAGE,
     VERBOSE_MESSAGE,
-    VERBOSE_MESSAGE_SPHINX
+    VERBOSE_MESSAGE_SPHINX,
+    PRINTERS
 )
 
 six.moves.reload_module(six)
@@ -81,22 +82,16 @@ ndb_client = ndb.Client(project=os.environ['PROJECT_ID'])
 sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
 sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
 
-from sympy import srepr, sstr, pretty, latex
+from sympy import sstr
 from sympy.interactive.session import int_to_Integer
 
 import settings
 
+from .models import Session, Searches
+
 LIVE_VERSION, LIVE_DEPLOYED = os.environ['CURRENT_VERSION_ID'].split('.')
 LIVE_DEPLOYED = datetime.datetime.fromtimestamp(long(LIVE_DEPLOYED) / pow(2, 28))
 LIVE_DEPLOYED = LIVE_DEPLOYED.strftime("%d/%m/%y %X")
-
-PRINTERS = {
-    'repr': srepr,
-    'str': sstr,
-    'ascii': lambda arg: pretty(arg, use_unicode=False, wrap_line=False),
-    'unicode': lambda arg: pretty(arg, use_unicode=True, wrap_line=False),
-    'latex': lambda arg: latex(arg, mode="equation*"),
-}
 
 
 def gdb():
@@ -110,21 +105,6 @@ _DEBUG = True
 
 # The entity kind for shell sessions. Feel free to rename to suit your app.
 _SESSION_KIND = '_Shell_Session'
-
-
-# The blueprint used to store user queries
-class Searches(ndb.Model):
-    user_id = ndb.StringProperty()
-    query = ndb.StringProperty()
-    timestamp = ndb.DateTimeProperty(auto_now_add=True)
-    private = ndb.BooleanProperty()
-
-    @classmethod
-    def query_(cls, *args, **kwargs):
-        """This method is for backwards compatibility, the ndb.Model now have a query
-        method, which conflicts with the query StringProperty of Searches.
-        """
-        return super(Searches, cls).query(*args, **kwargs)
 
 
 def banner(quiet=False):
@@ -480,113 +460,6 @@ class Live(object):
             stream.truncate(0) # clear output
             self.error(stream, ('Unable to process statement due to its excessive size.',))
 
-class Session(ndb.Model):
-  """A shell session. Stores the session's globals.
-
-  Each session globals is stored in one of two places:
-
-  If the global is picklable, it's stored in the parallel globals and
-  global_names list properties. (They're parallel lists to work around the
-  unfortunate fact that the datastore can't store dictionaries natively.)
-
-  If the global is not picklable (e.g. modules, classes, and functions), or if
-  it was created by the same statement that created an unpicklable global,
-  it's not stored directly. Instead, the statement is stored in the
-  unpicklables list property. On each request, before executing the current
-  statement, the unpicklable statements are evaluated to recreate the
-  unpicklable globals.
-
-  The unpicklable_names property stores all of the names of globals that were
-  added by unpicklable statements. When we pickle and store the globals after
-  executing a statement, we skip the ones in unpicklable_names.
-
-  Using Text instead of string is an optimization. We don't query on any of
-  these properties, so they don't need to be indexed.
-  """
-  global_names = ndb.TextProperty(repeated=True)
-  globals = ndb.BlobProperty(repeated=True)
-  unpicklable_names = ndb.TextProperty(repeated=True)
-  unpicklables = ndb.TextProperty(repeated=True)
-
-  def set_global(self, name, value):
-    """Adds a global, or updates it if it already exists.
-
-    Also removes the global from the list of unpicklable names.
-
-    Args:
-      name: the name of the global to remove
-      value: any picklable value
-    """
-    # We need to disable the pickling optimization here in order to get the
-    # correct values out.
-    blob = self.fast_dumps(value, 1)
-
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      self.globals[index] = blob
-    else:
-      self.global_names.append(name)
-      self.globals.append(blob)
-
-    self.remove_unpicklable_name(name)
-
-  def remove_global(self, name):
-    """Removes a global, if it exists.
-
-    Args:
-      name: string, the name of the global to remove
-    """
-    if name in self.global_names:
-      index = self.global_names.index(name)
-      del self.global_names[index]
-      del self.globals[index]
-
-  def globals_dict(self):
-    """Returns a dictionary view of the globals.
-    """
-    return dict((name, pickle.loads(val))
-                for name, val in zip(self.global_names, self.globals))
-
-  def add_unpicklable(self, statement, names):
-    """Adds a statement and list of names to the unpicklables.
-
-    Also removes the names from the globals.
-
-    Args:
-      statement: string, the statement that created new unpicklable global(s).
-      names: list of strings; the names of the globals created by the statement.
-    """
-    self.unpicklables.append(statement)
-
-    for name in names:
-      self.remove_global(name)
-      if name not in self.unpicklable_names:
-        self.unpicklable_names.append(name)
-
-  def remove_unpicklable_name(self, name):
-    """Removes a name from the list of unpicklable names, if it exists.
-
-    Args:
-      name: string, the name of the unpicklable global to remove
-    """
-    if name in self.unpicklable_names:
-      self.unpicklable_names.remove(name)
-
-  def fast_dumps(self, obj, protocol=None):
-    """Performs the same function as pickle.dumps but with optimizations off.
-
-    Args:
-      obj: object, object to be pickled
-      protocol: int, optional protocol option to emulate pickle.dumps
-
-    Note: It is necessary to pickle SymPy values with the fast option in order
-          to get the correct assumptions when unpickling. See Issue 2587.
-    """
-    file = StringIO()
-    p = pickle.Pickler(file, protocol)
-    p.fast = 1
-    p.dump(obj)
-    return file.getvalue()
 
 class ForceDesktopCookieHandler(webapp.RequestHandler):
     def get(self):
@@ -609,6 +482,7 @@ class ForceDesktopCookieHandler(webapp.RequestHandler):
                  }
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
+
 
 class FrontPageHandler(webapp.RequestHandler):
     """Creates a new session and renders the ``shell.html`` template. """
@@ -648,6 +522,7 @@ class FrontPageHandler(webapp.RequestHandler):
 
         rendered = webapp.template.render(template_file, vars, debug=_DEBUG)
         self.response.out.write(rendered)
+
 
 class CompletionHandler(webapp.RequestHandler):
     """Takes an incomplete statement and returns possible completions."""
@@ -704,6 +579,7 @@ class CompletionHandler(webapp.RequestHandler):
 
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
+
 
 class EvaluateHandler(webapp.RequestHandler):
     """Evaluates a Python statement in a given session and returns the result. """
@@ -801,6 +677,7 @@ class EvaluateHandler(webapp.RequestHandler):
 
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
+
 
 class SphinxBannerHandler(webapp.RequestHandler):
     """Provides the banner for the Sphinx extension.

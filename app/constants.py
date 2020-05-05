@@ -1,3 +1,10 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.getcwd(), 'sympy'))
+sys.path.insert(0, os.path.join(os.getcwd(), 'mpmath'))
+
+from sympy import srepr, sstr, pretty, latex
 import types
 
 # Types that can't be pickled.
@@ -49,3 +56,11 @@ VERBOSE_MESSAGE_SPHINX = """\
 These commands were executed:
 %(source)s
 """
+
+PRINTERS = {
+    'repr': srepr,
+    'str': sstr,
+    'ascii': lambda arg: pretty(arg, use_unicode=False, wrap_line=False),
+    'unicode': lambda arg: pretty(arg, use_unicode=True, wrap_line=False),
+    'latex': lambda arg: latex(arg, mode="equation*"),
+}
