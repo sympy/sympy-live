@@ -843,17 +843,3 @@ class StatusHandler(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps({"status": "ok"}))
-
-
-application = webapp.WSGIApplication([
-  ('/', FrontPageHandler),
-  ('/evaluate', EvaluateHandler),
-  ('/forcedesktop', ForceDesktopCookieHandler),
-  ('/delete', DeleteHistory),
-  ('/complete', CompletionHandler),
-  ('/sphinxbanner', SphinxBannerHandler),
-  ('/shellmobile', RedirectHandler),
-  ('/shelldsi', RedirectHandler),
-  ('/helpdsi', RedirectHandler),
-  ('/status', StatusHandler),
-], debug=_DEBUG)

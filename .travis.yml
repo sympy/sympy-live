@@ -44,6 +44,7 @@ before_deploy:
   - version=$(if [ ! -z "$TRAVIS_TAG" ]; then echo $(cut -d'-' -f2 <<<"$TRAVIS_TAG");
     else echo "$TRAVIS_BRANCH"; fi)
   - echo "Version = $version"
+
 deploy:
   provider: gae
   keyfile: "../client-secret.json"
@@ -58,7 +59,7 @@ deploy:
 after_deploy:
   - pip install requests
   - python bin/update_status_on_pr.py
-  - status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://$TRAVIS_BRANCH-dot-sympy-live-hrd.appspot.com/status)
+  - status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://$version-dot-sympy-live-hrd.appspot.com/status)
   - echo "App status code => $status_code"
   - if [ "$status_code" != "200" ]; then travis_terminate; fi
 
