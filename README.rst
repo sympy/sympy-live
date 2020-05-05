@@ -1,6 +1,9 @@
 SymPy Online Shell
 ==================
 
+.. image:: https://travis-ci.org/sympy/sympy-live.svg?branch=master
+    :target: https://travis-ci.org/sympy/sympy-live
+
 Online Shell for SymPy (sympy-live) is a simple web application based on
 Google App Engine, which allows to evaluate Python code with SymPy in web
 browsers.
