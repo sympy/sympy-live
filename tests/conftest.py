@@ -37,6 +37,10 @@ def browser(config):
     elif config['browser'] == 'Headless Chrome':
         opts = selenium.webdriver.ChromeOptions()
         opts.add_argument('headless')
+        opts.add_argument('--no-sandbox')
+        opts.add_argument('--window-size=1420,1080')
+        opts.add_argument('--disable-gpu')
+
         b = selenium.webdriver.Chrome(options=opts)
     else:
         raise Exception('Browser "%s" is not supported' % config["browser"])
