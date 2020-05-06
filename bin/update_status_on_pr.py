@@ -24,7 +24,7 @@ def get_branch_commit_sha(branch_name):
     if response.status_code == 200:
         response_json = response.json()
     else:
-        raise ValueError('Invalid response from github API')
+        raise ValueError('Invalid response from github API: %s', response.content)
     return response_json[0]['object']['sha']
 
 
