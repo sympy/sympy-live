@@ -1,6 +1,13 @@
 from pages import SymPyLivePage
 
 
+def test_app_status(browser):
+    live_page = SymPyLivePage(browser)
+    live_page.load('status')
+    response = live_page.browser.find_element_by_tag_name("pre").text
+    assert str(response) == '{"status": "ok"}'
+
+
 def test_page_title(browser):
     live_page = SymPyLivePage(browser)
     live_page.load()

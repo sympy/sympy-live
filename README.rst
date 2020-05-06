@@ -208,23 +208,33 @@ them you may skip this step. Otherwise to install testing requirements::
 
     $ pip install selenium pytest
 
-For testing you need to download the ``chromedriver``::
+You would also need latest version of one of the supported browsers:
+
+* Chrome: https://www.google.com/chrome/
+* Firefox: https://www.mozilla.org/firefox/new/
+
+You need to download the driver for your browser as well:
+
+For chrome, get the driver for your system from here:
+https://chromedriver.chromium.org/downloads
+
+Here is an example for Linux::
 
     $ wget https://chromedriver.storage.googleapis.com/81.0.4044.69/chromedriver_linux64.zip
     $ unzip -q chromedriver_linux64.zip
 
-Copy the ``chromedriver`` in your ``$HOME/bin/`` directory::
+For Firefox, get the driver for your system from here:
+https://github.com/mozilla/geckodriver/releases
 
-    $ cp chromedriver $HOME/bin/
+After extracting the browser driver from the zip or tar file, for Unix based systems,
+copy the driver to following directory::
+
+    $ mv /path/to/ChromeDriver /usr/local/bin
+    $ mv /path/to/geckodriver /usr/local/bin
+
+For other systems like Windows, you need to put it in PATH.
 
 Now run the application in the background, (See ``dev_appserver`` instructions above to start the app).
-
-You would need Google Chrome browser installed for running these tests:
-Download it from here: https://www.google.com/chrome/
-
-You would also need chrome driver (for your chrome version). Download it from here:
-https://chromedriver.storage.googleapis.com/index.html?path=81.0.4044.69/ and put
-it into PATH.
 
 Run selenium tests via the following command::
 
