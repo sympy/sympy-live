@@ -45,7 +45,7 @@ import sys
 import pdb
 import traceback
 import tokenize
-import rlcompleter
+from app import rlcompleter
 
 from StringIO import StringIO
 

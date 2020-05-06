@@ -18,7 +18,7 @@ from .models import Session, Searches
 from .ndb import ndb_client
 from .shell import Live
 
-import settings
+from app import settings
 
 from app.constants import (
     INITIAL_UNPICKLABLES,
