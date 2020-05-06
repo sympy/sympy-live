@@ -10,14 +10,14 @@ from selenium.webdriver.common.keys import Keys
 
 class SymPyLivePage(object):
 
-    URL = 'http://localhost:8080'
+    URL = 'http://localhost:8080/'
 
     def __init__(self, browser):
         self.browser = browser
 
-    def load(self):
+    def load(self, path=''):
         """Loads the URL in the given browser."""
-        self.browser.get(self.URL)
+        self.browser.get(self.URL + path)
 
     def title(self):
         """Returns the title of the page loaded by the browser."""
