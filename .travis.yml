@@ -12,8 +12,9 @@ install:
   - ls
 
 before_script:
-  - docker-compose up
+  - docker-compose up -d
 script:
+  - sleep 2  # Wait for api to be up
   - docker-compose exec app pytest tests/ -v
 
 before_deploy:
