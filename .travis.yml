@@ -2,43 +2,23 @@ language: python
 python:
   - '2.7'
 
-cache:
-  directories:
-    - "$HOME/google-cloud-sdk/"
+services:
+  - docker
 
-virtualenv:
-  system_site_packages: true
-
-addons:
-  chrome: stable
-
-# Stub: do nothing
+# Do nothing
 before_install:
   - ls
 install:
-  - pip install -r requirements/requirements.txt -t lib/
-  - pip install -r requirements/local_requirements.txt
+  - ls
 
 before_script:
-  - cd ..
-  - gcloud version || true
-  - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
-  - source /home/travis/google-cloud-sdk/path.bash.inc
-  - gcloud version
-  - gcloud components install cloud-datastore-emulator --quiet
-  - gcloud beta emulators datastore start &
-  - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.90.zip -nv
-  - unzip -q google_appengine_1.9.90.zip
-  - export SDK_LOCATION="$(pwd)/google_appengine"
-  - wget https://chromedriver.storage.googleapis.com/81.0.4044.69/chromedriver_linux64.zip
-  - unzip -q chromedriver_linux64.zip
-  - cp chromedriver $HOME/bin/
-  - cd $TRAVIS_BUILD_DIR
-  - python $SDK_LOCATION/dev_appserver.py --skip_sdk_update_check 1 . --env_var DATASTORE_EMULATOR_HOST=localhost:8081 --env_var DATASTORE_USE_PROJECT_ID_AS_APP_ID=true &
+  - docker-compose up -d
 script:
-  - pytest tests -v
+  - sleep 2  # Wait for api to be up
+  - docker-compose exec app pytest tests/ -v
 
 before_deploy:
+  - docker cp app:/usr/src/app/lib lib
   - openssl aes-256-cbc -K $encrypted_2fd045226a67_key -iv $encrypted_2fd045226a67_iv
     -in client-secret.json.enc -out ../client-secret.json -d
   - version=$(if [ ! -z "$TRAVIS_TAG" ]; then echo $(cut -d'-' -f2 <<<"$TRAVIS_TAG");
@@ -62,6 +42,7 @@ after_deploy:
   - status_code=$(curl --write-out %{http_code} --silent --output /dev/null https://$version-dot-sympy-live-hrd.appspot.com/status)
   - echo "App status code => $status_code"
   - if [ "$status_code" != "200" ]; then travis_terminate; fi
+  - docker-compose down
 
 env:
   global:
