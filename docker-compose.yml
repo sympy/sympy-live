@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    image: app
+    depends_on:
+      - datastore
+    volumes:
+      - .:/app
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8082:8082"
+      - "127.0.0.1:8083:8083"
+    command: /run.sh
+
+  datastore:
+    build:
+      context: .
+      dockerfile: ./docker/datastore/Dockerfile
+    image: datastore
+    ports:
+      - "127.0.0.1:8081:8081"
