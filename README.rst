@@ -20,87 +20,33 @@ evaluation request is a subject to this limit. There are also other limits
 related to memory consumption, output size, etc. (see Google App Engine
 documentation for details).
 
-Installation
-------------
-
-Download 1.9.xx version of the original Google App Engine SDK for Python from
-https://cloud.google.com/appengine/docs/python/download/ - it may be neccessary
-to click ``Or, you can download the original App Engine SDK for Python.`` link
-first to expand proper download section. Than move in the command line to the
-location where you downloaded SDK and unpack the downloaded package.
-
-    $ unzip google_appengine_1.9.xx.zip
-
-On the Mac, it is a disk image with an application, which you should
-drag to your Applications folder.  Open the program and install the
-symlinks (it should ask you the first time you open the application, but
-if it doesn't, choose "Make Symlinks..." from the
-GoogleAppEngineLauncher menu).  Note that you will have to do this again
-each time you update the AppEngine program.
-
-Then clone sympy-live repository::
-
-    $ git clone git://github.com/sympy/sympy-live.git
-    $ cd sympy-live
-
-We use submodules to include external libraries in sympy-live::
-
-    $ git submodule init
-    $ git submodule update
-
-This is sufficient to clone appropriate repositories in correct versions
-into sympy-live (see git documentation on submodules for information).
-
-You will need to install Datastore Emulator as well, which comes from gcloud's SDK,
-install the Google Cloud SDK for your OS from here: https://cloud.google.com/sdk/install
-Then run the following commands to install and run the datastore emulator in the background::
-
-    $ gcloud components install cloud-datastore-emulator --quiet
-    $ gcloud beta emulators datastore start &
-
-Install Dependencies
---------------------
-
-The project depends on some third-party libraries that are not on the list
-of built-in libraries (in app.yaml) bundled with the runtime, to install them
-run the following command.::
-
-    $ pip install -r requirements/requirements.txt -t lib/
-
-Some libraries although available on app engine runtime, but needs to be
-installed locally for development.
-
-Ref: https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27#local_development ::
-
-    $ pip install -r requirements/local_requirements.txt
-
-Development server
+Development Server
 ------------------
+
+To setup the development environment and run the app locally, you
+need ``docker`` and ``docker-compose``:
+
+* https://docs.docker.com/get-docker/
+* https://docs.docker.com/compose/install/
 
 Now you are ready to run development web server::
 
-    $ ../google_appengine/dev_appserver.py .
+    $ docker-compose up
 
-On the Mac, just run::
+This will build and run the image for app and datastore emulator.
 
-    $ dev_appserver .
+This will spin up a local server that runs on port ``8080``.
+Open a web browser and go to http://localhost:8080.
+You should see GUI of SymPy Online Shell.
 
-(make sure you installed the symlinks as described above).
-
-I couldn't figure out how to make it work in the GUI (it won't find the
-sympy git submodule).  If you figure out how to do it, please update
-this file and send a patch describing how to do it.
-
-This is a local server that runs on port 8080 (use ``--port`` option to
-change this). Open a web browser and go to http://localhost:8080. You
-should see GUI of SymPy Online Shell.
-
-Deploying to GAE
-----------------
+Deploying to Google App Engine
+------------------------------
 
 Travis-CI is used to deploy automatically to the official server
-via Github Releases. Go to https://github.com/sympy/sympy-live/releases
-and click on create a release and name the release as `version-NN`
+via Github Releases.
+
+* Go to https://github.com/sympy/sympy-live/releases
+* Click on create a release and name the release as `version-NN`
 where `NN` is the release version. After this travis will automatically
 release version `NN`.
 
@@ -118,6 +64,11 @@ the google cloud console for the project::
 
     $ gcloud init
 
+You need to to create ``lib`` (libraries) before deploying, make sure the development
+server is up and running via ``docker-compose``, as mentioned above and create
+libraries folder to package with the following command::
+
+    $ docker cp app:/usr/src/app/lib lib
 
 Assuming that sympy-live works properly (also across different mainstream web
 browsers), you can upload your changes to Google App Engine, replacing the
@@ -160,13 +111,21 @@ Testing on the App Engine
 -------------------------
 
 It's usually a good idea to test big changes on the App Engine itself before
-deploying, as ``dev_appserver.py`` can only simulate the App Engine.  There is
-a semi-official testing server at sympy-live-tests.appspot.com.  If you want
+deploying, as ``dev_appserver.py`` can only simulate the App Engine.
+
+There is a semi-official testing server at sympy-live-tests.appspot.com. If you want
 write access to it, just ask Aaron Meurer.  The convention there is to push
 to the version corresponding to the pull request (so if you have a branch that
 is pull request #55, you would push to version 55, and access it by
 55-dot-sympy-live-tests.appspot.com).  Alternately, you can set up your own
 testing server (it's free, though it requires a cell phone to set up).
+
+You need to to create ``lib`` (libraries) before deploying, make sure the development
+server is up and running via ``docker-compose``, as mentioned above and create
+libraries folder to package with the following command::
+
+    $ docker cp app:/usr/src/app/lib lib
+
 
 Either way, to test, you will need to edit the Project ID in the deploy command
 mentioned above with your Project ID and the version you want to deploy to::
@@ -194,51 +153,13 @@ includes Chrome, Firefox, Safari and Internet Explorer. Be extra cautious
 about trailing commas in JavaScript object and arrays. IE doesn't allow
 them, so you have to remove them, if any were introduced.
 
-GAE development server allows to use any Python interpreter, but Google
-App Engine uses Python 2.5, so if the default Python isn't 2.5, then make
-sure to test your changes to the server part, if it runs properly on 2.5.
-Also don't use any modules that aren't supported by GAE.
-
 Running Tests
 -------------
 
-To run the tests you need to have ``pytest`` and ``selenium`` installed. These are 
-already present in the ``local_requirements.txt``. If you you have installed 
-them you may skip this step. Otherwise to install testing requirements::
+To run tests you need to spinup the container as mentioned above
+via ``docker-compose`` and run the following command::
 
-    $ pip install selenium pytest
-
-You would also need latest version of one of the supported browsers:
-
-* Chrome: https://www.google.com/chrome/
-* Firefox: https://www.mozilla.org/firefox/new/
-
-You need to download the driver for your browser as well:
-
-For chrome, get the driver for your system from here:
-https://chromedriver.chromium.org/downloads
-
-Here is an example for Linux::
-
-    $ wget https://chromedriver.storage.googleapis.com/81.0.4044.69/chromedriver_linux64.zip
-    $ unzip -q chromedriver_linux64.zip
-
-For Firefox, get the driver for your system from here:
-https://github.com/mozilla/geckodriver/releases
-
-After extracting the browser driver from the zip or tar file, for Unix based systems,
-copy the driver to following directory::
-
-    $ mv /path/to/ChromeDriver /usr/local/bin
-    $ mv /path/to/geckodriver /usr/local/bin
-
-For other systems like Windows, you need to put it in PATH.
-
-Now run the application in the background, (See ``dev_appserver`` instructions above to start the app).
-
-Run selenium tests via the following command::
-
-    $ pytest tests -v
+    $ docker-compose exec app pytest tests/ -v
 
 Pulling changes
 ---------------
