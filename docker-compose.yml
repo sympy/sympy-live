@@ -12,9 +12,9 @@ services:
     volumes:
       - ./app/:/usr/src/app/app/
     ports:
-      - "127.0.0.1:8080:8080"
-      - "127.0.0.1:8082:8082"
-      - "127.0.0.1:8083:8083"
+      - "8080:8080"
+      - "8082:8082"
+      - "8083:8083"
     command: /run.sh
 
   datastore:
@@ -24,4 +24,4 @@ services:
     image: datastore
     container_name: datastore
     ports:
-      - "127.0.0.1:8081:8081"
+      - "8081:8081"

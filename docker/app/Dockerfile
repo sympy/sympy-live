@@ -11,8 +11,8 @@ WORKDIR /usr/src/app
 
 COPY requirements ./requirements
 COPY ./docker/app/run.sh /run.sh
-RUN pip install -r requirements/requirements.txt -t lib/
 
+RUN pip install -r requirements/requirements.txt -t lib/
 RUN pip install -r requirements/local_requirements.txt
 
 # Install App engine SDK
