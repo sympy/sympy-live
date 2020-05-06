@@ -6,10 +6,11 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
     image: app
+    container_name: app
     depends_on:
       - datastore
     volumes:
-      - .:/app
+      - ./app/:/usr/src/app/app/
     ports:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:8082:8082"
@@ -21,5 +22,6 @@ services:
       context: .
       dockerfile: ./docker/datastore/Dockerfile
     image: datastore
+    container_name: datastore
     ports:
       - "127.0.0.1:8081:8081"
