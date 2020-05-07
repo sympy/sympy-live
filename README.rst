@@ -20,6 +20,22 @@ evaluation request is a subject to this limit. There are also other limits
 related to memory consumption, output size, etc. (see Google App Engine
 documentation for details).
 
+Installation
+------------
+
+Clone sympy-live repository::
+
+    $ git clone git://github.com/sympy/sympy-live.git
+    $ cd sympy-live
+
+We use submodules to include external libraries in sympy-live::
+
+    $ git submodule init
+    $ git submodule update
+
+This is sufficient to clone appropriate repositories in correct versions
+into sympy-live (see git documentation on submodules for information).
+
 Development Server
 ------------------
 
