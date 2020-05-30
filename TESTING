@@ -1,6 +1,6 @@
 We currently don't have a lot of automated testing (see
 https://github.com/sympy/sympy/issues/6677).  So most of the things has to
-be tested by hand.  Make sure to test the following:
+be tested by manual steps.  Make sure to test the following:
 
 - All major web browsers.  Safari, Google Chrome, Firefox, and Internet
   Explorer.  We only need to support the most recent version of each.  If you
