@@ -21,11 +21,8 @@ def get_branch_commit_sha(branch_name):
     :return: str SHA
     """
     response = requests.get(GITHUB_API_REF_URL + branch_name)
-    if response.status_code == 200:
-        response_json = response.json()
-    else:
-        raise ValueError('Invalid response from github API: %s', response.content)
-    return response_json[0]['object']['sha']
+    response.raise_for_status()
+    return response.json()[0]['object']['sha']
 
 
 def update_pr_status_with_deployment(branch_name, commit_sha):
