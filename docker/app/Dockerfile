@@ -32,7 +32,8 @@ ENV DISPLAY=:99
 COPY . .
 
 # Install chromedriver
-RUN wget https://chromedriver.storage.googleapis.com/81.0.4044.69/chromedriver_linux64.zip -P /usr/src/
+RUN CHROME_DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE") \
+    && wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip -P /usr/src/
 RUN unzip -q /usr/src/chromedriver_linux64.zip -d /usr/local/bin/
 
 ENTRYPOINT [ "/run.sh" ]
