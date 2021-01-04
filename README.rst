@@ -5,13 +5,13 @@ SymPy Online Shell
     :target: https://travis-ci.org/sympy/sympy-live
 
 Online Shell for SymPy (sympy-live) is a simple web application based on
-Google App Engine, which allows to evaluate Python code with SymPy in web
+Google App Engine(GAE), which allows to evaluate Python code with SymPy in web
 browsers.
 
 This is accomplished by providing a HTML/JavaScript GUI for entering source
 code and visualization of output, and a server part which evaluates the
 requested source code. Note that this shell is not scalable and it uses
-only one instance on GAE(Google App Engine),thus all evaluation requests are queued and it
+only one instance on GAE,thus all evaluation requests are queued and it
 may take quite a lot of time, before our code can be evaluated (depending
 on the current load of the instance).
 
