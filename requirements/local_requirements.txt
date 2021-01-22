@@ -5,3 +5,4 @@ selenium
 enum34
 nose
 requests
+wget

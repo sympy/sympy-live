@@ -11,6 +11,7 @@ WORKDIR /usr/src/app
 
 COPY requirements ./requirements
 COPY ./docker/app/run.sh /run.sh
+COPY ./docker/app/get_chrome_driver.py /usr/src/get_chrome_driver.py
 
 RUN pip install -r requirements/requirements.txt -t lib/
 RUN pip install -r requirements/local_requirements.txt
@@ -32,8 +33,7 @@ ENV DISPLAY=:99
 COPY . .
 
 # Install chromedriver
-RUN CHROME_DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE") \
-    && wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip -P /usr/src/
+RUN python /usr/src/get_chrome_driver.py /usr/src/
 RUN unzip -q /usr/src/chromedriver_linux64.zip -d /usr/local/bin/
 
 ENTRYPOINT [ "/run.sh" ]
