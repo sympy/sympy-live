@@ -45,23 +45,6 @@
 
     <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full"></script>
 
-    <script type="text/javascript">
-      $(document).ready(function() {
-          var shell = new SymPy.Shell({
-              printer: "{{ printer }}",
-              submit: "{{ submit }}",
-              tabWidth: {{ tabWidth }}
-          });
-
-          var el = $('#shell');
-          shell.render(el);
-
-          var statements = utilities.getURLParameter('evaluate');
-          if (statements) {
-              shell.evaluateInitial(statements);
-          }
-      });
-    </script>
       <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=UA-163910085-2"></script>
       <script>

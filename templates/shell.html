@@ -5,7 +5,13 @@
 {% block content %}
 <h1>SymPy Live</h1>
 <div id="banner">{{ banner|safe }}</div>
-<div id="shell"></div>
+<iframe
+    id="numpy-shell"
+    src="https://replite.vercel.app/retro/consoles/?toolbar=1&kernel=python&code=import%20sympy%20as%20sp"
+    width="600px"
+    height="500px"
+>
+</iframe>
 {% endblock %}
 
 {% block sidebar %}
