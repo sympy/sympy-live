@@ -1,0 +1,17 @@
+name: Test
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Start Docker compose
+      run: |
+        docker-compose up -d
+        sleep 10
+    - name: Run Tests
+      run: |
+        docker-compose exec app pytest tests/ -v
