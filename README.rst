@@ -1,8 +1,14 @@
-SymPy Online Shell
-==================
 
-.. image:: https://travis-ci.org/sympy/sympy-live.svg?branch=master
-    :target: https://travis-ci.org/sympy/sympy-live
+This repo used to contain the backend code for the SymPy Live shell,
+but it is no longer used, since SymPy Live shell now runs entirely
+in the browser. See https://github.com/sympy/live for the current code.
+
+Please report issues related to https://live.sympy.org/ on the new
+repository: https://github.com/sympy/live/issues
+
+
+SymPy Online Shell (OLD BACKEND)
+================================
 
 Online Shell for SymPy (sympy-live) is a simple web application based on
 Google App Engine, which allows to evaluate Python code with SymPy in web
